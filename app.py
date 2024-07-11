@@ -1,7 +1,7 @@
 from dash import Dash, html, dcc, callback, Output, Input
 import plotly.express as px
 import pandas as pd
-import functools
+#import functools
 
 df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder_unfiltered.csv')
 
@@ -13,7 +13,7 @@ app.layout = [
     dcc.Graph(id='graph-content')
 ]
 
-@functools.lru_cache(maxsize=32)
+#@functools.lru_cache(maxsize=32)
 @callback(
     Output('graph-content', 'figure'),
     Input('dropdown-selection', 'value')
