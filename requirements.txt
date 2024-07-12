@@ -71,3 +71,4 @@ redis==5.0.7
 dill==0.3.8
 multiprocess==0.70.16
 psutil==6.0.0
+orjson==3.10.6
