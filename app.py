@@ -7,8 +7,7 @@ import os
 
 df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder_unfiltered.csv')
 
-app = Dash(__name__)
-server = app.server
+
 launch_uid = uuid4()
 TIMEOUT = 60 * 60 * 24
 
@@ -27,6 +26,8 @@ else:
     background_callback_manager = DiskcacheManager(
         cache, cache_by=[lambda: launch_uid], expire=TIMEOUT
     )
+app = Dash(__name__, background_callback_manager=background_callback_manager))
+server = app.server
 app.layout = [
     html.H1(children='Title of Dash App', style={'textAlign':'center'}),
     dcc.Dropdown(df.country.unique(), 'Canada', id='dropdown-selection'),
