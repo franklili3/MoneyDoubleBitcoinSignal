@@ -26,7 +26,7 @@ else:
     background_callback_manager = DiskcacheManager(
         cache, cache_by=[lambda: launch_uid], expire=TIMEOUT
     )
-app = Dash(__name__, background_callback_manager=background_callback_manager))
+app = Dash(__name__, background_callback_manager=background_callback_manager)
 server = app.server
 app.layout = [
     html.H1(children='Title of Dash App', style={'textAlign':'center'}),
