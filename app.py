@@ -19,7 +19,7 @@ cache = Cache(app.server, config={
     'CACHE_DIR': 'cache-directory'
 })
 
-TIMEOUT = 60
+TIMEOUT = 60 * 60 * 24
 #@functools.lru_cache(maxsize=32)
 @callback(
     Output('graph-content', 'figure'),
