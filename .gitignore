@@ -13,3 +13,4 @@ session.token
 .vscode
 itchat.pkl
 cache-directory*
+cache*
