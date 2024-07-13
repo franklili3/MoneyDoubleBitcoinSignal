@@ -1,60 +1,41 @@
-from dash import Dash, html, dcc, callback, Output, Input#, DiskcacheManager, CeleryManager
-import plotly.express as px
-import pandas as pd
-#from uuid import uuid4
-import os
-from flask_caching import Cache
+import dash
+from dash import html
+import dash_tvlwc
 
-df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder_unfiltered.csv')
-
-
-#launch_uid = uuid4()
-TIMEOUT = 60 * 60 * 24
-app = Dash(__name__)#, background_callback_manager=background_callback_manager)
-server = app.server
-if 'REDIS_URL' in os.environ:
-    '''
-    # Use Redis & Celery if REDIS_URL set as an env variable
-    from celery import Celery
-    celery_app = Celery(__name__, broker=os.environ['REDIS_URL'], backend=os.environ['REDIS_URL'])
-    background_callback_manager = CeleryManager(
-        celery_app, cache_by=[lambda: launch_uid], expire=TIMEOUT
-    )'''
-    cache = Cache(app.server, config={
-        'CACHE_TYPE': 'redis',
-        'CACHE_REDIS_URL': os.environ.get('REDIS_URL', '')
-    })
-else:
-    '''
-    # Diskcache for non-production apps when developing locally
-    import diskcache
-    cache = diskcache.Cache("./cache")
-    background_callback_manager = DiskcacheManager(
-        cache, cache_by=[lambda: launch_uid], expire=TIMEOUT
-    )'''
-    cache = Cache(app.server, config={
-        'CACHE_TYPE': 'filesystem',
-        'CACHE_DIR': 'cache-directory'
-    })    
-app.config.suppress_callback_exceptions = True
-app.layout = [
-    html.H1(children='Title of Dash App', style={'textAlign':'center'}),
-    dcc.Dropdown(df.country.unique(), 'Canada', id='dropdown-selection'),
-    dcc.Graph(id='graph-content')
+candlestick_data = [
+    {'close': 97.56528552307104, 'high': 101.29961689165621, 'low': 95.07567499691558, 'open': 100, 'time': '2021-01-01'},
+    {'close': 96.06356180606804, 'high': 99.06465394610109, 'low': 95.17992032380353, 'open': 97.56528552307104, 'time': '2021-01-02'},
+    {'close': 92.06401564143738, 'high': 98.39405126671237, 'low': 90.72070050544004, 'open': 96.06356180606804, 'time': '2021-01-03'},
+    {'close': 95.74360305170839, 'high': 97.87415563623739, 'low': 89.75190226134559, 'open': 92.06401564143738, 'time': '2021-01-04'},
+    {'close': 92.44126153356503, 'high': 97.5490031231672, 'low': 88.56992126621492, 'open': 95.74360305170839, 'time': '2021-01-05'},
+    {'close': 89.31798245074576, 'high': 93.1567770313186, 'low': 85.20567758020556, 'open': 92.44126153356503, 'time': '2021-01-06'},
+    {'close': 85.10146215208654, 'high': 93.08029337383608, 'low': 82.23447033699203, 'open': 89.31798245074576, 'time': '2021-01-07'},
+    {'close': 81.87094682062356, 'high': 88.34586718088414, 'low': 77.97650081954707, 'open': 85.10146215208654, 'time': '2021-01-08'},
+    {'close': 79.55813346660896, 'high': 82.44142545674086, 'low': 76.08689856481172, 'open': 81.87094682062356, 'time': '2021-01-09'},
+    {'close': 82.74433091311337, 'high': 84.01552900852634, 'low': 78.36455785433, 'open': 79.55813346660896, 'time': '2021-01-10'}
 ]
 
+line_data = [
+    {'time': '2021-01-01', 'value': 100.35718786923036},
+    {'time': '2021-01-02', 'value': 97.09160967312906},
+    {'time': '2021-01-03', 'value': 95.74016447714007},
+    {'time': '2021-01-04', 'value': 98.72179655168017},
+    {'time': '2021-01-05', 'value': 100.3009198346873},
+    {'time': '2021-01-06', 'value': 95.8657753396109},
+    {'time': '2021-01-07', 'value': 91.22617265506997},
+    {'time': '2021-01-08', 'value': 94.26856525775635},
+    {'time': '2021-01-09', 'value': 94.9210458141437},
+    {'time': '2021-01-10', 'value': 94.88075568100295}
+]
 
-
-
-@callback(
-    Output('graph-content', 'figure'),
-    Input('dropdown-selection', 'value')#,
-    #background=True
-)
-@cache.memoize(timeout=TIMEOUT)
-def update_graph(value):
-    dff = df[df.country==value]
-    return px.line(dff, x='year', y='pop')
+app = dash.Dash(__name__)
+server = app.server
+app.layout = html.Div(children=[
+    dash_tvlwc.Tvlwc(
+        seriesData=[candlestick_data, line_data],
+        seriesTypes=['candlestick', 'line'],
+    ),
+])
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
