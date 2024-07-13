@@ -33,7 +33,6 @@ pandas==2.2.2
 pip==24.0
 platformdirs==3.10.0
 plotly==5.22.0
-pluggy==1.0.0
 pycosat==0.6.6
 pycparser==2.21
 PySocks==1.7.1
