@@ -15,7 +15,7 @@ main_panel = [
         html.Div(children=[
             dash_tvlwc.Tvlwc(
                 id='tv-chart-1',
-                seriesData=[generate_random_ohlc(100, n=100)],
+                seriesData=[generate_random_ohlc(1000, n=1000)],
                 seriesTypes=[SeriesType.Candlestick],
                 width='99%',
                 chartOptions={
@@ -57,7 +57,7 @@ chart_options = {
     },
     'localization': {'locale': 'en-US'}
 }
-
+'''
 panel1 = [
     dash_tvlwc.Tvlwc(
         id='bar-chart',
@@ -190,7 +190,7 @@ panel6 = [
         chartOptions={'layout': {'textColor': '#ff80cc', 'background': {'type': 'solid', 'color': 'black'}}}
     )
 ]
-
+'''
 
 app = dash.Dash(__name__)
 server = app.server
@@ -208,7 +208,12 @@ app.layout = html.Div([
             Source code is available on [Github](https://github.com/tysonwu/dash-tradingview).
             Availble on [PyPI](https://pypi.org/project/dash-tvlwc/).
             ''', link_target='_blank'),
-            html.Div(children=main_panel),
+            html.Div(children=main_panel)
+        ]),
+        html.Span('By Tyson Wu, 2023')
+    ])
+])
+'''
             html.H2('Highly customizable styling options'),
             html.Div(className='options-container', children=[
                 html.Div(className='one', children=panel1),
@@ -218,10 +223,7 @@ app.layout = html.Div([
                 html.Div(className='five', children=panel5),
                 html.Div(className='six', children=panel6),
             ])
-        ]),
-        html.Span('By Tyson Wu, 2023')
-    ])
-])
+'''
 
 
 # callbacks to demo
@@ -265,7 +267,7 @@ def change_props(n, current_chart_options, chart_info_style):
 
     return [current_chart_options, chart_info_style]
 
-
+'''
 @app.callback(
     [
         Output('tv-chart-1', 'seriesData'),
@@ -338,7 +340,7 @@ def crosshair_move(crosshair, series_types):
         time = 'Hover on the plot to see date and price details.'
 
     return [time, prices]
-
+'''
 
 if __name__ == '__main__':
     app.run(debug=True)
