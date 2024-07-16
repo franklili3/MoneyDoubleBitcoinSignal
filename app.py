@@ -8,7 +8,8 @@ from dash import html, dcc, ctx
 
 from dash_tvlwc.types import ColorType, SeriesType
 from data_generator import generate_random_ohlc, generate_random_series
-
+import os
+from flask_caching import Cache
 
 main_panel = [
     html.Div(style={'position': 'relative', 'width': '100%', 'height': '100%', 'marginBottom': '30px'}, children=[
@@ -40,7 +41,7 @@ main_panel = [
         ], style={'position': 'absolute', 'left': 0, 'top': 0, 'zIndex': 10, 'color': 'white', 'padding': '10px'})
     ]),
     html.Div(children=[
-        html.Button('Candlestick / Line chart', id='change-chart-type'),
+        #html.Button('Candlestick / Line chart', id='change-chart-type'),
         html.Button('Change theme', id='change-theme'),
     ], style={'display': 'block'})
 ]
@@ -191,9 +192,34 @@ panel6 = [
     )
 ]
 '''
-
+TIMEOUT = 60 * 60 * 24
 app = dash.Dash(__name__)
 server = app.server
+if 'REDIS_URL' in os.environ:
+    '''
+    # Use Redis & Celery if REDIS_URL set as an env variable
+    from celery import Celery
+    celery_app = Celery(__name__, broker=os.environ['REDIS_URL'], backend=os.environ['REDIS_URL'])
+    background_callback_manager = CeleryManager(
+        celery_app, cache_by=[lambda: launch_uid], expire=TIMEOUT
+    )'''
+    cache = Cache(app.server, config={
+        'CACHE_TYPE': 'redis',
+        'CACHE_REDIS_URL': os.environ.get('REDIS_URL', '')
+    })
+else:
+    '''
+    # Diskcache for non-production apps when developing locally
+    import diskcache
+    cache = diskcache.Cache("./cache")
+    background_callback_manager = DiskcacheManager(
+        cache, cache_by=[lambda: launch_uid], expire=TIMEOUT
+    )'''
+    cache = Cache(app.server, config={
+        'CACHE_TYPE': 'filesystem',
+        'CACHE_DIR': 'cache-directory'
+    })    
+app.config.suppress_callback_exceptions = True
 app.layout = html.Div([
     dcc.Interval(id='timer', interval=500),
     html.Div(className='container', children=[
@@ -239,6 +265,7 @@ app.layout = html.Div([
     ],
     prevent_initial_call=True
 )
+@cache.memoize(timeout=TIMEOUT)
 def change_props(n, current_chart_options, chart_info_style):
     if current_chart_options['layout']['background']['color'] == '#1B2631':
         current_chart_options = {
