@@ -8,8 +8,8 @@ from dash import html, dcc, ctx
 
 from dash_tvlwc.types import ColorType, SeriesType
 from data_generator import generate_random_ohlc, generate_random_series
-#import os
-#from flask_caching import Cache
+import os
+from flask_caching import Cache
 
 
 '''
@@ -149,7 +149,7 @@ panel6 = [
 
 app = dash.Dash(__name__)
 server = app.server
-'''
+
 if 'REDIS_URL' in os.environ:
     
     # Use Redis if REDIS_URL set as an env variable
@@ -167,7 +167,6 @@ else:
 
 TIMEOUT = 60 * 60 * 24
 @cache.memoize(timeout=TIMEOUT)
-'''
 def generate_series():
     data = generate_random_series(1000, n=1000)
     return data
