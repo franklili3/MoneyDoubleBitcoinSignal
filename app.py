@@ -8,56 +8,10 @@ from dash import html, dcc, ctx
 
 from dash_tvlwc.types import ColorType, SeriesType
 from data_generator import generate_random_ohlc, generate_random_series
-import os
-from flask_caching import Cache
-
-main_panel = [
-    html.Div(style={'position': 'relative', 'width': '100%', 'height': '100%', 'marginBottom': '30px'}, children=[
-        html.Div(children=[
-            dash_tvlwc.Tvlwc(
-                id='tv-chart-1',
-                seriesData=[generate_random_ohlc(1000, n=1000)],
-                seriesTypes=[SeriesType.Candlestick],
-                width='99%',
-                chartOptions={
-                    'layout': {
-                        'background': {'type': ColorType.Solid, 'color': '#1B2631'},
-                        'textColor': 'white',
-                    },
-                    'grid': {
-                        'vertLines': {'visible': True, 'color': 'rgba(255,255,255,0.1)'},
-                        'horzLines': {'visible': True, 'color': 'rgba(255,255,255,0.1)'},
-                    },
-                    'localization': {
-                        'locale': 'en-US',
-                        'priceFormatter': "(function(price) { return '$' + price.toFixed(2); })"
-                    }
-                },
-            ),
-        ], style={'width': '100%', 'height': '100%', 'left': 0, 'top': 0}),
-        html.Div(id='chart-info', children=[
-            html.Span(id='chart-price', style={'fontSize': '60px', 'fontWeight': 'bold'}),
-            html.Span(id='chart-date', style={'fontSize': 'small'}),
-        ], style={'position': 'absolute', 'left': 0, 'top': 0, 'zIndex': 10, 'color': 'white', 'padding': '10px'})
-    ]),
-    html.Div(children=[
-        #html.Button('Candlestick / Line chart', id='change-chart-type'),
-        html.Button('Change theme', id='change-theme'),
-    ], style={'display': 'block'})
-]
+#import os
+#from flask_caching import Cache
 
 
-chart_options = {
-    'layout': {
-        'background': {'type': 'solid', 'color': '#1B2631'},
-        'textColor': 'white',
-    },
-    'grid': {
-        'vertLines': {'visible': False},
-        'horzLines': {'visible': False},
-    },
-    'localization': {'locale': 'en-US'}
-}
 '''
 panel1 = [
     dash_tvlwc.Tvlwc(
@@ -192,34 +146,84 @@ panel6 = [
     )
 ]
 '''
-TIMEOUT = 60 * 60 * 24
+
 app = dash.Dash(__name__)
 server = app.server
+'''
 if 'REDIS_URL' in os.environ:
-    '''
-    # Use Redis & Celery if REDIS_URL set as an env variable
-    from celery import Celery
-    celery_app = Celery(__name__, broker=os.environ['REDIS_URL'], backend=os.environ['REDIS_URL'])
-    background_callback_manager = CeleryManager(
-        celery_app, cache_by=[lambda: launch_uid], expire=TIMEOUT
-    )'''
+    
+    # Use Redis if REDIS_URL set as an env variable
     cache = Cache(app.server, config={
         'CACHE_TYPE': 'redis',
         'CACHE_REDIS_URL': os.environ.get('REDIS_URL', '')
     })
 else:
-    '''
+    
     # Diskcache for non-production apps when developing locally
-    import diskcache
-    cache = diskcache.Cache("./cache")
-    background_callback_manager = DiskcacheManager(
-        cache, cache_by=[lambda: launch_uid], expire=TIMEOUT
-    )'''
     cache = Cache(app.server, config={
         'CACHE_TYPE': 'filesystem',
         'CACHE_DIR': 'cache-directory'
-    })    
-app.config.suppress_callback_exceptions = True
+    })
+
+TIMEOUT = 60 * 60 * 24
+@cache.memoize(timeout=TIMEOUT)
+'''
+def generate_series():
+    data = generate_random_series(1000, n=1000)
+    return data
+main_panel = [
+    html.Div(style={'position': 'relative', 'width': '100%', 'height': '100%', 'marginBottom': '30px'}, children=[
+        html.Div(children=[
+            dash_tvlwc.Tvlwc(
+                #id='tv-chart-1',
+                #seriesData=[generate_random_ohlc(1000, n=1000)],
+                #seriesTypes=[SeriesType.Candlestick],
+                seriesData=[generate_series()],
+                seriesTypes=[SeriesType.Line],
+                width='99%',
+                chartOptions={
+                    'layout': {
+                        'background': {'type': ColorType.Solid, 'color': '#1B2631'},
+                        'textColor': 'white',
+                    },
+                    'grid': {
+                        'vertLines': {'visible': True, 'color': 'rgba(255,255,255,0.1)'},
+                        'horzLines': {'visible': True, 'color': 'rgba(255,255,255,0.1)'},
+                    },
+                    'localization': {
+                        'locale': 'en-US',
+                        'priceFormatter': "(function(price) { return '$' + price.toFixed(2); })"
+                    }
+                },
+            ),
+        ], style={'width': '100%', 'height': '100%', 'left': 0, 'top': 0}),
+        html.Div(id='chart-info', children=[
+            html.Span(id='chart-price', style={'fontSize': '60px', 'fontWeight': 'bold'}),
+            html.Span(id='chart-date', style={'fontSize': 'small'}),
+        ], style={'position': 'absolute', 'left': 0, 'top': 0, 'zIndex': 10, 'color': 'white', 'padding': '10px'})
+    ])
+]
+'''    
+    html.Div(children=[
+        #html.Button('Candlestick / Line chart', id='change-chart-type'),
+        #html.Button('Change theme', id='change-theme'),
+    ], style={'display': 'block'})
+''' 
+
+
+chart_options = {
+    'layout': {
+        'background': {'type': 'solid', 'color': '#1B2631'},
+        'textColor': 'white',
+    },
+    'grid': {
+        'vertLines': {'visible': False},
+        'horzLines': {'visible': False},
+    },
+    'localization': {'locale': 'en-US'}
+}
+
+#app.config.suppress_callback_exceptions = True
 app.layout = html.Div([
     dcc.Interval(id='timer', interval=500),
     html.Div(className='container', children=[
@@ -249,8 +253,6 @@ app.layout = html.Div([
                 html.Div(className='five', children=panel5),
                 html.Div(className='six', children=panel6),
             ])
-'''
-
 
 # callbacks to demo
 @app.callback(
@@ -265,7 +267,7 @@ app.layout = html.Div([
     ],
     prevent_initial_call=True
 )
-@cache.memoize(timeout=TIMEOUT)
+
 def change_props(n, current_chart_options, chart_info_style):
     if current_chart_options['layout']['background']['color'] == '#1B2631':
         current_chart_options = {
@@ -294,7 +296,7 @@ def change_props(n, current_chart_options, chart_info_style):
 
     return [current_chart_options, chart_info_style]
 
-'''
+
 @app.callback(
     [
         Output('tv-chart-1', 'seriesData'),
@@ -310,6 +312,7 @@ def change_props(n, current_chart_options, chart_info_style):
     ],
     prevent_initial_call=True
 )
+@cache.memoize(timeout=TIMEOUT)
 def change_props(n, interval, series_data, series_type):
     if ctx.triggered_id == 'timer':
         last_close_date = series_data[0][-1]['time']
