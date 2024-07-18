@@ -8,9 +8,11 @@ QR.png
 data/
 device.json
 go-cqhttp
-logs/
+log*
 session.token
 .vscode
 itchat.pkl
 cache-directory*
 cache*
+.env
+*.log
