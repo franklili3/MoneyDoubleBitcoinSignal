@@ -10,7 +10,7 @@ from dash_tvlwc.types import ColorType, SeriesType
 from data_generator import generate_random_ohlc, generate_random_series
 import os
 from flask_caching import Cache
-
+import requests, json
 
 '''
 panel1 = [
@@ -168,7 +168,35 @@ else:
 TIMEOUT = 60 * 60 * 24
 @cache.memoize(timeout=TIMEOUT)
 def generate_series():
-    data = generate_random_series(1000, n=1000)
+    data = generate_random_series(5000, n=5000)
+    '''
+    home_url = 'https://pocketbase-5umc.onrender.com'
+    auth_path = '/api/collections/bitcoin_trade_signal/auth-with-password'
+    auth_url = home_url + auth_path
+    username = os.environ.get('username')
+    password = os.environ.get('password')
+    # json.dumps 将python数据结构转换为JSON
+    data1 = json.dumps({"identity": username, "password": password})
+    # Content-Type 请求的HTTP内容类型 application/json 将数据已json形式发给服务器
+    header1 = {"Content-Type": "application/json"}
+    html = requests.post(auth_url, data=data1, headers=header1)
+    # html.json JSON 响应内容，提取token值
+    token = html.json()['token']
+    # 使用已经登录获取到的token 发送一个get请求
+    get_path = '/api/collections/bitcoin_trade_signal/records'
+    query_bitcoin_marketcap_log = "?fields=['date','marketcap_log']&&page=50&&perPage=100&&sort='date'&&skipTotal=1"
+    get_url = home_url + get_path + query_bitcoin_marketcap_log
+    header2 = {
+        "Content-Type": "application/json",
+        "Authorization": token
+    }
+    response = requests.get(get_url, headers=header2)
+    response_json = response.json()
+    data = []
+    for page in response_json:
+        for item in page['items']:
+            data.append({'time': item['date'], 'value': item['marketcap_log']})
+    '''
     return data
 main_panel = [
     html.Div(style={'position': 'relative', 'width': '100%', 'height': '100%', 'marginBottom': '30px'}, children=[
