@@ -16,3 +16,4 @@ cache-directory*
 cache*
 .env
 *.log
+*.xlsx

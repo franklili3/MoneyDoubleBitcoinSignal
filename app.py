@@ -8,8 +8,9 @@ from dash import html, dcc, ctx
 
 from dash_tvlwc.types import ColorType, SeriesType
 from data_generator import generate_random_ohlc, generate_random_series
-import os
+
 from flask_caching import Cache
+import os
 import requests, json, logging
 from logging.handlers import RotatingFileHandler
 
@@ -42,40 +43,43 @@ TIMEOUT = 60 * 60 * 24
 @cache.memoize(timeout=TIMEOUT)
 def generate_series():
     
-    home_url = 'https://pocketbase-5umc.onrender.com'
+    home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
     auth_path = '/api/admins/auth-with-password'
     auth_url = home_url + auth_path
     username = os.environ.get('username')
+    #print('username: ', username)
     password = os.environ.get('password')
     # json.dumps 将python数据结构转换为JSON
     data1 = json.dumps({"identity": username, "password": password})
     # Content-Type 请求的HTTP内容类型 application/json 将数据已json形式发给服务器
     header1 = {"Content-Type": "application/json"}
-    html = requests.post(auth_url, data=data1, headers=header1)
-    print('html: ', html)
-    app.logger.debug('html: {}'.format(str(html)))
+    response1 = requests.post(auth_url, data=data1, headers=header1)
+    response1_json = response1.json()
+    #print('html: ', html)
+    app.logger.debug('response1_json: {}'.format(str(response1_json)))
     # html.json JSON 响应内容，提取token值
-    if html.json()['token']:
-        token = html.json()['token']
+    if response1_json['token']:
+        token = response1_json['token']
 
         # 使用已经登录获取到的token 发送一个get请求
         get_path = '/api/collections/bitcoin_trade_signal/records'
-        query_bitcoin_marketcap_log = "?fields=['date','marketcap_log']&&page=50&&perPage=100&&sort='date'&&skipTotal=1"
+        query_bitcoin_marketcap_log = "?fields=date,marketcap_log"#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
         get_url = home_url + get_path + query_bitcoin_marketcap_log
         header2 = {
             "Content-Type": "application/json",
             "Authorization": token
         }
-        response = requests.get(get_url, headers=header2)
-        response_json = response.json()
+        response2 = requests.get(get_url, headers=header2)
+        response2_json = response2.json()
+        app.logger.debug('response2_json: {}'.format(str(response2_json)))
+
         data = []
-        for page in response_json:
-            for item in page['items']:
-                time = item['date']
-                value = item['marketcap_log']
-                app.logger.debug('time: {}'.format(str(time)) + ' ,value:{}'.format(str(value)))
-                print('time: ', time, ', value: ', value)
-                data.append({'time': time, 'value': value})
+        for item in response2_json['items']:
+            time = item['date']
+            value = item['marketcap_log']
+            app.logger.debug('time: {}'.format(str(time)) + ' ,value:{}'.format(str(value)))
+            #print('time: ', time, ', value: ', value)
+            data.append({'time': time, 'value': value})
     else:
         data = generate_random_series(5000, n=5000)
 
