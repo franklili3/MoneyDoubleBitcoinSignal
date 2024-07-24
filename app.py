@@ -18,11 +18,11 @@ from logging.handlers import RotatingFileHandler
 app = dash.Dash(__name__)
 server = app.server
 # 配置日志等级
-app.logger.setLevel(logging.INFO)
+app.logger.setLevel(logging.INFO)#)DEBUG
 
 # 创建RotatingFileHandler，并添加到app.logger.handlers列表
 handler = RotatingFileHandler('error.log', maxBytes=100000, backupCount=10)
-handler.setLevel(logging.INFO)
+handler.setLevel(logging.INFO)#)DEBUG
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')  
 handler.setFormatter(formatter)  
 app.logger.addHandler(handler)
@@ -44,7 +44,6 @@ else:
 TIMEOUT = 60 * 60 * 24
 @cache.memoize(timeout=TIMEOUT)
 def generate_series():
-    current_time = datetime.now()
     home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
     auth_path = '/api/admins/auth-with-password'
     auth_url = home_url + auth_path
@@ -66,10 +65,11 @@ def generate_series():
 
         # 使用已经登录获取到的token 发送一个get请求
         get_path = '/api/collections/bitcoin_trade_signal/records'
-        data = []
+        data_marketcap_log = []
+        data_blocks_log = []
 
-        for i in range(1,10):
-            query_bitcoin_marketcap_log = "?fields=date,marketcap_log&&perPage=500&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
+        for i in range(1,12):
+            query_bitcoin_marketcap_log = "?fields=date,marketcap_log,blocks_log&&perPage=500&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
             get_url = home_url + get_path + query_bitcoin_marketcap_log
             header2 = {
                 "Content-Type": "application/json",
@@ -81,14 +81,21 @@ def generate_series():
             app.logger.debug('response2_str: {}'.format(response2_str))
             for item in response2_json['items']:
                 time = item['date']
-                value = item['marketcap_log']
-                app.logger.debug('time: {}'.format(str(time)) + ' ,value:{}'.format(str(value)))
+                value1 = item['marketcap_log']
+                value2 = item['blocks_log']
+               
+                app.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)))
                 #print('time: ', time, ', value: ', value)
-                data.append({'time': time, 'value': value})
+                data_marketcap_log.append({'time': time, 'value': value1})
+                data_blocks_log.append({'time': time, 'value': value2})
+        data = [data_marketcap_log, data_blocks_log]
     else:
-        data = generate_random_series(5000, n=5000)
+        data = [generate_random_series(5000, n=5000), generate_random_series(5000, n=5000)]
 
     return data
+data1 = generate_series()
+app.logger.debug('data1[0]: {}'.format(str(data1[0])))
+app.logger.debug('data1[1]: {}'.format(str(data1[1])))
 main_panel = [
     html.Div(style={'position': 'relative', 'width': '100%', 'height': '100%', 'marginBottom': '30px'}, children=[
         html.Div(children=[
@@ -96,8 +103,8 @@ main_panel = [
                 #id='tv-chart-1',
                 #seriesData=[generate_random_ohlc(1000, n=1000)],
                 #seriesTypes=[SeriesType.Candlestick],
-                seriesData=[generate_series()],
-                seriesTypes=[SeriesType.Line],
+                seriesData=[data1[0], data1[1]],
+                seriesTypes=[SeriesType.Line, SeriesType.Line],
                 width='99%',
                 chartOptions={
                     'layout': {
@@ -109,10 +116,22 @@ main_panel = [
                         'horzLines': {'visible': True, 'color': 'rgba(255,255,255,0.1)'},
                     },
                     'localization': {
-                        'locale': 'en-US',
-                        'priceFormatter': "(function(price) { return '$' + price.toFixed(2); })"
+                        'locale': 'zh-CN',
+                        #en-US
+                        'priceFormatter': "(function(price) { return price.toFixed(2); })"
+                        #'$' + 
                     }
                 },
+                seriesOptions=[
+                    {
+                        'title': 'Bitcoin MarketCap(Log)'
+                        #'color': 'blue' 
+                    },
+                    {
+                        'title': 'Number of Bitcoin Blocks(Log)',
+                        'color': '#FFAA30' 
+                     }
+                ]
             ),
         ], style={'width': '100%', 'height': '100%', 'left': 0, 'top': 0}),
         html.Div(id='chart-info', children=[
@@ -121,21 +140,6 @@ main_panel = [
         ], style={'position': 'absolute', 'left': 0, 'top': 0, 'zIndex': 10, 'color': 'white', 'padding': '10px'})
     ])
 ]
-
-
-
-chart_options = {
-    'layout': {
-        'background': {'type': 'solid', 'color': '#1B2631'},
-        'textColor': 'white',
-    },
-    'grid': {
-        'vertLines': {'visible': False},
-        'horzLines': {'visible': False},
-    },
-    'localization': {'locale': 'en-US'}
-}
-
 
 app.layout = html.Div([
     dcc.Interval(id='timer', interval=500),

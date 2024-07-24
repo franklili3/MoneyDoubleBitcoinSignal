@@ -12,7 +12,7 @@ import os
 from flask_caching import Cache
 #import requests, json
 
-
+# bar chart
 panel1 = [
     dash_tvlwc.Tvlwc(
         id='bar-chart',
@@ -23,7 +23,7 @@ panel1 = [
     )
 ]
 
-
+# candlestick chart
 p2_series = generate_random_ohlc(v0=1, n=50, ret=0.1)
 p2_series = [{'time': v['time']} if 12 < idx < 20 or idx > 45 else v for idx, v in enumerate(p2_series)]
 panel2 = [
@@ -42,7 +42,7 @@ panel2 = [
     )
 ]
 
-
+# area chart
 panel3 = [
     dash_tvlwc.Tvlwc(
         id='area-chart',
@@ -60,7 +60,7 @@ panel3 = [
     )
 ]
 
-
+# baseline chart
 p4_series = generate_random_series(v0=5000, n=50)
 p4_mean = sum([p['value'] for p in p4_series]) / 50
 p4_max = max([p['value'] for p in p4_series])
@@ -91,7 +91,7 @@ panel4 = [
 ]
 
 
-# add markers and add color to volume bar
+# line & histogram chart, add markers and add color to volume bar
 p5_series = generate_random_series(v0=1, n=50, ret=0.1)
 markers = [
     {'time': p5_series[15]['time'], 'position': 'aboveBar', 'color': '#f68410', 'shape': 'circle', 'text': 'Signal'},
@@ -124,7 +124,7 @@ panel5 = [
     )
 ]
 
-
+# histogram chart
 p6_series = generate_random_series(v0=100, n=50, ret=0.3)
 for idx, _ in enumerate(p6_series):
     if idx in [5,12,13,14,20,33,34,46]:
