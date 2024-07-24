@@ -15,5 +15,6 @@ itchat.pkl
 cache-directory*
 cache*
 .env
+*.log.*
 *.log
 *.xlsx

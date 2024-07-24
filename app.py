@@ -23,6 +23,8 @@ app.logger.setLevel(logging.DEBUG)
 # 创建RotatingFileHandler，并添加到app.logger.handlers列表
 handler = RotatingFileHandler('error.log', maxBytes=100000, backupCount=10)
 handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')  
+handler.setFormatter(formatter)  
 app.logger.addHandler(handler)
 if 'REDIS_URL' in os.environ:
     
@@ -32,7 +34,7 @@ if 'REDIS_URL' in os.environ:
         'CACHE_REDIS_URL': os.environ.get('REDIS_URL', '')
     })
 else:
-    
+    pass
     # Diskcache for non-production apps when developing locally
     cache = Cache(app.server, config={
         'CACHE_TYPE': 'filesystem',
@@ -42,7 +44,7 @@ else:
 TIMEOUT = 60 * 60 * 24
 @cache.memoize(timeout=TIMEOUT)
 def generate_series():
-    
+    current_time = datetime.now()
     home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
     auth_path = '/api/admins/auth-with-password'
     auth_url = home_url + auth_path
@@ -55,31 +57,34 @@ def generate_series():
     header1 = {"Content-Type": "application/json"}
     response1 = requests.post(auth_url, data=data1, headers=header1)
     response1_json = response1.json()
+    response1_str = str(response1_json)
     #print('html: ', html)
-    app.logger.debug('response1_json: {}'.format(str(response1_json)))
+    app.logger.debug('response1_str: {}'.format(response1_str))
     # html.json JSON 响应内容，提取token值
     if response1_json['token']:
         token = response1_json['token']
 
         # 使用已经登录获取到的token 发送一个get请求
         get_path = '/api/collections/bitcoin_trade_signal/records'
-        query_bitcoin_marketcap_log = "?fields=date,marketcap_log"#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
-        get_url = home_url + get_path + query_bitcoin_marketcap_log
-        header2 = {
-            "Content-Type": "application/json",
-            "Authorization": token
-        }
-        response2 = requests.get(get_url, headers=header2)
-        response2_json = response2.json()
-        app.logger.debug('response2_json: {}'.format(str(response2_json)))
-
         data = []
-        for item in response2_json['items']:
-            time = item['date']
-            value = item['marketcap_log']
-            app.logger.debug('time: {}'.format(str(time)) + ' ,value:{}'.format(str(value)))
-            #print('time: ', time, ', value: ', value)
-            data.append({'time': time, 'value': value})
+
+        for i in range(1,10):
+            query_bitcoin_marketcap_log = "?fields=date,marketcap_log&&perPage=500&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
+            get_url = home_url + get_path + query_bitcoin_marketcap_log
+            header2 = {
+                "Content-Type": "application/json",
+                "Authorization": token
+            }
+            response2 = requests.get(get_url, headers=header2)
+            response2_json = response2.json()
+            response2_str = str(response2_json)
+            app.logger.debug('response2_str: {}'.format(response2_str))
+            for item in response2_json['items']:
+                time = item['date']
+                value = item['marketcap_log']
+                app.logger.debug('time: {}'.format(str(time)) + ' ,value:{}'.format(str(value)))
+                #print('time: ', time, ', value: ', value)
+                data.append({'time': time, 'value': value})
     else:
         data = generate_random_series(5000, n=5000)
 
@@ -148,4 +153,4 @@ app.layout = html.Div([
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
