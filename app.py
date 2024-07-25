@@ -43,7 +43,7 @@ else:
 
 TIMEOUT = 60 * 60 * 24
 @cache.memoize(timeout=TIMEOUT)
-def generate_series():
+def get_series():
     home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
     auth_path = '/api/admins/auth-with-password'
     auth_url = home_url + auth_path
@@ -93,7 +93,7 @@ def generate_series():
         data = [generate_random_series(5000, n=5000), generate_random_series(5000, n=5000)]
 
     return data
-data1 = generate_series()
+data1 = get_series()
 app.logger.debug('data1[0]: {}'.format(str(data1[0])))
 app.logger.debug('data1[1]: {}'.format(str(data1[1])))
 main_panel = [
@@ -124,11 +124,11 @@ main_panel = [
                 },
                 seriesOptions=[
                     {
-                        'title': 'Bitcoin MarketCap(Log)'
+                        'title': '比特币市值(对数)'
                         #'color': 'blue' 
                     },
                     {
-                        'title': 'Number of Bitcoin Blocks(Log)',
+                        'title': '比特币区块数(对数)',
                         'color': '#FFAA30' 
                      }
                 ]
