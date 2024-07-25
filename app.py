@@ -120,12 +120,19 @@ main_panel = [
                         #en-US
                         'priceFormatter': "(function(price) { return price.toFixed(2); })"
                         #'$' + 
+                    },
+                    'rightPriceScale': {
+                        'visible': 'true'
+                    },
+                    'leftPriceScale': {
+                        'visible': 'true'
                     }
                 },
                 seriesOptions=[
                     {
-                        'title': '比特币市值(对数)'
+                        'title': '比特币市值(对数)',
                         #'color': 'blue' 
+                        'priceScaleId': 'left'
                     },
                     {
                         'title': '比特币区块数(对数)',
