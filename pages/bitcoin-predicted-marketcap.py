@@ -49,7 +49,7 @@ else:
 
 TIMEOUT = 60 * 60 * 24
 @cache.memoize(timeout=TIMEOUT)
-def get_series():
+def get_predicted_marketcap():
     home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
     auth_path = '/api/admins/auth-with-password'
     auth_url = home_url + auth_path
@@ -98,7 +98,7 @@ def get_series():
         data = [generate_random_series(5000, n=5000), generate_random_series(5000, n=5000)]
 
     return data
-data1 = get_series()
+data1 = get_predicted_marketcap()
 app1.logger.debug('data1[0]: {}'.format(str(data1[0])))
 app1.logger.debug('data1[1]: {}'.format(str(data1[1])))
 main_panel = [
