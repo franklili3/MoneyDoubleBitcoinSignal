@@ -7,6 +7,6 @@ dash.register_page(__name__,
     name='主页')
 
 layout = html.Div([
-    html.H1('最新数据'),
+    html.H2('最新数据'),
     html.Div('比特币交易信号'),
 ])

@@ -18,8 +18,8 @@ from flask_caching import Cache
 from logging.handlers import RotatingFileHandler
 
 dash.register_page(__name__,
-    title='1.比特币因子分析',
-    name='1.比特币因子分析')
+    title='2.比特币预测市值分析',
+    name='2.比特币预测市值分析')
 app1 = dash.get_app()
 # 创建RotatingFileHandler，并添加到app.logger.handlers列表
 handler = RotatingFileHandler('../error.log', maxBytes=100000, backupCount=10)
@@ -75,8 +75,8 @@ def get_series():
         data_blocks_log = []
 
         for i in range(1,12):
-            query_bitcoin_marketcap_log = "?fields=date,marketcap_log,blocks_log&&perPage=500&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
-            get_url = home_url + get_path + query_bitcoin_marketcap_log
+            query_predicted_marketcap_log = "?fields=date,marketcap_log,predicted_marketcap_log&&perPage=500&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
+            get_url = home_url + get_path + query_predicted_marketcap_log
             header2 = {
                 "Content-Type": "application/json",
                 "Authorization": token
@@ -88,7 +88,7 @@ def get_series():
             for item in response2_json['items']:
                 time = item['date']
                 value1 = item['marketcap_log']
-                value2 = item['blocks_log']
+                value2 = item['predicted_marketcap_log']
                 app1.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)))
                 #print('time: ', time, ', value: ', value)
                 data_marketcap_log.append({'time': time, 'value': value1})
@@ -140,7 +140,7 @@ main_panel = [
                         'priceScaleId': 'left'
                     },
                     {
-                        'title': '比特币区块数(对数)',
+                        'title': '比特币预测市值(对数)',
                         'color': '#FFAA30' 
                      }
                 ]
@@ -157,9 +157,9 @@ layout = html.Div([
     dcc.Interval(id='timer', interval=500),
     html.Div(className='container', children=[
         html.Div(className='main-container', children=[
-            html.H2('比特币因子和市值图 📊'),
+            html.H2('比特币预测市值和市值图 📊'),
             dcc.Markdown('''
-            ### 对比特币市值影响最大的因子是比特币区块数，比特币区块数和市值的走势很一致，相关系数高达0.9。
+            ### 根据比特币市值和比特币区块数建立预测模型，比特币预测市值和实际市值的走势很一致，模型的R方（可解释度）高达0.8。
             '''),
             html.Div(children=main_panel)
         ]),
