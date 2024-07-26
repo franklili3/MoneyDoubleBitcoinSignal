@@ -154,7 +154,7 @@ main_panel = [
 ]
 
 layout = html.Div([
-    dcc.Interval(id='timer', interval=500),
+    #dcc.Interval(id='timer', interval=500),
     html.Div(className='container', children=[
         html.Div(className='main-container', children=[
             html.H2('比特币预测市值和市值图 📊'),
