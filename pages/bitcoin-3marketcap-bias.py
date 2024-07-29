@@ -99,8 +99,8 @@ def get_marketcap_bias():
 
     return data
 data1 = get_marketcap_bias()
-app1.logger.debug('data1[0]: {}'.format(str(data1[0])))
-app1.logger.debug('data1[1]: {}'.format(str(data1[1])))
+app1.logger.debug('data1[0]: {}'.format(str(data1[0])[0:10]))
+app1.logger.debug('data1[1]: {}'.format(str(data1[1])[0:10]))
 main_panel = [
     html.Div(style={'position': 'relative', 'width': '100%', 'height': '100%', 'marginBottom': '30px'}, children=[
         html.Div(children=[

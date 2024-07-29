@@ -102,9 +102,9 @@ def get_upper_lower_price():
 
     return data
 data1 = get_upper_lower_price()
-app1.logger.debug('data1[0]: {}'.format(str(data1[0][0:10])))
-app1.logger.debug('data1[1]: {}'.format(str(data1[1][0:10])))
-app1.logger.debug('data1[2]: {}'.format(str(data1[2][0:10])))
+app1.logger.debug('data1[0]: {}'.format(str(data1[0])[0:10]))
+app1.logger.debug('data1[1]: {}'.format(str(data1[1])[0:10]))
+app1.logger.debug('data1[2]: {}'.format(str(data1[2])[0:10]))
 main_panel = [
     html.Div(style={'position': 'relative', 'width': '100%', 'height': '100%', 'marginBottom': '30px'}, children=[
         html.Div(children=[
