@@ -9,6 +9,8 @@ from dash import html, dcc#, ctx
 from dash_tvlwc.types import ColorType, SeriesType
 import os
 import requests, json
+#from flask import request
+#from user_agents import parse
 #import sys
 #sys.path.append('..')
 #import app
@@ -16,6 +18,7 @@ import requests, json
 import logging
 from flask_caching import Cache
 from logging.handlers import RotatingFileHandler
+import dash_bootstrap_components as dbc
 
 dash.register_page(__name__,
     title='1.比特币因子分析',
@@ -49,7 +52,7 @@ else:
 
 TIMEOUT = 60 * 60 * 24
 @cache.memoize(timeout=TIMEOUT)
-def get_series():
+def get_series(frequency='daily'):
     home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
     auth_path = '/api/admins/auth-with-password'
     auth_url = home_url + auth_path
@@ -75,32 +78,64 @@ def get_series():
         get_path = '/api/collections/bitcoin_trade_signal/records'
         data_marketcap_log = []
         data_blocks_log = []
-
-        for i in range(1,12):
-            query_bitcoin_marketcap_log = "?fields=date,marketcap_log,blocks_log&&perPage=500&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
-            get_url = home_url + get_path + query_bitcoin_marketcap_log
-            header2 = {
-                "Content-Type": "application/json",
-                "Authorization": token
-            }
-            response2 = requests.get(get_url, headers=header2)
-            response2_json = response2.json()
-            response2_str = str(response2_json)
-            app1.logger.debug('response2_str: {}'.format(response2_str))
-            for item in response2_json['items']:
-                time = item['date']
-                value1 = item['marketcap_log']
-                value2 = item['blocks_log']
-                app1.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)))
-                #print('time: ', time, ', value: ', value)
-                data_marketcap_log.append({'time': time, 'value': value1})
-                data_blocks_log.append({'time': time, 'value': value2})
-        data = [data_marketcap_log, data_blocks_log]
+        if frequency == 'daily':
+            for i in range(1,12):
+                query_bitcoin_marketcap_log = "?fields=date,marketcap_log,blocks_log&&perPage=500&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
+                get_url = home_url + get_path + query_bitcoin_marketcap_log
+                header2 = {
+                    "Content-Type": "application/json",
+                    "Authorization": token
+                }
+                response2 = requests.get(get_url, headers=header2)
+                response2_json = response2.json()
+                response2_str = str(response2_json)
+                app1.logger.debug('response2_str: {}'.format(response2_str))
+                for item in response2_json['items']:
+                    time = item['date']
+                    value1 = item['marketcap_log']
+                    value2 = item['blocks_log']
+                    app1.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)))
+                    #print('time: ', time, ', value: ', value)
+                    data_marketcap_log.append({'time': time, 'value': value1})
+                    data_blocks_log.append({'time': time, 'value': value2})
+            data = [data_marketcap_log, data_blocks_log]
+        elif frequency == 'weekly':
+            for i in range(1,3):
+                query_bitcoin_marketcap_log = "?filter=(weekday=1)&&fields=date,marketcap_log,blocks_log&&perPage=500&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
+                get_url = home_url + get_path + query_bitcoin_marketcap_log
+                header2 = {
+                    "Content-Type": "application/json",
+                    "Authorization": token
+                }
+                response2 = requests.get(get_url, headers=header2)
+                response2_json = response2.json()
+                response2_str = str(response2_json)
+                app1.logger.debug('response2_str: {}'.format(response2_str))
+                for item in response2_json['items']:
+                    time = item['date']
+                    value1 = item['marketcap_log']
+                    value2 = item['blocks_log']
+                    app1.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)))
+                    #print('time: ', time, ', value: ', value)
+                    data_marketcap_log.append({'time': time, 'value': value1})
+                    data_blocks_log.append({'time': time, 'value': value2})
+            data = [data_marketcap_log, data_blocks_log]
     else:
         data = [generate_random_series(5000, n=5000), generate_random_series(5000, n=5000)]
 
     return data
-data1 = get_series()
+'''
+user_agent_string = request.headers.get('User-Agent')
+user_agent = parse(user_agent_string)
+is_mobile = user_agent.is_mobile
+is_tablet = user_agent.is_tablet
+is_pc = user_agent.is_pc
+if is_pc:
+    data1 = get_series(frequency='daily')
+elif is_mobile or is_tablet:
+    data1 = get_series(frequency='weekly') 
+'''
+data1 = get_series(frequency='daily')   
 app1.logger.debug('data1[0]: {}'.format(str(data1[0])[0:10]))
 app1.logger.debug('data1[1]: {}'.format(str(data1[1])[0:10]))
 main_panel = [
@@ -155,17 +190,21 @@ main_panel = [
     ])
 ]
 
-layout = html.Div([
-    #dcc.Interval(id='timer', interval=500),
-    html.Div(className='container', children=[
-        html.Div(className='main-container', children=[
-            html.H2('比特币因子和市值图 📊'),
-            dcc.Markdown('''
-            ### 对比特币市值影响最大的因子是比特币区块数，比特币区块数和市值的走势很一致，相关系数高达0.9。
-            '''),
-            html.Div(children=main_panel)
-        ]),
-        html.Span('李力, 2024')
+layout = dbc.Container([
+    dbc.Row([
+        html.Div([
+            #dcc.Interval(id='timer', interval=500),
+            html.Div(className='container', children=[
+                html.Div(className='main-container', children=[
+                    html.H2('比特币因子和市值图 📊'),
+                    dcc.Markdown('''
+                    ### 对比特币市值影响最大的因子是比特币区块数，比特币区块数和市值的走势很一致，相关系数高达0.9。
+                    '''),
+                    html.Div(children=main_panel)
+                ]),
+                html.Span('李力, 2024')
+            ])
+        ])
     ])
 ])
 

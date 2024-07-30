@@ -5,17 +5,15 @@ import dash_tvlwc
 import dash
 #from dash.dependencies import Input, Output, State
 from dash import html, dcc#, ctx
-
 from dash_tvlwc.types import ColorType, SeriesType
 import os
 import requests, json
 import sys
 sys.path.append('..')
-#import app
-
 import logging
 from flask_caching import Cache
 from logging.handlers import RotatingFileHandler
+import dash_bootstrap_components as dbc
 
 dash.register_page(__name__,
     title='4.比特币价格上限和下限分析',
@@ -164,17 +162,21 @@ main_panel = [
     ])
 ]
 
-layout = html.Div([
-    #dcc.Interval(id='timer', interval=500),
-    html.Div(className='container', children=[
-        html.Div(className='main-container', children=[
-            html.H2('比特币价格上限和下限图 📊'),
-            dcc.Markdown('''
-            ### 根据历史经验，比特币市值偏差为1时，比特币市值在牛市顶部，计算出的比特币价格为牛市的价格上限，比特币市值偏差为-0.95时，比特币市值在熊市底部，计算出的比特币价格为熊市的价格下限。
-            '''),
-            html.Div(children=main_panel)
-        ]),
-        html.Span('李力, 2024')
+layout = dbc.Container([
+    dbc.Row([
+        html.Div([
+            #dcc.Interval(id='timer', interval=500),
+            html.Div(className='container', children=[
+                html.Div(className='main-container', children=[
+                    html.H2('比特币价格上限和下限图 📊'),
+                    dcc.Markdown('''
+                    ### 根据历史经验，比特币市值偏差为1时，比特币市值在牛市顶部，计算出的比特币价格为牛市的价格上限，比特币市值偏差为-0.95时，比特币市值在熊市底部，计算出的比特币价格为熊市的价格下限。
+                    '''),
+                    html.Div(children=main_panel)
+                ]),
+                html.Span('李力, 2024')
+            ])
+        ])
     ])
 ])
 

@@ -5,17 +5,16 @@ import dash_tvlwc
 import dash
 #from dash.dependencies import Input, Output, State
 from dash import html, dcc#, ctx
-
 from dash_tvlwc.types import ColorType, SeriesType
 import os
 import requests, json
 #import sys
 #sys.path.append('..')
 #import app
-
 import logging
 from flask_caching import Cache
 from logging.handlers import RotatingFileHandler
+import dash_bootstrap_components as dbc
 
 dash.register_page(__name__,
     title='3.比特币市值偏差分析',
@@ -153,17 +152,21 @@ main_panel = [
     ])
 ]
 
-layout = html.Div([
-    #dcc.Interval(id='timer', interval=500),
-    html.Div(className='container', children=[
-        html.Div(className='main-container', children=[
-            html.H2('比特币市值偏差和市值图 📊'),
-            dcc.Markdown('''
-            ### 比特币市值和比特币预测市值的差为比特币市值偏差，比特币市值和比特币市值偏差的顶部和底部很一致，而且比特币市值偏差在-1到2之间震荡，比特币市值偏差能预测比特币市值的牛市顶部和熊市底部。
-            '''),
-            html.Div(children=main_panel)
-        ]),
-        html.Span('李力, 2024')
+layout = dbc.Container([
+    dbc.Row([
+        html.Div([
+            #dcc.Interval(id='timer', interval=500),
+            html.Div(className='container', children=[
+                html.Div(className='main-container', children=[
+                    html.H2('比特币市值偏差和市值图 📊'),
+                    dcc.Markdown('''
+                    ### 比特币市值和比特币预测市值的差为比特币市值偏差，比特币市值和比特币市值偏差的顶部和底部很一致，而且比特币市值偏差在-1到2之间震荡，比特币市值偏差能预测比特币市值的牛市顶部和熊市底部。
+                    '''),
+                    html.Div(children=main_panel)
+                ]),
+                html.Span('李力, 2024')
+            ])
+        ])
     ])
 ])
 
