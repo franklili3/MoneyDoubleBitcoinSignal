@@ -154,9 +154,7 @@ main_panel = [
     ])
 ]
 
-layout = dbc.Container([
-    dbc.Row([
-        html.Div([
+layout = html.Div([
             #dcc.Interval(id='timer', interval=500),
             html.Div(className='container', children=[
                 html.Div(className='main-container', children=[
@@ -169,7 +167,5 @@ layout = dbc.Container([
                 html.Span('李力, 2024')
             ])
         ])
-    ])
-])
 
 

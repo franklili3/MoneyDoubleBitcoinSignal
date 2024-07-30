@@ -96,60 +96,48 @@ app1.logger.debug('data1[1]: {}'.format(str(data1[1])[0:10]))
 app1.logger.debug('data1[2]: {}'.format(str(data1[2])[0:10]))
 app1.logger.debug('data1[3]: {}'.format(str(data1[3])[0:10]))
 app1.logger.debug('data1[4]: {}'.format(str(data1[4])[0:10]))
-layout = dbc.Container([
-    dbc.Row([
-        html.Div([
-            html.H2('最新数据-' + data1[0],
-                style={
-                    'textAlign': 'center'
-                }          
-            )
-        ])
-    ]),
-    dbc.Row([
-        dbc.Col([
-            daq.Gauge(
-                value=data1[3]/10000,
-                label='比特币价格上限',
-                max=round(data1[3]/10000, 4),
-                min=0,
-                showCurrentValue=True,
-                units="万美元",
-                scale={'interval': 2, 'labelInterval': 2}
-            )
-        ]),
-        dbc.Col([        
-            daq.Gauge(
-                value=data1[4]/10000,
-                label='比特币预测价格',
-                max=round(data1[3]/10000, 4),
-                min=0,
-                showCurrentValue=True,
-                units="万美元",
-                scale={'interval': 2, 'labelInterval': 2}
-            )
-        ]),
-        dbc.Col([          
-            daq.Gauge(
-                value=data1[1]/10000,
-                label='比特币价格',
-                max=round(data1[3]/10000, 4),
-                min=0,
-                showCurrentValue=True,
-                units="万美元",
-                scale={'interval': 2, 'labelInterval': 2}
-            )
-        ]),
-        dbc.Col([          
-            daq.Gauge(
-                value=data1[2]/10000,
-                label='比特币价格下限',
-                max=round(data1[3]/10000, 4),
-                min=0,
-                showCurrentValue=True,
-                units="万美元",
-                scale={'interval': 2, 'labelInterval': 2}
-            )     
-        ])
-    ])
+layout = html.Div([
+    html.H2('最新数据-' + data1[0],
+        style={
+            'textAlign': 'center'
+        }          
+    ),
+    html.Div(className='row', children=[
+        daq.Gauge(
+            value=data1[2]/10000,
+            label='比特币价格下限',
+            max=round(data1[3]/10000, 4),
+            min=0,
+            showCurrentValue=True,
+            units="万美元",
+            scale={'interval': 2, 'labelInterval': 2}
+        ),
+        daq.Gauge(
+            value=data1[1]/10000,
+            label='比特币价格',
+            max=round(data1[3]/10000, 4),
+            min=0,
+            showCurrentValue=True,
+            units="万美元",
+            scale={'interval': 2, 'labelInterval': 2}
+        ),
+        daq.Gauge(
+            value=data1[4]/10000,
+            label='比特币预测价格',
+            max=round(data1[3]/10000, 4),
+            min=0,
+            showCurrentValue=True,
+            units="万美元",
+            scale={'interval': 2, 'labelInterval': 2}
+        ),
+        daq.Gauge(
+            value=data1[3]/10000,
+            label='比特币价格上限',
+            max=round(data1[3]/10000, 4),
+            min=0,
+            showCurrentValue=True,
+            units="万美元",
+            scale={'interval': 2, 'labelInterval': 2}
+        ) 
+    ])       
 ])
