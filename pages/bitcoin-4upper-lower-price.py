@@ -13,7 +13,7 @@ sys.path.append('..')
 import logging
 from flask_caching import Cache
 from logging.handlers import RotatingFileHandler
-import dash_bootstrap_components as dbc
+#import dash_bootstrap_components as dbc
 
 dash.register_page(__name__,
     title='4.比特币价格上限和下限分析',

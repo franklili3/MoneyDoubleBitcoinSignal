@@ -14,7 +14,7 @@ import requests, json
 import logging
 from flask_caching import Cache
 from logging.handlers import RotatingFileHandler
-import dash_bootstrap_components as dbc
+#import dash_bootstrap_components as dbc
 
 dash.register_page(__name__,
     title='3.比特币市值偏差分析',
