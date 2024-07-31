@@ -50,7 +50,7 @@ else:
 
 TIMEOUT = 60 * 60 * 24
 @cache.memoize(timeout=TIMEOUT)
-def get_predicted_marketcap():
+def get_predicted_marketcap(frequency='weekly'):
     home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
     auth_path = '/api/admins/auth-with-password'
     auth_url = home_url + auth_path
@@ -74,32 +74,53 @@ def get_predicted_marketcap():
         get_path = '/api/collections/bitcoin_trade_signal/records'
         data_marketcap_log = []
         data_blocks_log = []
-
-        for i in range(1,12):
-            query_predicted_marketcap_log = "?fields=date,marketcap_log,predicted_marketcap_log&&perPage=500&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
-            get_url = home_url + get_path + query_predicted_marketcap_log
-            header2 = {
-                "Content-Type": "application/json",
-                "Authorization": token
-            }
-            response2 = requests.get(get_url, headers=header2)
-            response2_json = response2.json()
-            response2_str = str(response2_json)
-            app1.logger.debug('response2_str: {}'.format(response2_str))
-            for item in response2_json['items']:
-                time = item['date']
-                value1 = item['marketcap_log']
-                value2 = item['predicted_marketcap_log']
-                app1.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)))
-                #print('time: ', time, ', value: ', value)
-                data_marketcap_log.append({'time': time, 'value': value1})
-                data_blocks_log.append({'time': time, 'value': value2})
-        data = [data_marketcap_log, data_blocks_log]
+        if frequency == 'daily':
+            for i in range(1,12):
+                query_predicted_marketcap_log = "?fields=date,marketcap_log,predicted_marketcap_log&&perPage=500&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
+                get_url = home_url + get_path + query_predicted_marketcap_log
+                header2 = {
+                    "Content-Type": "application/json",
+                    "Authorization": token
+                }
+                response2 = requests.get(get_url, headers=header2)
+                response2_json = response2.json()
+                response2_str = str(response2_json)
+                app1.logger.debug('response2_str: {}'.format(response2_str))
+                for item in response2_json['items']:
+                    time = item['date']
+                    value1 = item['marketcap_log']
+                    value2 = item['predicted_marketcap_log']
+                    app1.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)))
+                    #print('time: ', time, ', value: ', value)
+                    data_marketcap_log.append({'time': time, 'value': value1})
+                    data_blocks_log.append({'time': time, 'value': value2})
+            data = [data_marketcap_log, data_blocks_log]
+        elif frequency == 'weekly':
+            for i in range(1,3):
+                query_predicted_marketcap_log = "?filter=(weekday=1)&&fields=date,marketcap_log,predicted_marketcap_log&&perPage=500&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
+                get_url = home_url + get_path + query_predicted_marketcap_log
+                header2 = {
+                    "Content-Type": "application/json",
+                    "Authorization": token
+                }
+                response2 = requests.get(get_url, headers=header2)
+                response2_json = response2.json()
+                response2_str = str(response2_json)
+                app1.logger.debug('response2_str: {}'.format(response2_str))
+                for item in response2_json['items']:
+                    time = item['date']
+                    value1 = item['marketcap_log']
+                    value2 = item['predicted_marketcap_log']
+                    app1.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)))
+                    #print('time: ', time, ', value: ', value)
+                    data_marketcap_log.append({'time': time, 'value': value1})
+                    data_blocks_log.append({'time': time, 'value': value2})
+            data = [data_marketcap_log, data_blocks_log] 
     else:
         data = [generate_random_series(5000, n=5000), generate_random_series(5000, n=5000)]
 
     return data
-data1 = get_predicted_marketcap()
+data1 = get_predicted_marketcap(frequency='weekly')
 app1.logger.debug('data1[0]: {}'.format(str(data1[0])[0:10]))
 app1.logger.debug('data1[1]: {}'.format(str(data1[1])[0:10]))
 main_panel = [

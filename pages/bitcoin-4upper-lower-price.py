@@ -47,7 +47,7 @@ else:
 
 TIMEOUT = 60 * 60 * 24
 @cache.memoize(timeout=TIMEOUT)
-def get_upper_lower_price():
+def get_upper_lower_price(frequency = 'weekly'):
     home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
     auth_path = '/api/admins/auth-with-password'
     auth_url = home_url + auth_path
@@ -72,34 +72,57 @@ def get_upper_lower_price():
         data_price = []
         data_price_lower_limit = []
         data_price_upper_limit = []
-
-        for i in range(1,12):
-            query_predicted_marketcap_log = "?fields=date,price,price_lower_limit,price_upper_limit&&perPage=500&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
-            get_url = home_url + get_path + query_predicted_marketcap_log
-            header2 = {
-                "Content-Type": "application/json",
-                "Authorization": token
-            }
-            response2 = requests.get(get_url, headers=header2)
-            response2_json = response2.json()
-            response2_str = str(response2_json)
-            app1.logger.debug('response2_str: {}'.format(response2_str[0:100]))
-            for item in response2_json['items']:
-                time = item['date']
-                value1 = item['price']
-                value2 = item['price_lower_limit']
-                value3 = item['price_upper_limit']
-                #app1.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)) + ' ,value3:{}'.format(str(value3)))
-                #print('time: ', time, ', value: ', value)
-                data_price.append({'time': time, 'value': value1})
-                data_price_lower_limit.append({'time': time, 'value': value2})
-                data_price_upper_limit.append({'time': time, 'value': value3})
-        data = [data_price, data_price_lower_limit, data_price_upper_limit]
+        if frequency == 'daily':
+            for i in range(1,12):
+                query_predicted_marketcap_log = "?fields=date,price,price_lower_limit,price_upper_limit&&perPage=500&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
+                get_url = home_url + get_path + query_predicted_marketcap_log
+                header2 = {
+                    "Content-Type": "application/json",
+                    "Authorization": token
+                }
+                response2 = requests.get(get_url, headers=header2)
+                response2_json = response2.json()
+                response2_str = str(response2_json)
+                app1.logger.debug('response2_str: {}'.format(response2_str[0:100]))
+                for item in response2_json['items']:
+                    time = item['date']
+                    value1 = item['price']
+                    value2 = item['price_lower_limit']
+                    value3 = item['price_upper_limit']
+                    #app1.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)) + ' ,value3:{}'.format(str(value3)))
+                    #print('time: ', time, ', value: ', value)
+                    data_price.append({'time': time, 'value': value1})
+                    data_price_lower_limit.append({'time': time, 'value': value2})
+                    data_price_upper_limit.append({'time': time, 'value': value3})
+            data = [data_price, data_price_lower_limit, data_price_upper_limit]
+        elif frequency == 'weekly':
+            for i in range(1,3):
+                query_predicted_marketcap_log = "?filter=(weekday=1)&&fields=date,price,price_lower_limit,price_upper_limit&&perPage=500&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
+                get_url = home_url + get_path + query_predicted_marketcap_log
+                header2 = {
+                    "Content-Type": "application/json",
+                    "Authorization": token
+                }
+                response2 = requests.get(get_url, headers=header2)
+                response2_json = response2.json()
+                response2_str = str(response2_json)
+                app1.logger.debug('response2_str: {}'.format(response2_str[0:100]))
+                for item in response2_json['items']:
+                    time = item['date']
+                    value1 = item['price']
+                    value2 = item['price_lower_limit']
+                    value3 = item['price_upper_limit']
+                    #app1.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)) + ' ,value3:{}'.format(str(value3)))
+                    #print('time: ', time, ', value: ', value)
+                    data_price.append({'time': time, 'value': value1})
+                    data_price_lower_limit.append({'time': time, 'value': value2})
+                    data_price_upper_limit.append({'time': time, 'value': value3})
+            data = [data_price, data_price_lower_limit, data_price_upper_limit]
     else:
         data = [generate_random_series(5000, n=5000), generate_random_series(5000, n=5000), generate_random_series(5000, n=5000)]
 
     return data
-data1 = get_upper_lower_price()
+data1 = get_upper_lower_price(frequency = 'weekly')
 app1.logger.debug('data1[0]: {}'.format(str(data1[0])[0:10]))
 app1.logger.debug('data1[1]: {}'.format(str(data1[1])[0:10]))
 app1.logger.debug('data1[2]: {}'.format(str(data1[2])[0:10]))

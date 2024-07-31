@@ -52,7 +52,7 @@ else:
 
 TIMEOUT = 60 * 60 * 24
 @cache.memoize(timeout=TIMEOUT)
-def get_series(frequency='daily'):
+def get_series(frequency='weekly'):
     home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
     auth_path = '/api/admins/auth-with-password'
     auth_url = home_url + auth_path
@@ -135,7 +135,7 @@ if is_pc:
 elif is_mobile or is_tablet:
     data1 = get_series(frequency='weekly') 
 '''
-data1 = get_series(frequency='daily')   
+data1 = get_series(frequency='weekly')   
 app1.logger.debug('data1[0]: {}'.format(str(data1[0])[0:10]))
 app1.logger.debug('data1[1]: {}'.format(str(data1[1])[0:10]))
 main_panel = [
