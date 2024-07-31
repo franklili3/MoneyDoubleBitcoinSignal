@@ -57,9 +57,9 @@ def get_series(frequency='weekly'):
     auth_path = '/api/admins/auth-with-password'
     auth_url = home_url + auth_path
     username = os.environ.get('username')
-    print('username: ', username)
+    #print('username: ', username)
     password = os.environ.get('password')
-    print('password: ', password)
+    #print('password: ', password)
     # json.dumps 将python数据结构转换为JSON
     data1 = json.dumps({"identity": username, "password": password})
     # Content-Type 请求的HTTP内容类型 application/json 将数据已json形式发给服务器
@@ -68,7 +68,7 @@ def get_series(frequency='weekly'):
     response1_json = response1.json()
     response1_str = str(response1_json)
     #print('html: ', html)
-    print('response1_str: {}'.format(response1_str))
+    #print('response1_str: {}'.format(response1_str))
     app1.logger.debug('response1_str: {}'.format(response1_str))
     # html.json JSON 响应内容，提取token值
     if response1_json['token']:
