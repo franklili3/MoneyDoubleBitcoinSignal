@@ -6,7 +6,7 @@ import logging
 from flask_caching import Cache
 from logging.handlers import RotatingFileHandler
 import os
-import dash_bootstrap_components as dbc
+#import dash_bootstrap_components as dbc
 
 dash.register_page(__name__, 
     path='/',

@@ -4,7 +4,7 @@ from data_generator import generate_random_series
 import dash_tvlwc
 import dash
 #from dash.dependencies import Input, Output, State
-from dash import html, dcc#, ctx
+from dash import html#, dcc, ctx
 
 from dash_tvlwc.types import ColorType, SeriesType
 import os
@@ -18,7 +18,7 @@ import requests, json
 import logging
 from flask_caching import Cache
 from logging.handlers import RotatingFileHandler
-import dash_bootstrap_components as dbc
+#import dash_bootstrap_components as dbc
 
 dash.register_page(__name__,
     title='1.比特币因子分析',
@@ -195,9 +195,7 @@ layout = html.Div([
             html.Div(className='container', children=[
                 html.Div(className='main-container', children=[
                     html.H2('比特币因子和市值图 📊'),
-                    dcc.Markdown('''
-                    ### 对比特币市值影响最大的因子是比特币区块数，比特币区块数和市值的走势很一致，相关系数高达0.9。
-                    '''),
+                    html.H3('对比特币市值影响最大的因子是比特币区块数，比特币区块数和市值的走势很一致，相关系数高达0.9。'),
                     html.Div(children=main_panel)
                 ]),
                 html.Span('李力, 2024')

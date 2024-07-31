@@ -4,7 +4,7 @@ from data_generator import generate_random_series
 import dash_tvlwc
 import dash
 #from dash.dependencies import Input, Output, State
-from dash import html, dcc#, ctx
+from dash import html#, dcc, ctx
 
 from dash_tvlwc.types import ColorType, SeriesType
 import os
@@ -16,7 +16,7 @@ import requests, json
 import logging
 from flask_caching import Cache
 from logging.handlers import RotatingFileHandler
-import dash_bootstrap_components as dbc
+#import dash_bootstrap_components as dbc
 
 dash.register_page(__name__,
     title='2.比特币预测市值分析',
@@ -180,9 +180,7 @@ layout = html.Div([
             html.Div(className='container', children=[
                 html.Div(className='main-container', children=[
                     html.H2('比特币预测市值和市值图 📊'),
-                    dcc.Markdown('''
-                    ### 根据比特币市值和比特币区块数建立预测模型，比特币预测市值和实际市值的走势很一致，模型的R方（可解释度）高达0.8。
-                    '''),
+                    html.H3('根据比特币市值和比特币区块数建立预测模型，比特币预测市值和实际市值的走势很一致，模型的R方（可解释度）高达0.8。'),
                     html.Div(children=main_panel)
                 ]),
                 html.Span('李力, 2024')

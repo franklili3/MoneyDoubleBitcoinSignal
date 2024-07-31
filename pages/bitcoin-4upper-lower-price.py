@@ -4,7 +4,7 @@ from data_generator import generate_random_series
 import dash_tvlwc
 import dash
 #from dash.dependencies import Input, Output, State
-from dash import html, dcc#, ctx
+from dash import html#, dcc, ctx
 from dash_tvlwc.types import ColorType, SeriesType
 import os
 import requests, json
@@ -190,9 +190,7 @@ layout = html.Div([
             html.Div(className='container', children=[
                 html.Div(className='main-container', children=[
                     html.H2('比特币价格上限和下限图 📊'),
-                    dcc.Markdown('''
-                    ### 根据历史经验，比特币市值偏差为1时，比特币市值在牛市顶部，计算出的比特币价格为牛市的价格上限，比特币市值偏差为-0.95时，比特币市值在熊市底部，计算出的比特币价格为熊市的价格下限。
-                    '''),
+                    html.H3('根据历史经验，比特币市值偏差为1时，比特币市值在牛市顶部，计算出的比特币价格为牛市的价格上限，比特币市值偏差为-0.95时，比特币市值在熊市底部，计算出的比特币价格为熊市的价格下限。'),
                     html.Div(children=main_panel)
                 ]),
                 html.Span('李力, 2024')
