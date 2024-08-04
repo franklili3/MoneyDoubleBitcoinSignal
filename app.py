@@ -3,6 +3,7 @@ from dash import Dash, html, dcc
 #import dash_bootstrap_components as dbc
 
 # Initialize the app - incorporate a Dash Bootstrap theme
+'''
 #external_stylesheets = [dbc.themes.SUPERHERO]
 # external JavaScript files
 external_scripts = [
@@ -16,10 +17,11 @@ external_scripts = [
     #'https://unpkg.com/react-dom@16.14.0/umd/react-dom.production.min.js',
     'https://unpkg.com/react@16.14.0/umd/react.production.min.js'
 ]
+'''
 app = Dash(__name__, 
             use_pages=True,
-            external_scripts=external_scripts
-)#, external_stylesheets=external_stylesheets)
+            serve_locally=False
+            )#, external_stylesheets=external_stylesheets)external_scripts=external_scripts
 server = app.server
 app.layout = html.Div([
                 html.H1('翻一番比特币投资驾驶舱'),
