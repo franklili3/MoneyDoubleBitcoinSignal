@@ -6,17 +6,17 @@ from dash import Dash, html, dcc, page_container, page_registry
 
 #external_stylesheets = [dbc.themes.SUPERHERO]
 # external JavaScript files
-external_scripts = [
-        'https://unpkg.com/dash_tvlwc@0.1.2/dash_tvlwc/dash_tvlwc.min.js'
-]
+#external_scripts = [
+#        'https://unpkg.com/dash_tvlwc@0.1.2/dash_tvlwc/dash_tvlwc.min.js'
+#]
 
 app = Dash(__name__, 
             title="钱翻一番",
             update_title="更新中",
             use_pages=True,
             serve_locally=False,
-            external_scripts=external_scripts
-            )#, external_stylesheets=external_stylesheets)
+            include_assets_files=False
+)#, external_stylesheets=external_stylesheets)external_scripts=external_scripts
 server = app.server
 app.layout = html.Div([
                 html.H1('钱翻一番投资驾驶舱'),
