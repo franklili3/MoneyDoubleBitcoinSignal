@@ -16,8 +16,8 @@ from logging.handlers import RotatingFileHandler
 #import dash_bootstrap_components as dbc
 
 register_page(__name__,
-    title='4.比特币价格上限和下限分析',
-    name='4.比特币价格上限和下限分析')
+    title='5.比特币价格上限和下限',
+    name='5.比特币价格上限和下限')
 app1 = get_app()
 # 创建RotatingFileHandler，并添加到app.logger.handlers列表
 handler = RotatingFileHandler('error.log', maxBytes=100000, backupCount=10)

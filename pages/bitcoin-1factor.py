@@ -21,8 +21,8 @@ from logging.handlers import RotatingFileHandler
 #import dash_bootstrap_components as dbc
 
 register_page(__name__,
-    title='1.比特币因子分析',
-    name='1.比特币因子分析')
+    title='1.比特币因子',
+    name='1.比特币因子')
 app1 = get_app()
 # 创建RotatingFileHandler，并添加到app.logger.handlers列表
 handler = RotatingFileHandler('../error.log', maxBytes=100000, backupCount=10)
