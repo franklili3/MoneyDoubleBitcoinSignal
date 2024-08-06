@@ -1,0 +1,3 @@
+[submodule "dash-tradingview"]
+	path = dash-tradingview
+	url = https://github.com/franklili3/dash-tradingview
