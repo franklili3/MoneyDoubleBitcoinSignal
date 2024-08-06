@@ -1,5 +1,5 @@
-import dash
-from dash import Dash, html, dcc
+#import dash
+from dash import Dash, html, dcc, page_container, page_registry
 #import dash_bootstrap_components as dbc
 
 # Initialize the app - incorporate a Dash Bootstrap theme
@@ -11,21 +11,23 @@ external_scripts = [
 ]
 
 app = Dash(__name__, 
+            title="钱翻一番",
+            update_title="更新中",
             use_pages=True,
             serve_locally=False,
             external_scripts=external_scripts
             )#, external_stylesheets=external_stylesheets)
 server = app.server
 app.layout = html.Div([
-                html.H1('翻一番比特币投资驾驶舱'),
+                html.H1('钱翻一番投资驾驶舱'),
                 html.Div([
                     html.Div([
                         html.Div(
                             dcc.Link(f"{page['name']}", href=page["relative_path"])# - {page['path']}
-                        ) for page in dash.page_registry.values()
+                        ) for page in page_registry.values()
                     ]),            
                 ]),
-                dash.page_container
+                page_container
 ]) 
 
 

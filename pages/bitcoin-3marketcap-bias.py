@@ -2,9 +2,9 @@
 #from datetime import datetime, timedelta
 from data_generator import generate_random_series
 import dash_tvlwc
-import dash
+#import dash
 #from dash.dependencies import Input, Output, State
-from dash import html#, dcc, ctx
+from dash import html, register_page, get_app#, dcc, ctx
 from dash_tvlwc.types import ColorType, SeriesType
 import os
 import requests, json
@@ -16,10 +16,10 @@ from flask_caching import Cache
 from logging.handlers import RotatingFileHandler
 #import dash_bootstrap_components as dbc
 
-dash.register_page(__name__,
+register_page(__name__,
     title='3.比特币市值偏差分析',
     name='3.比特币市值偏差分析')
-app1 = dash.get_app()
+app1 = get_app()
 # 创建RotatingFileHandler，并添加到app.logger.handlers列表
 handler = RotatingFileHandler('../error.log', maxBytes=100000, backupCount=10)
 handler.setLevel(logging.INFO)#)DEBUG

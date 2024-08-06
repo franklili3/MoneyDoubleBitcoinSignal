@@ -1,5 +1,5 @@
-import dash
-from dash import html
+#import dash
+from dash import html, register_page, get_app
 import dash_daq as daq
 import requests, json
 import logging
@@ -8,11 +8,11 @@ from logging.handlers import RotatingFileHandler
 import os
 #import dash_bootstrap_components as dbc
 
-dash.register_page(__name__, 
+register_page(__name__, 
     path='/',
     title='主页',
     name='主页')
-app1 = dash.get_app()
+app1 = get_app()
 # 创建RotatingFileHandler，并添加到app.logger.handlers列表
 handler = RotatingFileHandler('error.log', maxBytes=100000, backupCount=10)
 handler.setLevel(logging.INFO)#)DEBUG
