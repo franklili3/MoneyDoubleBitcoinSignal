@@ -71,7 +71,7 @@ dill==0.3.8
 multiprocess==0.70.16
 psutil==6.0.0
 orjson==3.10.6
-dash-tvlwc==0.1.1
+#dash-tvlwc==0.1.1
 XlsxWriter==3.2.0
 #data_generator==1.0.1
 iniconfig==2.0.0
