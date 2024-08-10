@@ -127,12 +127,12 @@ def get_series(frequency='weekly'):
 
 layout = html.Div([
             #dcc.Interval(id='timer', interval=500),
-            dcc.Store(id="store"),
+            dcc.Store(id="store-1"),
             html.Div(className='container', children=[
                 html.Div(className='main-container', children=[
                     html.H2('比特币因子和市值图 📊'),
                     html.H3('对比特币市值影响最大的因子是比特币区块数，比特币区块数和市值的走势很一致，相关系数高达0.9。'),
-                    html.Div(id="main_panel")
+                    html.Div(id="main_panel-1")
                 ]),
                 html.Span('李力, 2024')
             ])
@@ -149,11 +149,11 @@ clientside_callback(
         return user_Agent
     }
     """,
-    Output("store", "data"),
-    Input("store", "data"),
+    Output("store-1", "data"),
+    Input("store-1", "data"),
 )
 
-@app1.callback(Output("main_panel", "children"), Input("store", "data"))
+@app1.callback(Output("main_panel-1", "children"), Input("store-1", "data"))
 def update(JSoutput):
     user_agent = parse(JSoutput)
     is_mobile = user_agent.is_mobile

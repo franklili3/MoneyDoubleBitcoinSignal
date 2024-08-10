@@ -3,17 +3,18 @@
 from data_generator import generate_random_series
 import dash_tvlwc
 #import dash
-#from dash.dependencies import Input, Output, State
-from dash import html, register_page, get_app#, dcc, ctx
+from dash.dependencies import Input, Output#, State
+from dash import html, register_page, get_app, clientside_callback, dcc#, ctx
 from dash_tvlwc.types import ColorType, SeriesType
 import os
 import requests, json
-import sys
-sys.path.append('..')
+#import sys
+#sys.path.append('..')
 import logging
 from flask_caching import Cache
 from logging.handlers import RotatingFileHandler
 #import dash_bootstrap_components as dbc
+from user_agents import parse
 
 register_page(__name__,
     title='4.比特币市值上限和下限',
@@ -72,28 +73,27 @@ def get_upper_lower_marketcap(frequency = 'weekly'):
         data_marketcap = []
         data_marketcap_lower_limit = []
         data_marketcap_upper_limit = []
-        if frequency == 'daily':
-            for i in range(1,12):
-                query_predicted_marketcap_log = "?fields=date,marketcap_log,marketcap_lower_limit,marketcap_upper_limit&&perPage=500&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
-                get_url = home_url + get_path + query_predicted_marketcap_log
-                header2 = {
-                    "Content-Type": "application/json",
-                    "Authorization": token
-                }
-                response2 = requests.get(get_url, headers=header2)
-                response2_json = response2.json()
-                response2_str = str(response2_json)
-                app1.logger.debug('response2_str: {}'.format(response2_str[0:100]))
-                for item in response2_json['items']:
-                    time = item['date']
-                    value1 = item['marketcap_log']
-                    value2 = item['marketcap_lower_limit']
-                    value3 = item['marketcap_upper_limit']
-                    #app1.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)) + ' ,value3:{}'.format(str(value3)))
-                    #print('time: ', time, ', value: ', value)
-                    data_marketcap.append({'time': time, 'value': value1})
-                    data_marketcap_lower_limit.append({'time': time, 'value': value2})
-                    data_marketcap_upper_limit.append({'time': time, 'value': value3})
+        if frequency == 'monthly':
+            query_predicted_marketcap_log = "?filter=(day_of_month=1)&&fields=date,marketcap_log,marketcap_lower_limit,marketcap_upper_limit&&perPage=500&&page=1"# + str(i)&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
+            get_url = home_url + get_path + query_predicted_marketcap_log
+            header2 = {
+                "Content-Type": "application/json",
+                "Authorization": token
+            }
+            response2 = requests.get(get_url, headers=header2)
+            response2_json = response2.json()
+            response2_str = str(response2_json)
+            app1.logger.debug('response2_str: {}'.format(response2_str[0:100]))
+            for item in response2_json['items']:
+                time = item['date']
+                value1 = item['marketcap_log']
+                value2 = item['marketcap_lower_limit']
+                value3 = item['marketcap_upper_limit']
+                #app1.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)) + ' ,value3:{}'.format(str(value3)))
+                #print('time: ', time, ', value: ', value)
+                data_marketcap.append({'time': time, 'value': value1})
+                data_marketcap_lower_limit.append({'time': time, 'value': value2})
+                data_marketcap_upper_limit.append({'time': time, 'value': value3})
             data = [data_marketcap, data_marketcap_lower_limit, data_marketcap_upper_limit]
         elif frequency == 'weekly':
             for i in range(1,3):
@@ -122,79 +122,106 @@ def get_upper_lower_marketcap(frequency = 'weekly'):
         data = [generate_random_series(5000, n=5000), generate_random_series(5000, n=5000), generate_random_series(5000, n=5000)]
 
     return data
-data1 = get_upper_lower_marketcap(frequency = 'weekly')
-app1.logger.debug('data1[0]: {}'.format(str(data1[0])[0:10]))
-app1.logger.debug('data1[1]: {}'.format(str(data1[1])[0:10]))
-app1.logger.debug('data1[2]: {}'.format(str(data1[2])[0:10]))
-main_panel = [
-    html.Div(style={'position': 'relative', 'width': '100%', 'height': '100%', 'marginBottom': '30px'}, children=[
-        html.Div(children=[
-            dash_tvlwc.Tvlwc(
-                #id='tv-chart-1',
-                #seriesData=[generate_random_ohlc(1000, n=1000)],
-                #seriesTypes=[SeriesType.Candlestick],
-                seriesData=[data1[0], data1[1], data1[2]],
-                seriesTypes=[SeriesType.Line, SeriesType.Line, SeriesType.Line],
-                width='99%',
-                chartOptions={
-                    'layout': {
-                        'background': {'type': ColorType.Solid, 'color': '#1B2631'},
-                        'textColor': 'white',
-                    },
-                    'grid': {
-                        'vertLines': {'visible': True, 'color': 'rgba(255,255,255,0.1)'},
-                        'horzLines': {'visible': True, 'color': 'rgba(255,255,255,0.1)'},
-                    },
-                    'localization': {
-                        'locale': 'zh-CN',
-                        #en-US
-                        'priceFormatter': "(function(price) { return '$' + price.toFixed(2); })"
-                        # 
-                    }
-                    
-                    #},
-                    #'rightPriceScale': {
-                    #    'visible': 'true'
-                    #},
-                    #'leftPriceScale': {
-                    #    'visible': 'true'
-                    
-                },
-                seriesOptions=[
-                    {
-                        'title': '比特币市值对数',
-                        #'color': 'blue' 
-                        #'priceScaleId': 'left'
-                    },
-                    {
-                        'title': '比特币市值对数下限',
-                        'color': 'green' 
-                        #'priceScaleId': 'left'
-                    },
-                    {
-                        'title': '比特币市值对数上限',
-                        'color': 'red' 
-                    }
-                ]
-            ),
-        ], style={'width': '100%', 'height': '100%', 'left': 0, 'top': 0}),
-        html.Div(id='chart-info', children=[
-            html.Span(id='chart-price', style={'fontSize': '60px', 'fontWeight': 'bold'}),
-            html.Span(id='chart-date', style={'fontSize': 'small'}),
-        ], style={'position': 'absolute', 'left': 0, 'top': 0, 'zIndex': 10, 'color': 'white', 'padding': '10px'})
-    ])
-]
+
 
 layout = html.Div([
             #dcc.Interval(id='timer', interval=500),
+            dcc.Store(id="store-4"),
             html.Div(className='container', children=[
                 html.Div(className='main-container', children=[
                     html.H2('比特币市值上限和下限图 📊'),
                     html.H3('根据历史经验，比特币市值偏离度为1时，比特币市值在牛市顶部，为牛市的市值上限，比特币市值偏离度为-0.95时，比特币市值在熊市底部，为熊市的市值下限。'),
-                    html.Div(children=main_panel)
+                    html.Div(id="main_panel-4")
                 ]),
                 html.Span('李力, 2024')
             ])
         ])
 
+clientside_callback(
+    """
+    function(trigger) {
+        //  can use any prop to trigger this callback - we just want to store the info on startup
+        // USE THIS TO GET screen dimensions 
+        // const screenInfo = {height :screen.height, width: screen.width};  
+        // USE THIS TO GET useragent string
+        user_Agent = navigator.userAgent;
+        return user_Agent
+    }
+    """,
+    Output("store-4", "data"),
+    Input("store-4", "data"),
+)
 
+@app1.callback(Output("main_panel-4", "children"), Input("store-4", "data"))
+def update(JSoutput):
+    user_agent = parse(JSoutput)
+    is_mobile = user_agent.is_mobile
+    is_tablet = user_agent.is_tablet
+    is_pc = user_agent.is_pc
+    if is_pc:
+        data1 = get_upper_lower_marketcap(frequency='weekly')
+    elif is_mobile or is_tablet:
+        data1 = get_upper_lower_marketcap(frequency='monthly') 
+    #data1 = get_upper_lower_marketcap(frequency = 'weekly')
+    app1.logger.debug('data1[0]: {}'.format(str(data1[0])[0:10]))
+    app1.logger.debug('data1[1]: {}'.format(str(data1[1])[0:10]))
+    app1.logger.debug('data1[2]: {}'.format(str(data1[2])[0:10]))
+    main_panel = [
+        html.Div(style={'position': 'relative', 'width': '100%', 'height': '100%', 'marginBottom': '30px'}, children=[
+            html.Div(children=[
+                dash_tvlwc.Tvlwc(
+                    #id='tv-chart-1',
+                    #seriesData=[generate_random_ohlc(1000, n=1000)],
+                    #seriesTypes=[SeriesType.Candlestick],
+                    seriesData=[data1[0], data1[1], data1[2]],
+                    seriesTypes=[SeriesType.Line, SeriesType.Line, SeriesType.Line],
+                    width='99%',
+                    chartOptions={
+                        'layout': {
+                            'background': {'type': ColorType.Solid, 'color': '#1B2631'},
+                            'textColor': 'white',
+                        },
+                        'grid': {
+                            'vertLines': {'visible': True, 'color': 'rgba(255,255,255,0.1)'},
+                            'horzLines': {'visible': True, 'color': 'rgba(255,255,255,0.1)'},
+                        },
+                        'localization': {
+                            'locale': 'zh-CN',
+                            #en-US
+                            'priceFormatter': "(function(price) { return '$' + price.toFixed(2); })"
+                            # 
+                        }
+                        
+                        #},
+                        #'rightPriceScale': {
+                        #    'visible': 'true'
+                        #},
+                        #'leftPriceScale': {
+                        #    'visible': 'true'
+                        
+                    },
+                    seriesOptions=[
+                        {
+                            'title': '比特币市值对数',
+                            #'color': 'blue' 
+                            #'priceScaleId': 'left'
+                        },
+                        {
+                            'title': '比特币市值对数下限',
+                            'color': 'green' 
+                            #'priceScaleId': 'left'
+                        },
+                        {
+                            'title': '比特币市值对数上限',
+                            'color': 'red' 
+                        }
+                    ]
+                ),
+            ], style={'width': '100%', 'height': '100%', 'left': 0, 'top': 0}),
+            html.Div(id='chart-info', children=[
+                html.Span(id='chart-price', style={'fontSize': '60px', 'fontWeight': 'bold'}),
+                html.Span(id='chart-date', style={'fontSize': 'small'}),
+            ], style={'position': 'absolute', 'left': 0, 'top': 0, 'zIndex': 10, 'color': 'white', 'padding': '10px'})
+        ])
+    ]
+    return main_panel
