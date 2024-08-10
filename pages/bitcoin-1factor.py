@@ -79,28 +79,29 @@ def get_series(frequency='weekly'):
         data_marketcap_log = []
         data_blocks_log = []
         if frequency == 'monthly':
-            query_bitcoin_marketcap_log = "?filter=(day_of_month=1)&&fields=date,marketcap_log,blocks_log&&perPage=500&&page=1"# + str(i)&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
-            get_url = home_url + get_path + query_bitcoin_marketcap_log
-            header2 = {
-                "Content-Type": "application/json",
-                "Authorization": token
-            }
-            response2 = requests.get(get_url, headers=header2)
-            response2_json = response2.json()
-            response2_str = str(response2_json)
-            app1.logger.debug('response2_str: {}'.format(response2_str))
-            for item in response2_json['items']:
-                time = item['date']
-                value1 = item['marketcap_log']
-                value2 = item['blocks_log']
-                app1.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)))
-                #print('time: ', time, ', value: ', value)
-                data_marketcap_log.append({'time': time, 'value': value1})
-                data_blocks_log.append({'time': time, 'value': value2})
-            data = [data_marketcap_log, data_blocks_log]
+            for i in range(1,13):        
+                query_bitcoin_marketcap_log = "?filter=(day_of_month=1)&&fields=date,marketcap_log,blocks_log&&perPage=12&&page=1" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
+                get_url = home_url + get_path + query_bitcoin_marketcap_log
+                header2 = {
+                    "Content-Type": "application/json",
+                    "Authorization": token
+                }
+                response2 = requests.get(get_url, headers=header2)
+                response2_json = response2.json()
+                response2_str = str(response2_json)
+                app1.logger.debug('response2_str: {}'.format(response2_str))
+                for item in response2_json['items']:
+                    time = item['date']
+                    value1 = item['marketcap_log']
+                    value2 = item['blocks_log']
+                    app1.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)))
+                    #print('time: ', time, ', value: ', value)
+                    data_marketcap_log.append({'time': time, 'value': value1})
+                    data_blocks_log.append({'time': time, 'value': value2})
+                data = [data_marketcap_log, data_blocks_log]
         elif frequency == 'weekly':
-            for i in range(1,3):
-                query_bitcoin_marketcap_log = "?filter=(weekday=1)&&fields=date,marketcap_log,blocks_log&&perPage=500&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
+            for i in range(1,13):
+                query_bitcoin_marketcap_log = "?filter=(weekday=1)&&fields=date,marketcap_log,blocks_log&&perPage=52&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
                 get_url = home_url + get_path + query_bitcoin_marketcap_log
                 header2 = {
                     "Content-Type": "application/json",
