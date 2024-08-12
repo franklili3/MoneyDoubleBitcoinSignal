@@ -79,8 +79,8 @@ def get_series(frequency='weekly'):
         data_marketcap_log = []
         data_blocks_log = []
         if frequency == 'monthly':
-            for i in range(1,13):        
-                query_bitcoin_marketcap_log = "?filter=(day_of_month=1)&&fields=date,marketcap_log,blocks_log&&perPage=12&&page=1" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
+            for i in range(1,14):        
+                query_bitcoin_marketcap_log = "?filter=(day_of_month=1)&&fields=date,marketcap_log,blocks_log&&perPage=12&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
                 get_url = home_url + get_path + query_bitcoin_marketcap_log
                 header2 = {
                     "Content-Type": "application/json",
@@ -100,7 +100,7 @@ def get_series(frequency='weekly'):
                     data_blocks_log.append({'time': time, 'value': value2})
                 data = [data_marketcap_log, data_blocks_log]
         elif frequency == 'weekly':
-            for i in range(1,13):
+            for i in range(1,14):
                 query_bitcoin_marketcap_log = "?filter=(weekday=1)&&fields=date,marketcap_log,blocks_log&&perPage=52&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
                 get_url = home_url + get_path + query_bitcoin_marketcap_log
                 header2 = {

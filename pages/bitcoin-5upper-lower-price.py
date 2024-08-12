@@ -72,9 +72,9 @@ def get_upper_lower_price(frequency = 'weekly'):
         data_price = []
         data_price_lower_limit = []
         data_price_upper_limit = []
-        if frequency == 'daily':
-            for i in range(1,12):
-                query_predicted_marketcap_log = "?fields=date,price,price_lower_limit,price_upper_limit&&perPage=500&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
+        if frequency == 'monthly':
+            for i in range(1,14):
+                query_predicted_marketcap_log = "?filter=(day_of_month=1)&&fields=date,price,price_lower_limit,price_upper_limit&&perPage=12&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
                 get_url = home_url + get_path + query_predicted_marketcap_log
                 header2 = {
                     "Content-Type": "application/json",
@@ -96,8 +96,8 @@ def get_upper_lower_price(frequency = 'weekly'):
                     data_price_upper_limit.append({'time': time, 'value': value3})
             data = [data_price, data_price_lower_limit, data_price_upper_limit]
         elif frequency == 'weekly':
-            for i in range(1,3):
-                query_predicted_marketcap_log = "?filter=(weekday=1)&&fields=date,price,price_lower_limit,price_upper_limit&&perPage=500&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
+            for i in range(1,14):
+                query_predicted_marketcap_log = "?filter=(weekday=1)&&fields=date,price,price_lower_limit,price_upper_limit&&perPage=52&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
                 get_url = home_url + get_path + query_predicted_marketcap_log
                 header2 = {
                     "Content-Type": "application/json",

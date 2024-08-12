@@ -74,30 +74,31 @@ def get_upper_lower_marketcap(frequency = 'weekly'):
         data_marketcap_lower_limit = []
         data_marketcap_upper_limit = []
         if frequency == 'monthly':
-            query_predicted_marketcap_log = "?filter=(day_of_month=1)&&fields=date,marketcap_log,marketcap_lower_limit,marketcap_upper_limit&&perPage=500&&page=1"# + str(i)&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
-            get_url = home_url + get_path + query_predicted_marketcap_log
-            header2 = {
-                "Content-Type": "application/json",
-                "Authorization": token
-            }
-            response2 = requests.get(get_url, headers=header2)
-            response2_json = response2.json()
-            response2_str = str(response2_json)
-            app1.logger.debug('response2_str: {}'.format(response2_str[0:100]))
-            for item in response2_json['items']:
-                time = item['date']
-                value1 = item['marketcap_log']
-                value2 = item['marketcap_lower_limit']
-                value3 = item['marketcap_upper_limit']
-                #app1.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)) + ' ,value3:{}'.format(str(value3)))
-                #print('time: ', time, ', value: ', value)
-                data_marketcap.append({'time': time, 'value': value1})
-                data_marketcap_lower_limit.append({'time': time, 'value': value2})
-                data_marketcap_upper_limit.append({'time': time, 'value': value3})
-            data = [data_marketcap, data_marketcap_lower_limit, data_marketcap_upper_limit]
+            for i in range(1,14):             
+                query_predicted_marketcap_log = "?filter=(day_of_month=1)&&fields=date,marketcap_log,marketcap_lower_limit,marketcap_upper_limit&&perPage=500&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
+                get_url = home_url + get_path + query_predicted_marketcap_log
+                header2 = {
+                    "Content-Type": "application/json",
+                    "Authorization": token
+                }
+                response2 = requests.get(get_url, headers=header2)
+                response2_json = response2.json()
+                response2_str = str(response2_json)
+                app1.logger.debug('response2_str: {}'.format(response2_str[0:100]))
+                for item in response2_json['items']:
+                    time = item['date']
+                    value1 = item['marketcap_log']
+                    value2 = item['marketcap_lower_limit']
+                    value3 = item['marketcap_upper_limit']
+                    #app1.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)) + ' ,value3:{}'.format(str(value3)))
+                    #print('time: ', time, ', value: ', value)
+                    data_marketcap.append({'time': time, 'value': value1})
+                    data_marketcap_lower_limit.append({'time': time, 'value': value2})
+                    data_marketcap_upper_limit.append({'time': time, 'value': value3})
+                data = [data_marketcap, data_marketcap_lower_limit, data_marketcap_upper_limit]
         elif frequency == 'weekly':
-            for i in range(1,3):
-                query_predicted_marketcap_log = "?filter=(weekday=1)&&fields=date,marketcap_log,marketcap_lower_limit,marketcap_upper_limit&&perPage=500&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
+            for i in range(1,14):
+                query_predicted_marketcap_log = "?filter=(weekday=1)&&fields=date,marketcap_log,marketcap_lower_limit,marketcap_upper_limit&&perPage=52&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
                 get_url = home_url + get_path + query_predicted_marketcap_log
                 header2 = {
                     "Content-Type": "application/json",
