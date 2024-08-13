@@ -129,6 +129,23 @@ layout = html.Div([
             #dcc.Interval(id='timer', interval=500),
             dcc.Store(id="store-1"),
             html.Div(className='container', children=[
+                html.Div([
+                    html.Div([
+                        html.Div([
+                            dcc.Link("主页", href="/"),
+                            html.Br(),
+                            dcc.Link("2.比特币预测市值", href="/bitcoin-predicted-marketcap"),
+                            html.Br(),
+                            dcc.Link("3.比特币市值偏离度", href="/bitcoin-marketcap-bias"),
+                            html.Br(),
+                            dcc.Link("4.比特币市值上限和下限", href="/bitcoin-upper-lower-marketcap"),
+                            html.Br(),
+                            dcc.Link("5.比特币价格上限和下限", href="/bitcoin-upper-lower-price")
+                        ])
+                        #    dcc.Link(f"{page['name']}", href=page["relative_path"])# - {page['path']}
+                        #) for page in page_registry.values()
+                    ]),            
+                ]),
                 html.Div(className='main-container', children=[
                     html.H2('比特币因子和市值图 📊'),
                     html.H3('对比特币市值影响最大的因子是比特币区块数，比特币区块数和市值的走势很一致，相关系数高达0.9。'),

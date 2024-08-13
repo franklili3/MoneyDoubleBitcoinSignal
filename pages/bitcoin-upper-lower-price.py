@@ -128,6 +128,24 @@ layout = html.Div([
             #dcc.Interval(id='timer', interval=500),
             dcc.Store(id="store-5"),
             html.Div(className='container', children=[
+                html.Div([
+                    html.Div([
+                        html.Div([
+                            dcc.Link("主页", href="/"),
+                            html.Br(),
+                            dcc.Link("1.比特币因子", href="/bitcoin-factor"),
+                            html.Br(),
+                            dcc.Link("2.比特币预测市值", href="/bitcoin-predicted-marketcap"),
+                            html.Br(),
+                            dcc.Link("3.比特币市值偏离度", href="/bitcoin-marketcap-bias"),
+                            html.Br(),
+                            dcc.Link("4.比特币市值上限和下限", href="/bitcoin-upper-lower-marketcap"),
+                            html.Br()
+                        ])
+                        #    dcc.Link(f"{page['name']}", href=page["relative_path"])# - {page['path']}
+                        #) for page in page_registry.values()
+                    ]),            
+                ]),
                 html.Div(className='main-container', children=[
                     html.H2('比特币价格上限和下限图 📊'),
                     html.H3('根据历史经验，比特币市值偏差为1时，比特币市值在牛市顶部，计算出的比特币价格为牛市的价格上限，比特币市值偏差为-0.95时，比特币市值在熊市底部，计算出的比特币价格为熊市的价格下限。'),
@@ -136,6 +154,7 @@ layout = html.Div([
                 html.Span('李力, 2024')
             ])
         ])
+
 
 
 clientside_callback(

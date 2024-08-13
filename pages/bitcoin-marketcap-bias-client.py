@@ -3,7 +3,7 @@
 from data_generator import generate_random_series
 import dash_tvlwc
 #import dash
-from dash.dependencies import Input, Output#, State
+from dash.dependencies import Input, Output#, callback
 from dash import html, register_page, get_app, clientside_callback, dcc#, ctx
 from dash_tvlwc.types import ColorType, SeriesType
 import os
@@ -16,10 +16,13 @@ from flask_caching import Cache
 from logging.handlers import RotatingFileHandler
 from user_agents import parse
 #import dash_bootstrap_components as dbc
+from flask_login import current_user
+from utils.login_handler import require_login
 
 register_page(__name__,
     title='3.比特币市值偏离度',
-    name='3.比特币市值偏离度')
+    name='3.比特币市值偏离度-客户')
+require_login(__name__)
 app1 = get_app()
 # 创建RotatingFileHandler，并添加到app.logger.handlers列表
 handler = RotatingFileHandler('../error.log', maxBytes=100000, backupCount=10)
@@ -124,6 +127,23 @@ layout = html.Div([
             #dcc.Interval(id='timer', interval=500),
             dcc.Store(id="store-8"),
             html.Div(className='container', children=[
+                html.Div([
+                    html.Div([
+                        html.Div([
+                            dcc.Link("主页", href="/home-client"),
+                            html.Br(),
+                            dcc.Link("1.比特币因子", href="/bitcoin-factor-client"),
+                            html.Br(),
+                            dcc.Link("2.比特币预测市值", href="/bitcoin-predicted-marketcap-client"),
+                            html.Br(),
+                            dcc.Link("4.比特币市值上限和下限", href="/bitcoin-upper-lower-marketcap-client"),
+                            html.Br(),
+                            dcc.Link("5.比特币价格上限和下限", href="/bitcoin-upper-lower-price-client")
+                    ])
+                        #    dcc.Link(f"{page['name']}", href=page["relative_path"])# - {page['path']}
+                        #) for page in page_registry.values()
+                    ]),            
+                ]),
                 html.Div(className='main-container', children=[
                     html.H2('比特币市值偏离度和市值图 📊'),
                     html.H3('比特币市值和比特币预测市值的差为比特币市值偏离度，比特币市值和比特币市值偏离度的顶部和底部很一致，而且比特币市值偏离度-1到2之间震荡，比特币市值偏离度能预测比特币市值的牛市顶部和熊市底部。'),

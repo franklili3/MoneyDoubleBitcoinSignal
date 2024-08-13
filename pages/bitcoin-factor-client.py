@@ -3,8 +3,9 @@
 from data_generator import generate_random_series
 import dash_tvlwc
 #import dash
-from dash.dependencies import Input, Output#, State
-from dash import html, clientside_callback, dcc, register_page, get_app#, ctx
+from dash.dependencies import Input, Output
+
+from dash import html, clientside_callback, dcc, register_page, get_app#, callback, ctx
 
 from dash_tvlwc.types import ColorType, SeriesType
 import os
@@ -19,10 +20,13 @@ import logging
 from flask_caching import Cache
 from logging.handlers import RotatingFileHandler
 #import dash_bootstrap_components as dbc
+from flask_login import current_user
+from utils.login_handler import require_login
 
 register_page(__name__,
     title='1.比特币因子',
-    name='1.比特币因子')
+    name='1.比特币因子-客户')
+require_login(__name__)
 app1 = get_app()
 # 创建RotatingFileHandler，并添加到app.logger.handlers列表
 handler = RotatingFileHandler('../error.log', maxBytes=100000, backupCount=10)
@@ -129,6 +133,23 @@ layout = html.Div([
             #dcc.Interval(id='timer', interval=500),
             dcc.Store(id="store-6"),
             html.Div(className='container', children=[
+                html.Div([
+                    html.Div([
+                        html.Div([
+                            dcc.Link("主页", href="/home-client"),
+                            html.Br(),
+                            dcc.Link("2.比特币预测市值", href="/bitcoin-predicted-marketcap-client"),
+                            html.Br(),
+                            dcc.Link("3.比特币市值偏离度", href="/bitcoin-marketcap-bias-client"),
+                            html.Br(),
+                            dcc.Link("4.比特币市值上限和下限", href="/bitcoin-upper-lower-marketcap-client"),
+                            html.Br(),
+                            dcc.Link("5.比特币价格上限和下限", href="/bitcoin-upper-lower-price-client")
+                    ])
+                        #    dcc.Link(f"{page['name']}", href=page["relative_path"])# - {page['path']}
+                        #) for page in page_registry.values()
+                    ]),            
+                ]),
                 html.Div(className='main-container', children=[
                     html.H2('比特币因子和市值图 📊'),
                     html.H3('对比特币市值影响最大的因子是比特币区块数，比特币区块数和市值的走势很一致，相关系数高达0.9。'),

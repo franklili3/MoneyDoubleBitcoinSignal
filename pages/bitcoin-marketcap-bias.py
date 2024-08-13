@@ -124,6 +124,23 @@ layout = html.Div([
             #dcc.Interval(id='timer', interval=500),
             dcc.Store(id="store-3"),
             html.Div(className='container', children=[
+                html.Div([
+                    html.Div([
+                        html.Div([
+                            dcc.Link("主页", href="/"),
+                            html.Br(),
+                            dcc.Link("1.比特币因子", href="/bitcoin-factor"),
+                            html.Br(),
+                            dcc.Link("2.比特币预测市值", href="/bitcoin-predicted-marketcap"),
+                            html.Br(),
+                            dcc.Link("4.比特币市值上限和下限", href="/bitcoin-upper-lower-marketcap"),
+                            html.Br(),
+                            dcc.Link("5.比特币价格上限和下限", href="/bitcoin-upper-lower-price")
+                        ])
+                        #    dcc.Link(f"{page['name']}", href=page["relative_path"])# - {page['path']}
+                        #) for page in page_registry.values()
+                    ]),            
+                ]),
                 html.Div(className='main-container', children=[
                     html.H2('比特币市值偏离度和市值图 📊'),
                     html.H3('比特币市值和比特币预测市值的差为比特币市值偏离度，比特币市值和比特币市值偏离度的顶部和底部很一致，而且比特币市值偏离度-1到2之间震荡，比特币市值偏离度能预测比特币市值的牛市顶部和熊市底部。'),

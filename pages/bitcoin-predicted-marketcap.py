@@ -124,12 +124,29 @@ def get_predicted_marketcap(frequency='weekly'):
 
 layout = html.Div([
             #dcc.Interval(id='timer', interval=500),
-            dcc.Store(id="store-7"),
+            dcc.Store(id="store-2"),
             html.Div(className='container', children=[
+                html.Div([
+                    html.Div([
+                        html.Div([
+                            dcc.Link("主页", href="/"),
+                            html.Br(),
+                            dcc.Link("1.比特币因子", href="/bitcoin-factor"),
+                            html.Br(),
+                            dcc.Link("3.比特币市值偏离度", href="/bitcoin-marketcap-bias"),
+                            html.Br(),
+                            dcc.Link("4.比特币市值上限和下限", href="/bitcoin-upper-lower-marketcap"),
+                            html.Br(),
+                            dcc.Link("5.比特币价格上限和下限", href="/bitcoin-upper-lower-price")
+                        ])
+                        #    dcc.Link(f"{page['name']}", href=page["relative_path"])# - {page['path']}
+                        #) for page in page_registry.values()
+                    ]),            
+                ]),
                 html.Div(className='main-container', children=[
                     html.H2('比特币预测市值和市值图 📊'),
                     html.H3('根据比特币市值和比特币区块数建立预测模型，比特币预测市值和实际市值的走势很一致，模型的R方（可解释度）高达0.8。'),
-                    html.Div(id="main_panel-7")
+                    html.Div(id="main_panel-2")
                 ]),
                 html.Span('李力, 2024')
             ])
@@ -146,11 +163,11 @@ clientside_callback(
         return user_Agent
     }
     """,
-    Output("store-7", "data"),
-    Input("store-7", "data"),
+    Output("store-2", "data"),
+    Input("store-2", "data"),
 )
 
-@app1.callback(Output("main_panel-7", "children"), Input("store-7", "data"))
+@app1.callback(Output("main_panel-2", "children"), Input("store-2", "data"))
 def update(JSoutput):
     user_agent = parse(JSoutput)
     is_mobile = user_agent.is_mobile
