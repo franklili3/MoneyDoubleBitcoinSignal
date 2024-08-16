@@ -41,7 +41,7 @@ else:
 
 TIMEOUT = 60 * 60 * 24
 @cache.memoize(timeout=TIMEOUT)
-def get_upper_lower_price():
+def get_upper_lower_price_before_1year():
     home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
     auth_path = '/api/admins/auth-with-password'
     auth_url = home_url + auth_path
@@ -90,7 +90,7 @@ def get_upper_lower_price():
         data = ["2024-07-22", 39877, 229876, 325477, 35741]
 
     return data
-data1 = get_upper_lower_price()
+data1 = get_upper_lower_price_before_1year()
 app1.logger.debug('data1[0]: {}'.format(str(data1[0])[0:10]))
 app1.logger.debug('data1[1]: {}'.format(str(data1[1])[0:10]))
 app1.logger.debug('data1[2]: {}'.format(str(data1[2])[0:10]))
