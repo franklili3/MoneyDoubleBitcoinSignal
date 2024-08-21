@@ -10,7 +10,7 @@ import os
 
 register_page(__name__, 
     path='/',
-    title='主页',
+    title='钱翻一番-主页',
     name='主页')
 app1 = get_app()
 # 创建RotatingFileHandler，并添加到app.logger.handlers列表
@@ -122,15 +122,6 @@ layout = html.Div([
         }          
     ),
     html.Div(className='row', children=[
-        daq.Gauge(
-            value=data1[2]/10000,
-            label='比特币价格下限',
-            max=round(data1[3]/10000, 4),
-            min=0,
-            showCurrentValue=True,
-            units="万美元",
-            scale={'interval': 2, 'labelInterval': 2}
-        ),
         daq.Gauge(
             value=data1[1]/10000,
             label='比特币价格',

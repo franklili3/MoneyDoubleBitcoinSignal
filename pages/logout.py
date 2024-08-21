@@ -2,7 +2,8 @@ import dash
 from dash import html, dcc
 from flask_login import logout_user, current_user
 
-dash.register_page(__name__)
+dash.register_page(__name__,
+                   title="钱翻一番-退出")
 
 
 def layout(**kwargs):

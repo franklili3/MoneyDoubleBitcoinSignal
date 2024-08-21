@@ -26,6 +26,7 @@ server = Flask(__name__)
 def login_button_click():
     if request.form:
         username = request.form['username']
+        session['username'] = username
         password = request.form['password']
         home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
         auth_path = '/api/collections/clients/auth-with-password'

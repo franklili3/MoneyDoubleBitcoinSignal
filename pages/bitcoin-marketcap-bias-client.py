@@ -123,7 +123,12 @@ def get_marketcap_bias_client(frequency='weekly'):
 
     return data
 
-layout = html.Div([
+def layout(**kwargs):
+    if not current_user.is_authenticated:
+        return html.Div(["请", dcc.Link("登录", href="/login"), "，再继续访问"])
+
+    return html.Div(
+        [
             #dcc.Interval(id='timer', interval=500),
             dcc.Store(id="store-8"),
             html.Div(className='container', children=[
