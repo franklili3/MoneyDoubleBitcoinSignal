@@ -45,10 +45,10 @@ def get_upper_lower_price():
     home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
     auth_path = '/api/admins/auth-with-password'
     auth_url = home_url + auth_path
-    username = os.environ.get('username')
-    #print('username: ', username)
-    app1.logger.debug('username: {}'.format(username))
-    password = os.environ.get('password')
+    username = os.environ.get('admin_username')
+    print('admin_username: ', username)
+    app1.logger.debug('admin_username: {}'.format(username))
+    password = os.environ.get('admin_password')
     # json.dumps 将python数据结构转换为JSON
     data1 = json.dumps({"identity": username, "password": password})
     # Content-Type 请求的HTTP内容类型 application/json 将数据已json形式发给服务器

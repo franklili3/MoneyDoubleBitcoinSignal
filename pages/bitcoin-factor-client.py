@@ -60,9 +60,9 @@ def get_series_client(frequency='weekly'):
     home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
     auth_path = '/api/admins/auth-with-password'
     auth_url = home_url + auth_path
-    username = os.environ.get('username')
+    username = os.environ.get('admin_username')
     #print('username: ', username)
-    password = os.environ.get('password')
+    password = os.environ.get('admin_password')
     #print('password: ', password)
     # json.dumps 将python数据结构转换为JSON
     data1 = json.dumps({"identity": username, "password": password})
