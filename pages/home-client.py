@@ -7,11 +7,15 @@ from flask_caching import Cache
 from logging.handlers import RotatingFileHandler
 import os
 #import dash_bootstrap_components as dbc
+from flask_login import current_user
+from utils.login_handler import require_login
 
 register_page(__name__, 
     path='/home-client',
     title='主页',
     name='主页-客户')
+require_login(__name__)
+
 app1 = get_app()
 # 创建RotatingFileHandler，并添加到app.logger.handlers列表
 handler = RotatingFileHandler('error.log', maxBytes=100000, backupCount=10)
@@ -96,7 +100,13 @@ app1.logger.debug('data1[1]: {}'.format(str(data1[1])[0:10]))
 app1.logger.debug('data1[2]: {}'.format(str(data1[2])[0:10]))
 app1.logger.debug('data1[3]: {}'.format(str(data1[3])[0:10]))
 app1.logger.debug('data1[4]: {}'.format(str(data1[4])[0:10]))
-layout = html.Div([
+
+def layout(**kwargs):
+    if not current_user.is_authenticated:
+        return html.Div(["请", dcc.Link("登录", href="/login"), "，再继续访问"])
+
+    return html.Div(
+    [
     html.Div([
         html.Div([
             html.Div([
