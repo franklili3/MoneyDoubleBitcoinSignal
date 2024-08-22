@@ -10,7 +10,7 @@ import os
 
 register_page(__name__, 
     path='/',
-    title='主页',
+    title='钱翻一番-主页',
     name='主页')
 app1 = get_app()
 # 创建RotatingFileHandler，并添加到app.logger.handlers列表
@@ -45,10 +45,10 @@ def get_upper_lower_price_before_1year():
     home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
     auth_path = '/api/admins/auth-with-password'
     auth_url = home_url + auth_path
-    username = os.environ.get('username')
-    #print('username: ', username)
-    app1.logger.debug('username: {}'.format(username))
-    password = os.environ.get('password')
+    username = os.environ.get('admin_username')
+    print('admin_username: ', username)
+    app1.logger.debug('admin_username: {}'.format(username))
+    password = os.environ.get('admin_password')
     # json.dumps 将python数据结构转换为JSON
     data1 = json.dumps({"identity": username, "password": password})
     # Content-Type 请求的HTTP内容类型 application/json 将数据已json形式发给服务器
@@ -122,15 +122,6 @@ layout = html.Div([
         }          
     ),
     html.Div(className='row', children=[
-        daq.Gauge(
-            value=data1[2]/10000,
-            label='比特币价格下限',
-            max=round(data1[3]/10000, 4),
-            min=0,
-            showCurrentValue=True,
-            units="万美元",
-            scale={'interval': 2, 'labelInterval': 2}
-        ),
         daq.Gauge(
             value=data1[1]/10000,
             label='比特币价格',

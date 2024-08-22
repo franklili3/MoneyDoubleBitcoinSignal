@@ -2,7 +2,8 @@ import dash
 from dash import html, dcc
 
 
-dash.register_page(__name__)
+dash.register_page(__name__,
+                   title="钱翻一番-登录")
 
 # Login screen
 layout = html.Form(

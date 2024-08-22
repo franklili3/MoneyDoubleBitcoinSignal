@@ -58,9 +58,9 @@ def get_predicted_marketcap_client(frequency='weekly'):
     home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
     auth_path = '/api/admins/auth-with-password'
     auth_url = home_url + auth_path
-    username = os.environ.get('username')
+    username = os.environ.get('admin_username')
     #print('username: ', username)
-    password = os.environ.get('password')
+    password = os.environ.get('admin_password')
     # json.dumps 将python数据结构转换为JSON
     data1 = json.dumps({"identity": username, "password": password})
     # Content-Type 请求的HTTP内容类型 application/json 将数据已json形式发给服务器
@@ -125,7 +125,12 @@ def get_predicted_marketcap_client(frequency='weekly'):
 
     return data
 
-layout = html.Div([
+def layout(**kwargs):
+    if not current_user.is_authenticated:
+        return html.Div(["请", dcc.Link("登录", href="/login"), "，再继续访问"])
+
+    return html.Div(
+        [
             #dcc.Interval(id='timer', interval=500),
             dcc.Store(id="store-7"),
             html.Div(className='container', children=[
