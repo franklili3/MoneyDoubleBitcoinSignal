@@ -3,8 +3,8 @@
 from data_generator import generate_random_series
 import dash_tvlwc
 #import dash
-from dash.dependencies import Input, Output#, callback
-from dash import html, register_page, get_app, clientside_callback, dcc#, ctx
+from dash.dependencies import Input, Output
+from dash import html, register_page, get_app, dcc, clientside_callback#, ctx
 from dash_tvlwc.types import ColorType, SeriesType
 import os
 import requests, json
@@ -19,8 +19,8 @@ from flask_login import current_user
 from utils.login_handler import require_login
 
 register_page(__name__,
-    title='4.比特币市值上限和下限',
-    name='4.比特币市值上限和下限-客户')
+    title='6.我的总回报',
+    name='6.我的总回报-客户')
 require_login(__name__)
 app1 = get_app()
 # 创建RotatingFileHandler，并添加到app.logger.handlers列表
@@ -51,9 +51,8 @@ else:
 
 TIMEOUT = 60 * 60 * 24
 @cache.memoize(timeout=TIMEOUT)
-def get_upper_lower_marketcap_client(frequency = 'weekly'):
+def get_my_total_return_client(frequency = 'weekly'):
     home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
-    '''
     auth_path = '/api/admins/auth-with-password'
     auth_url = home_url + auth_path
     username = os.environ.get('admin_username')
@@ -69,19 +68,17 @@ def get_upper_lower_marketcap_client(frequency = 'weekly'):
     #print('html: ', html)
     app1.logger.debug('response1_str: {}'.format(response1_str[0:100]))
     # html.json JSON 响应内容，提取token值
-    '''
-    if session.get('token'):
-        token = session.get('token')
-        #print('token: ', token)
+    if response1_json['token']:
+        token = response1_json['token']
 
         # 使用已经登录获取到的token 发送一个get请求
         get_path = '/api/collections/bitcoin_trade_signal/records'
-        data_marketcap = []
-        data_marketcap_lower_limit = []
-        data_marketcap_upper_limit = []
+        data_price = []
+        data_price_lower_limit = []
+        data_price_upper_limit = []
         if frequency == 'monthly':
-            for i in range(1,15):             
-                query_predicted_marketcap_log = "?filter=(day_of_month=1)&&fields=date,marketcap_log,marketcap_lower_limit,marketcap_upper_limit&&perPage=500&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
+            for i in range(1,15):
+                query_predicted_marketcap_log = "?filter=(day_of_month=1)&&fields=date,price,price_lower_limit,price_upper_limit&&perPage=12&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
                 get_url = home_url + get_path + query_predicted_marketcap_log
                 header2 = {
                     "Content-Type": "application/json",
@@ -93,18 +90,18 @@ def get_upper_lower_marketcap_client(frequency = 'weekly'):
                 app1.logger.debug('response2_str: {}'.format(response2_str[0:100]))
                 for item in response2_json['items']:
                     time = item['date']
-                    value1 = item['marketcap_log']
-                    value2 = item['marketcap_lower_limit']
-                    value3 = item['marketcap_upper_limit']
+                    value1 = item['price']
+                    value2 = item['price_lower_limit']
+                    value3 = item['price_upper_limit']
                     #app1.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)) + ' ,value3:{}'.format(str(value3)))
                     #print('time: ', time, ', value: ', value)
-                    data_marketcap.append({'time': time, 'value': value1})
-                    data_marketcap_lower_limit.append({'time': time, 'value': value2})
-                    data_marketcap_upper_limit.append({'time': time, 'value': value3})
-                data = [data_marketcap, data_marketcap_lower_limit, data_marketcap_upper_limit]
+                    data_price.append({'time': time, 'value': value1})
+                    data_price_lower_limit.append({'time': time, 'value': value2})
+                    data_price_upper_limit.append({'time': time, 'value': value3})
+            data = [data_price, data_price_lower_limit, data_price_upper_limit]
         elif frequency == 'weekly':
             for i in range(1,15):
-                query_predicted_marketcap_log = "?filter=(weekday=1)&&fields=date,marketcap_log,marketcap_lower_limit,marketcap_upper_limit&&perPage=52&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
+                query_predicted_marketcap_log = "?filter=(weekday=1)&&fields=date,price,price_lower_limit,price_upper_limit&&perPage=52&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
                 get_url = home_url + get_path + query_predicted_marketcap_log
                 header2 = {
                     "Content-Type": "application/json",
@@ -116,29 +113,28 @@ def get_upper_lower_marketcap_client(frequency = 'weekly'):
                 app1.logger.debug('response2_str: {}'.format(response2_str[0:100]))
                 for item in response2_json['items']:
                     time = item['date']
-                    value1 = item['marketcap_log']
-                    value2 = item['marketcap_lower_limit']
-                    value3 = item['marketcap_upper_limit']
+                    value1 = item['price']
+                    value2 = item['price_lower_limit']
+                    value3 = item['price_upper_limit']
                     #app1.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)) + ' ,value3:{}'.format(str(value3)))
                     #print('time: ', time, ', value: ', value)
-                    data_marketcap.append({'time': time, 'value': value1})
-                    data_marketcap_lower_limit.append({'time': time, 'value': value2})
-                    data_marketcap_upper_limit.append({'time': time, 'value': value3})
-            data = [data_marketcap, data_marketcap_lower_limit, data_marketcap_upper_limit]
+                    data_price.append({'time': time, 'value': value1})
+                    data_price_lower_limit.append({'time': time, 'value': value2})
+                    data_price_upper_limit.append({'time': time, 'value': value3})
+            data = [data_price, data_price_lower_limit, data_price_upper_limit]
     else:
-        data = [generate_random_series(5000, n=500), generate_random_series(5000, n=500), generate_random_series(5000, n=500)]
+        data = [generate_random_series(5000, n=5000), generate_random_series(5000, n=5000), generate_random_series(5000, n=5000)]
 
     return data
 
-
 def layout(**kwargs):
     if not current_user.is_authenticated:
-        return html.Div(["请", dcc.Link("登录", href="/login"), "，再继续访问"])
+        return html.Div(["请 ", dcc.Link("登录", href="/login"), " 继续查看。"])
 
     return html.Div(
         [
             #dcc.Interval(id='timer', interval=500),
-            dcc.Store(id="store-9"),
+            dcc.Store(id="store-10"),            
             html.Div(className='container', children=[
                 html.Div([
                     html.Div([
@@ -151,16 +147,17 @@ def layout(**kwargs):
                             html.Br(),
                             dcc.Link("3.比特币市值偏离度", href="/bitcoin-marketcap-bias-client"),
                             html.Br(),
-                            dcc.Link("5.比特币价格上限和下限", href="/bitcoin-upper-lower-price-client")
-                    ])
+                            dcc.Link("4.比特币市值上限和下限", href="/bitcoin-upper-lower-marketcap-client"),
+                            html.Br()
+                        ])
                         #    dcc.Link(f"{page['name']}", href=page["relative_path"])# - {page['path']}
                         #) for page in page_registry.values()
                     ]),            
                 ]),
                 html.Div(className='main-container', children=[
-                    html.H2('比特币市值上限和下限图 📊'),
-                    html.H3('根据历史经验，比特币市值偏离度为1时，比特币市值在牛市顶部，为牛市的市值上限，比特币市值偏离度为-0.95时，比特币市值在熊市底部，为熊市的市值下限。'),
-                    html.Div(id="main_panel-9")
+                    html.H2('比特币价格上限和下限图 📊'),
+                    html.H3('根据历史经验，比特币市值偏差为1时，比特币市值在牛市顶部，计算出的比特币价格为牛市的价格上限，比特币市值偏差为-0.95时，比特币市值在熊市底部，计算出的比特币价格为熊市的价格下限。'),
+                    html.Div(id="main_panel-10")
                 ]),
                 html.Span('李力, 2024')
             ])
@@ -177,24 +174,25 @@ clientside_callback(
         return user_Agent
     }
     """,
-    Output("store-9", "data"),
-    Input("store-9", "data"),
+    Output("store-10", "data"),
+    Input("store-10", "data"),
 )
 
-@app1.callback(Output("main_panel-9", "children"), Input("store-9", "data"))
+@app1.callback(Output("main_panel-10", "children"), Input("store-10", "data"))
 def update(JSoutput):
     user_agent = parse(JSoutput)
     is_mobile = user_agent.is_mobile
     is_tablet = user_agent.is_tablet
     is_pc = user_agent.is_pc
     if is_pc:
-        data1 = get_upper_lower_marketcap_client(frequency='weekly')
+        data1 = get_upper_lower_price_client(frequency='weekly')
     elif is_mobile or is_tablet:
-        data1 = get_upper_lower_marketcap_client(frequency='monthly') 
+        data1 = get_upper_lower_price_client(frequency='monthly') 
     #data1 = get_upper_lower_marketcap(frequency = 'weekly')
     app1.logger.debug('data1[0]: {}'.format(str(data1[0])[0:10]))
     app1.logger.debug('data1[1]: {}'.format(str(data1[1])[0:10]))
     app1.logger.debug('data1[2]: {}'.format(str(data1[2])[0:10]))
+
     main_panel = [
         html.Div(style={'position': 'relative', 'width': '100%', 'height': '100%', 'marginBottom': '30px'}, children=[
             html.Div(children=[
@@ -231,17 +229,17 @@ def update(JSoutput):
                     },
                     seriesOptions=[
                         {
-                            'title': '比特币市值对数',
+                            'title': '比特币价格',
                             #'color': 'blue' 
                             #'priceScaleId': 'left'
                         },
                         {
-                            'title': '比特币市值对数下限',
+                            'title': '比特币价格下限',
                             'color': 'green' 
                             #'priceScaleId': 'left'
                         },
                         {
-                            'title': '比特币市值对数上限',
+                            'title': '比特币价格上限',
                             'color': 'red' 
                         }
                     ]
