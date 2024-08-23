@@ -20,6 +20,7 @@ from logging.handlers import RotatingFileHandler
 #import dash_bootstrap_components as dbc
 from flask_login import current_user
 from utils.login_handler import require_login
+from flask import session
 
 register_page(__name__,
     title='2.比特币预测市值',

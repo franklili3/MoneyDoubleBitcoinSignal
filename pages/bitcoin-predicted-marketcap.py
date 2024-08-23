@@ -18,6 +18,7 @@ import logging
 from flask_caching import Cache
 from logging.handlers import RotatingFileHandler
 #import dash_bootstrap_components as dbc
+from flask import session
 
 register_page(__name__,
     title='2.比特币预测市值',

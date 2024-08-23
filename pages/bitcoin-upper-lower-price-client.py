@@ -17,6 +17,7 @@ from logging.handlers import RotatingFileHandler
 from user_agents import parse
 from flask_login import current_user
 from utils.login_handler import require_login
+from flask import session
 
 register_page(__name__,
     title='5.比特币价格上限和下限',

@@ -18,6 +18,7 @@ from user_agents import parse
 #import dash_bootstrap_components as dbc
 from flask_login import current_user
 from utils.login_handler import require_login
+from flask import session
 
 register_page(__name__,
     title='3.比特币市值偏离度',
@@ -54,6 +55,7 @@ TIMEOUT = 60 * 60 * 24
 @cache.memoize(timeout=TIMEOUT)
 def get_marketcap_bias_client(frequency='weekly'):
     home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
+    '''
     auth_path = '/api/admins/auth-with-password'
     auth_url = home_url + auth_path
     username = os.environ.get('admin_username')
@@ -69,8 +71,10 @@ def get_marketcap_bias_client(frequency='weekly'):
     #print('html: ', html)
     app1.logger.debug('response1_str: {}'.format(response1_str))
     # html.json JSON 响应内容，提取token值
-    if response1_json['token']:
-        token = response1_json['token']
+    '''
+    if session.get('token'):
+        token = session.get('token')
+        #print('token: ', token)
 
         # 使用已经登录获取到的token 发送一个get请求
         get_path = '/api/collections/bitcoin_trade_signal/records'

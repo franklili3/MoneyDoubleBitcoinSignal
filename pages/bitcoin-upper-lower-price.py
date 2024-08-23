@@ -15,6 +15,7 @@ from flask_caching import Cache
 from logging.handlers import RotatingFileHandler
 #import dash_bootstrap_components as dbc
 from user_agents import parse
+from flask import session
 
 register_page(__name__,
     title='5.比特币价格上限和下限',
