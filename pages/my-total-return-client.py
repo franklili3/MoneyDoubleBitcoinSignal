@@ -79,12 +79,9 @@ def get_my_total_return_client(frequency = 'daily'):
         get_path = '/api/collections/clients_trade_account/records'
         data_total_return = []
         data_annualized_return = []
-        data_annualized_volatility = []
-        data_annualized_sharpe = []
-        data_max_drawdown = []
         if frequency == 'daily':
             for i in range(1,2):
-                query_total_return = "?filter=(day_of_month=1)&&fields=date,total_return,annualized_return,annualized_volatility,annualized_sharpe,max_drawdown&&perPage=30&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
+                query_total_return = "?fields=date,total_return&&perPage=365&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
                 get_url = home_url + get_path + query_total_return
                 header2 = {
                     "Content-Type": "application/json",
@@ -97,20 +94,33 @@ def get_my_total_return_client(frequency = 'daily'):
                 for item in response2_json['items']:
                     time = item['date']
                     value1 = item['total_return']
-                    value2 = item['annualized_return']
-                    value3 = item['annualized_volatility']
-                    value4 = item['annualized_sharpe']
-                    value5 = item['max_drawdown']
                     #app1.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)) + ' ,value3:{}'.format(str(value3)))
                     #print('time: ', time, ', value: ', value)
                     data_total_return.append({'time': time, 'value': value1})
-                    data_annualized_return.append({'time': time, 'value': value2})
-                    data_annualized_volatility.append({'time': time, 'value': value3})
-                    data_annualized_sharpe.append({'time': time, 'value': value4})
-                    data_max_drawdown.append({'time': time, 'value': value5})
-           data = [data_total_return, data_annualized_return, data_annualized_volatility, data_annualized_sharpe, data_max_drawdown]
+
+            query_annualized_return = "?fields=date,annualized_return,annualized_volatility,annualized_sharpe,max_drawdown&&perPage=1&&page=1"# + str(i)&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
+            get_url = home_url + get_path + query_annualized_return
+            header2 = {
+                "Content-Type": "application/json",
+                "Authorization": token
+            }
+            response3 = requests.get(get_url, headers=header2)
+            response3_json = response3.json()
+            response3_str = str(response3_json)
+            app1.logger.debug('response2_str: {}'.format(response3_str[0:100]))
+            time = response3_json['items'][0]['date']
+            value2 = response3_json['items'][0]['annualized_return']
+            value3 = response3_json['items'][0]['annualized_volatility']
+            value4 = response3_json['items'][0]['annualized_sharpe']
+            value5 = response3_json['items'][0]['max_drawdown']
+            #app1.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)) + ' ,value3:{}'.format(str(value3)))
+            #print('time: ', time, ', value: ', value)
+            data_annualized_return.append({'time': time, 'annualized_return': value2, 'annualized_volatility': value3,
+                                            'annualized_sharpe': value4, 'max_drawdown': value5})
+
+        data = [data_total_return, data_annualized_return]
     else:
-        data = [generate_random_series(5000, n=5000), generate_random_series(5000, n=5000), generate_random_series(5000, n=5000)]
+        data = [generate_random_series(5000, n=500), generate_random_series(5000, n=500)]
 
     return data
 
@@ -121,7 +131,7 @@ def layout(**kwargs):
     return html.Div(
         [
             #dcc.Interval(id='timer', interval=500),
-            dcc.Store(id="store-10"),            
+            dcc.Store(id="store-11"),            
             html.Div(className='container', children=[
                 html.Div([
                     html.Div([
@@ -135,18 +145,19 @@ def layout(**kwargs):
                             dcc.Link("3.比特币市值偏离度", href="/bitcoin-marketcap-bias-client"),
                             html.Br(),
                             dcc.Link("4.比特币市值上限和下限", href="/bitcoin-upper-lower-marketcap-client"),
-                            html.Br()
+                            html.Br(),
+                            dcc.Link("5.比特币价格上限和下限", href="/bitcoin-upper-lower-price-client")
                         ])
                         #    dcc.Link(f"{page['name']}", href=page["relative_path"])# - {page['path']}
                         #) for page in page_registry.values()
                     ]),            
                 ]),
                 html.Div(className='main-container', children=[
-                    html.H2('比特币价格上限和下限图 📊'),
-                    html.H3('根据历史经验，比特币市值偏差为1时，比特币市值在牛市顶部，计算出的比特币价格为牛市的价格上限，比特币市值偏差为-0.95时，比特币市值在熊市底部，计算出的比特币价格为熊市的价格下限。'),
-                    html.Div(id="main_panel-10")
+                    html.H2('我的累计收益率图 📊'),
+                    #html.H3('根据历史经验，比特币市值偏差为1时，比特币市值在牛市顶部，计算出的比特币价格为牛市的价格上限，比特币市值偏差为-0.95时，比特币市值在熊市底部，计算出的比特币价格为熊市的价格下限。'),
+                    html.Div(id="main_panel-11")
                 ]),
-                html.Span('李力, 2024')
+                #html.Span('李力, 2024')
             ])
         ])
 
@@ -161,20 +172,20 @@ clientside_callback(
         return user_Agent
     }
     """,
-    Output("store-10", "data"),
-    Input("store-10", "data"),
+    Output("store-11", "data"),
+    Input("store-11", "data"),
 )
 
-@app1.callback(Output("main_panel-10", "children"), Input("store-10", "data"))
+@app1.callback(Output("main_panel-11", "children"), Input("store-11", "data"))
 def update(JSoutput):
     user_agent = parse(JSoutput)
     is_mobile = user_agent.is_mobile
     is_tablet = user_agent.is_tablet
     is_pc = user_agent.is_pc
     if is_pc:
-        data1 = get_upper_lower_price_client(frequency='weekly')
+        data1 = get_my_total_return_client(frequency='daily')
     elif is_mobile or is_tablet:
-        data1 = get_upper_lower_price_client(frequency='monthly') 
+        data1 = get_my_total_return_client(frequency='daily') 
     #data1 = get_upper_lower_marketcap(frequency = 'weekly')
     app1.logger.debug('data1[0]: {}'.format(str(data1[0])[0:10]))
     app1.logger.debug('data1[1]: {}'.format(str(data1[1])[0:10]))
@@ -187,8 +198,8 @@ def update(JSoutput):
                     #id='tv-chart-1',
                     #seriesData=[generate_random_ohlc(1000, n=1000)],
                     #seriesTypes=[SeriesType.Candlestick],
-                    seriesData=[data1[0], data1[1], data1[2]],
-                    seriesTypes=[SeriesType.Line, SeriesType.Line, SeriesType.Line],
+                    seriesData=[data1[0]],
+                    seriesTypes=[SeriesType.Line],
                     width='99%',
                     chartOptions={
                         'layout': {
@@ -216,18 +227,9 @@ def update(JSoutput):
                     },
                     seriesOptions=[
                         {
-                            'title': '比特币价格',
+                            'title': '我的累计收益率',
                             #'color': 'blue' 
                             #'priceScaleId': 'left'
-                        },
-                        {
-                            'title': '比特币价格下限',
-                            'color': 'green' 
-                            #'priceScaleId': 'left'
-                        },
-                        {
-                            'title': '比特币价格上限',
-                            'color': 'red' 
                         }
                     ]
                 ),

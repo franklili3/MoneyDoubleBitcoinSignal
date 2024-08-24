@@ -136,8 +136,7 @@ def layout(**kwargs):
     if not current_user.is_authenticated:
         return html.Div(["请", dcc.Link("登录", href="/login"), "，再继续访问"])
 
-    return html.Div(
-        [
+    return html.Div([
             #dcc.Interval(id='timer', interval=500),
             dcc.Store(id="store-9"),
             html.Div(className='container', children=[
@@ -152,11 +151,13 @@ def layout(**kwargs):
                             html.Br(),
                             dcc.Link("3.比特币市值偏离度", href="/bitcoin-marketcap-bias-client"),
                             html.Br(),
-                            dcc.Link("5.比特币价格上限和下限", href="/bitcoin-upper-lower-price-client")
-                    ])
+                            dcc.Link("5.比特币价格上限和下限", href="/bitcoin-upper-lower-price-client"),
+                            html.Br(),
+                            dcc.Link("6.我的累计收益率", href="/my-total-return-client"),
+                        ])
                         #    dcc.Link(f"{page['name']}", href=page["relative_path"])# - {page['path']}
                         #) for page in page_registry.values()
-                    ]),            
+                    ])            
                 ]),
                 html.Div(className='main-container', children=[
                     html.H2('比特币市值上限和下限图 📊'),
@@ -165,7 +166,7 @@ def layout(**kwargs):
                 ]),
                 html.Span('李力, 2024')
             ])
-        ])
+    ])
 
 clientside_callback(
     """

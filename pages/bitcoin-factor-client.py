@@ -153,7 +153,9 @@ def layout(**kwargs):
                             html.Br(),
                             dcc.Link("4.比特币市值上限和下限", href="/bitcoin-upper-lower-marketcap-client"),
                             html.Br(),
-                            dcc.Link("5.比特币价格上限和下限", href="/bitcoin-upper-lower-price-client")
+                            dcc.Link("5.比特币价格上限和下限", href="/bitcoin-upper-lower-price-client"),
+                            html.Br(),
+                            dcc.Link("6.我的累计收益率", href="/my-total-return-client")
                     ])
                         #    dcc.Link(f"{page['name']}", href=page["relative_path"])# - {page['path']}
                         #) for page in page_registry.values()
