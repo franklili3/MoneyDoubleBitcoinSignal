@@ -17,6 +17,7 @@ from logging.handlers import RotatingFileHandler
 from user_agents import parse
 from flask_login import current_user
 from utils.login_handler import require_login
+from flask import session
 
 register_page(__name__,
     title='6.我的总回报',
@@ -51,8 +52,9 @@ else:
 
 TIMEOUT = 60 * 60 * 24
 @cache.memoize(timeout=TIMEOUT)
-def get_my_total_return_client(frequency = 'weekly'):
+def get_my_total_return_client(frequency = 'daily'):
     home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
+    '''
     auth_path = '/api/admins/auth-with-password'
     auth_url = home_url + auth_path
     username = os.environ.get('admin_username')
@@ -68,18 +70,22 @@ def get_my_total_return_client(frequency = 'weekly'):
     #print('html: ', html)
     app1.logger.debug('response1_str: {}'.format(response1_str[0:100]))
     # html.json JSON 响应内容，提取token值
-    if response1_json['token']:
-        token = response1_json['token']
+    '''
+    if session.get('token'):
+        token = session.get('token')
+        #print('token: ', token)
 
         # 使用已经登录获取到的token 发送一个get请求
-        get_path = '/api/collections/bitcoin_trade_signal/records'
-        data_price = []
-        data_price_lower_limit = []
-        data_price_upper_limit = []
-        if frequency == 'monthly':
-            for i in range(1,15):
-                query_predicted_marketcap_log = "?filter=(day_of_month=1)&&fields=date,price,price_lower_limit,price_upper_limit&&perPage=12&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
-                get_url = home_url + get_path + query_predicted_marketcap_log
+        get_path = '/api/collections/clients_trade_account/records'
+        data_total_return = []
+        data_annualized_return = []
+        data_annualized_volatility = []
+        data_annualized_sharpe = []
+        data_max_drawdown = []
+        if frequency == 'daily':
+            for i in range(1,2):
+                query_total_return = "?filter=(day_of_month=1)&&fields=date,total_return,annualized_return,annualized_volatility,annualized_sharpe,max_drawdown&&perPage=30&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
+                get_url = home_url + get_path + query_total_return
                 header2 = {
                     "Content-Type": "application/json",
                     "Authorization": token
@@ -90,38 +96,19 @@ def get_my_total_return_client(frequency = 'weekly'):
                 app1.logger.debug('response2_str: {}'.format(response2_str[0:100]))
                 for item in response2_json['items']:
                     time = item['date']
-                    value1 = item['price']
-                    value2 = item['price_lower_limit']
-                    value3 = item['price_upper_limit']
+                    value1 = item['total_return']
+                    value2 = item['annualized_return']
+                    value3 = item['annualized_volatility']
+                    value4 = item['annualized_sharpe']
+                    value5 = item['max_drawdown']
                     #app1.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)) + ' ,value3:{}'.format(str(value3)))
                     #print('time: ', time, ', value: ', value)
-                    data_price.append({'time': time, 'value': value1})
-                    data_price_lower_limit.append({'time': time, 'value': value2})
-                    data_price_upper_limit.append({'time': time, 'value': value3})
-            data = [data_price, data_price_lower_limit, data_price_upper_limit]
-        elif frequency == 'weekly':
-            for i in range(1,15):
-                query_predicted_marketcap_log = "?filter=(weekday=1)&&fields=date,price,price_lower_limit,price_upper_limit&&perPage=52&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
-                get_url = home_url + get_path + query_predicted_marketcap_log
-                header2 = {
-                    "Content-Type": "application/json",
-                    "Authorization": token
-                }
-                response2 = requests.get(get_url, headers=header2)
-                response2_json = response2.json()
-                response2_str = str(response2_json)
-                app1.logger.debug('response2_str: {}'.format(response2_str[0:100]))
-                for item in response2_json['items']:
-                    time = item['date']
-                    value1 = item['price']
-                    value2 = item['price_lower_limit']
-                    value3 = item['price_upper_limit']
-                    #app1.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)) + ' ,value3:{}'.format(str(value3)))
-                    #print('time: ', time, ', value: ', value)
-                    data_price.append({'time': time, 'value': value1})
-                    data_price_lower_limit.append({'time': time, 'value': value2})
-                    data_price_upper_limit.append({'time': time, 'value': value3})
-            data = [data_price, data_price_lower_limit, data_price_upper_limit]
+                    data_total_return.append({'time': time, 'value': value1})
+                    data_annualized_return.append({'time': time, 'value': value2})
+                    data_annualized_volatility.append({'time': time, 'value': value3})
+                    data_annualized_sharpe.append({'time': time, 'value': value4})
+                    data_max_drawdown.append({'time': time, 'value': value5})
+           data = [data_total_return, data_annualized_return, data_annualized_volatility, data_annualized_sharpe, data_max_drawdown]
     else:
         data = [generate_random_series(5000, n=5000), generate_random_series(5000, n=5000), generate_random_series(5000, n=5000)]
 
