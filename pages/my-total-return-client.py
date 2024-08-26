@@ -78,7 +78,8 @@ def get_my_total_return_client(frequency = 'daily'):
         # 使用已经登录获取到的token 发送一个get请求
         get_path = '/api/collections/clients_trade_account/records'
         data_total_return = []
-        data_annualized_return = []
+        data_annualized_return = {'time': [], 'annualized_return': [], 'annualized_volatility': [],
+                                            'annualized_sharpe': [], 'max_drawdown': []}
         if frequency == 'daily':
             for i in range(1,2):
                 query_total_return = "?fields=date,total_return&&perPage=365&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
@@ -108,22 +109,32 @@ def get_my_total_return_client(frequency = 'daily'):
             response3_json = response3.json()
             response3_str = str(response3_json)
             app1.logger.debug('response2_str: {}'.format(response3_str[0:100]))
-            time = response3_json['items'][0]['date']
-            value2 = response3_json['items'][0]['annualized_return']
-            value3 = response3_json['items'][0]['annualized_volatility']
-            value4 = response3_json['items'][0]['annualized_sharpe']
-            value5 = response3_json['items'][0]['max_drawdown']
+            data_annualized_return['time'].append(response3_json['items'][0]['date'])
+            data_annualized_return['annualized_return'].append(response3_json['items'][0]['annualized_return'])
+            data_annualized_return['annualized_volatility'].append(response3_json['items'][0]['annualized_volatility'])
+            data_annualized_return['annualized_sharpe'].append(response3_json['items'][0]['annualized_sharpe'])
+            data_annualized_return['max_drawdown'].append(response3_json['items'][0]['max_drawdown'])
             #app1.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)) + ' ,value3:{}'.format(str(value3)))
             #print('time: ', time, ', value: ', value)
-            data_annualized_return.append({'time': time, 'annualized_return': value2, 'annualized_volatility': value3,
-                                            'annualized_sharpe': value4, 'max_drawdown': value5})
-
         data = [data_total_return, data_annualized_return]
     else:
         data = [generate_random_series(5000, n=500), generate_random_series(5000, n=500)]
 
     return data
 
+data0 = get_my_total_return_client(frequency='daily')
+data_annualized_return = data0[1]
+columnDefs = [
+    { 'field': 'country' },
+    { 'field': 'pop', 'headerName': 'Population'},
+    { 'field': 'lifeExp', 'headerName': 'Life Expectancy'},
+]
+
+grid = dag.AgGrid(
+    id="getting-started-headers",
+    rowData=df.to_dict("records"),
+    columnDefs=columnDefs,
+)
 def layout(**kwargs):
     if not current_user.is_authenticated:
         return html.Div(["请 ", dcc.Link("登录", href="/login"), " 继续查看。"])
@@ -152,6 +163,8 @@ def layout(**kwargs):
                         #) for page in page_registry.values()
                     ]),            
                 ]),
+                # show annualized_return,annualized_volatility,annualized_sharpe,max_drawdown values
+                html.Div([grid]),
                 html.Div(className='main-container', children=[
                     html.H2('我的累计收益率图 📊'),
                     #html.H3('根据历史经验，比特币市值偏差为1时，比特币市值在牛市顶部，计算出的比特币价格为牛市的价格上限，比特币市值偏差为-0.95时，比特币市值在熊市底部，计算出的比特币价格为熊市的价格下限。'),
