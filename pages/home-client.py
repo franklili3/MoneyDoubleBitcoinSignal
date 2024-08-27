@@ -68,7 +68,7 @@ def get_upper_lower_price_client():
     # html.json JSON 响应内容，提取token值
     if session.get('token'):
         token = session.get('token')
-        #print('token: ', token)
+        print('token: ', token)
         # 使用已经登录获取到的token 发送一个get请求
         get_path = '/api/collections/bitcoin_trade_signal/records'
 
@@ -183,7 +183,9 @@ def layout(**kwargs):
                 html.Br(),
                 dcc.Link("4.比特币市值上限和下限", href="/bitcoin-upper-lower-marketcap-client"),
                 html.Br(),
-                dcc.Link("5.比特币价格上限和下限", href="/bitcoin-upper-lower-price-client")
+                dcc.Link("5.比特币价格上限和下限", href="/bitcoin-upper-lower-price-client"),
+                html.Br(),
+                dcc.Link("6.我的累计收益率", href="/my-total-return-client")
         ])
             #    dcc.Link(f"{page['name']}", href=page["relative_path"])# - {page['path']}
             #) for page in page_registry.values()

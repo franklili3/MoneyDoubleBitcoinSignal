@@ -18,6 +18,8 @@ from user_agents import parse
 from flask_login import current_user
 from utils.login_handler import require_login
 from flask import session
+import pandas as pd
+import dash_ag_grid as dag
 
 register_page(__name__,
     title='6.我的总回报',
@@ -26,12 +28,12 @@ require_login(__name__)
 app1 = get_app()
 # 创建RotatingFileHandler，并添加到app.logger.handlers列表
 handler = RotatingFileHandler('error.log', maxBytes=100000, backupCount=10)
-handler.setLevel(logging.INFO)#)DEBUG
+handler.setLevel(logging.DEBUG)#)INFO
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')  
 handler.setFormatter(formatter)  
 
 # 配置日志等级
-app1.logger.setLevel(logging.INFO)#)DEBUG
+app1.logger.setLevel(logging.DEBUG)#)INFO
 
 app1.logger.addHandler(handler)
 if 'REDIS_URL' in os.environ:
@@ -73,8 +75,9 @@ def get_my_total_return_client(frequency = 'daily'):
     '''
     if session.get('token'):
         token = session.get('token')
-        #print('token: ', token)
-
+        app1.logger.debug('token: ', token)
+        username = session.get('username')
+        app1.logger.debug('username: ', username)
         # 使用已经登录获取到的token 发送一个get请求
         get_path = '/api/collections/clients_trade_account/records'
         data_total_return = []
@@ -82,7 +85,7 @@ def get_my_total_return_client(frequency = 'daily'):
                                             'annualized_sharpe': [], 'max_drawdown': []}
         if frequency == 'daily':
             for i in range(1,2):
-                query_total_return = "?fields=date,total_return&&perPage=365&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
+                query_total_return = "?filter=(username='" + username + "'||email='" + username + "')&&fields=date,total_return&&perPage=365&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
                 get_url = home_url + get_path + query_total_return
                 header2 = {
                     "Content-Type": "application/json",
@@ -99,7 +102,7 @@ def get_my_total_return_client(frequency = 'daily'):
                     #print('time: ', time, ', value: ', value)
                     data_total_return.append({'time': time, 'value': value1})
 
-            query_annualized_return = "?fields=date,annualized_return,annualized_volatility,annualized_sharpe,max_drawdown&&perPage=1&&page=1"# + str(i)&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
+            query_annualized_return = "?fields=date,annualized_return,annualized_volatility,annualized_sharpe,max_drawdown&&sort=-date&&perPage=1&&page=1"# + str(i)&&page=50&&perPage=100&&skipTotal=1response1_json
             get_url = home_url + get_path + query_annualized_return
             header2 = {
                 "Content-Type": "application/json",
@@ -122,23 +125,26 @@ def get_my_total_return_client(frequency = 'daily'):
 
     return data
 
-data0 = get_my_total_return_client(frequency='daily')
-data_annualized_return = data0[1]
-columnDefs = [
-    { 'field': 'country' },
-    { 'field': 'pop', 'headerName': 'Population'},
-    { 'field': 'lifeExp', 'headerName': 'Life Expectancy'},
-]
 
-grid = dag.AgGrid(
-    id="getting-started-headers",
-    rowData=df.to_dict("records"),
-    columnDefs=columnDefs,
-)
 def layout(**kwargs):
     if not current_user.is_authenticated:
         return html.Div(["请 ", dcc.Link("登录", href="/login"), " 继续查看。"])
+    data0 = get_my_total_return_client(frequency='daily')
+    data_annualized_return = data0[1]
+    df = pd.DataFrame(data_annualized_return)
+    columnDefs = [
+        { 'field': 'time', 'headerName': '日期' },
+        { 'field': 'annualized_return', 'headerName': '年化收益率'},
+        { 'field': 'annualized_volatility', 'headerName': '年化波动率'},
+        { 'field': 'annualized_sharpe', 'headerName': '年化夏普比率'},
+        { 'field': 'max_drawdown', 'headerName': '最大回撤比率'},
+    ]
 
+    grid = dag.AgGrid(
+        id="getting-started-headers",
+        rowData=df.to_dict("records"),
+        columnDefs=columnDefs,
+    )
     return html.Div(
         [
             #dcc.Interval(id='timer', interval=500),
@@ -202,7 +208,6 @@ def update(JSoutput):
     #data1 = get_upper_lower_marketcap(frequency = 'weekly')
     app1.logger.debug('data1[0]: {}'.format(str(data1[0])[0:10]))
     app1.logger.debug('data1[1]: {}'.format(str(data1[1])[0:10]))
-    app1.logger.debug('data1[2]: {}'.format(str(data1[2])[0:10]))
 
     main_panel = [
         html.Div(style={'position': 'relative', 'width': '100%', 'height': '100%', 'marginBottom': '30px'}, children=[

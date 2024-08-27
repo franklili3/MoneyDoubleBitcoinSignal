@@ -123,8 +123,8 @@ def get_predicted_marketcap(frequency='weekly'):
                     data_marketcap_log.append({'time': time, 'value': value1})
                     data_blocks_log.append({'time': time, 'value': value2})
             data = [data_marketcap_log, data_blocks_log] 
-        else:
-            data = [generate_random_series(5000, n=500), generate_random_series(5000, n=500)]
+    else:
+        data = [generate_random_series(5000, n=500), generate_random_series(5000, n=500)]
 
     return data
 

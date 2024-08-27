@@ -7,6 +7,7 @@ from flask_caching import Cache
 from logging.handlers import RotatingFileHandler
 import os
 #import dash_bootstrap_components as dbc
+from flask import session
 
 register_page(__name__, 
     path='/',
@@ -61,7 +62,7 @@ def get_upper_lower_price():
     # html.json JSON 响应内容，提取token值
     if response1_json['token']:
         token = response1_json['token']
-
+        session['token'] = token
         # 使用已经登录获取到的token 发送一个get请求
         get_path = '/api/collections/bitcoin_trade_signal/records'
 
