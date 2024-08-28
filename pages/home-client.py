@@ -18,16 +18,15 @@ register_page(__name__,
 require_login(__name__)
 
 app1 = get_app()
-# 创建RotatingFileHandler，并添加到app.logger.handlers列表
-handler = RotatingFileHandler('error.log', maxBytes=100000, backupCount=10)
-handler.setLevel(logging.DEBUG)#)INFO
+
+# 创建FileHandler，并添加到logger.handlers列表
+logger = logging.getLogger(__name__)
+handler = logging.FileHandler('error.log')
+logger.setLevel(logging.DEBUG)#)INFO
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')  
 handler.setFormatter(formatter)  
+logger.addHandler(handler)
 
-# 配置日志等级
-app1.logger.setLevel(logging.DEBUG)#)INFO
-
-app1.logger.addHandler(handler)
 if 'REDIS_URL' in os.environ:
     
     # Use Redis if REDIS_URL set as an env variable
@@ -68,7 +67,7 @@ def get_upper_lower_price_client():
     # html.json JSON 响应内容，提取token值
     if session.get('token'):
         token = session.get('token')
-        print('token: ', token)
+        logger.debug('token: ', token)
         # 使用已经登录获取到的token 发送一个get请求
         get_path = '/api/collections/bitcoin_trade_signal/records'
 
@@ -81,7 +80,7 @@ def get_upper_lower_price_client():
         response2 = requests.get(get_url, headers=header2)
         response2_json = response2.json()
         response2_str = str(response2_json)
-        app1.logger.debug('response2_str: {}'.format(response2_str[0:100]))
+        logger.debug('response2_str: {}'.format(response2_str[0:100]))
        
         time = response2_json['items'][0]['date'][0:10]
         data_price = response2_json['items'][0]['price']
@@ -137,7 +136,7 @@ def get_my_net_asset_value():
         response = requests.get(get_url, headers=header)
         response_json = response.json()
         response_str = str(response_json)
-        app1.logger.debug('response_str: {}'.format(response_str[0:100]))
+        logger.debug('response_str: {}'.format(response_str[0:100]))
         #print('response_str: {}'.format(response_str[0:100]))
         client_id = response_json['items'][0]['id']
         # 使用client_id，查询net_asset_value
@@ -147,7 +146,7 @@ def get_my_net_asset_value():
         response2 = requests.get(get_url2, headers=header)
         response2_json = response2.json()
         response2_str = str(response2_json)
-        app1.logger.debug('response2_str: {}'.format(response2_str[0:100]))
+        logger.debug('response2_str: {}'.format(response2_str[0:100]))
         #print('response2_str: {}'.format(response2_str[0:100]))
         net_asset_value = response2_json['items'][0]['net_asset_value']
             
@@ -162,11 +161,11 @@ def layout(**kwargs):
         return html.Div(["请", dcc.Link("登录", href="/login"), "，再继续访问"])
     data1 = get_upper_lower_price_client()
     data2 = get_my_net_asset_value()
-    app1.logger.debug('data1[0]: {}'.format(str(data1[0])[0:10]))
-    app1.logger.debug('data1[1]: {}'.format(str(data1[1])[0:10]))
-    app1.logger.debug('data1[2]: {}'.format(str(data1[2])[0:10]))
-    app1.logger.debug('data1[3]: {}'.format(str(data1[3])[0:10]))
-    app1.logger.debug('data1[4]: {}'.format(str(data1[4])[0:10]))
+    logger.debug('data1[0]: {}'.format(str(data1[0])[0:10]))
+    logger.debug('data1[1]: {}'.format(str(data1[1])[0:10]))
+    logger.debug('data1[2]: {}'.format(str(data1[2])[0:10]))
+    logger.debug('data1[3]: {}'.format(str(data1[3])[0:10]))
+    logger.debug('data1[4]: {}'.format(str(data1[4])[0:10]))
 
     return html.Div(
     [

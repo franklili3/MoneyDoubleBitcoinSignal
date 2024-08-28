@@ -24,16 +24,15 @@ register_page(__name__,
     name='5.比特币价格上限和下限-客户')
 require_login(__name__)
 app1 = get_app()
-# 创建RotatingFileHandler，并添加到app.logger.handlers列表
-handler = RotatingFileHandler('error.log', maxBytes=100000, backupCount=10)
-handler.setLevel(logging.INFO)#)DEBUG
+
+# 创建FileHandler，并添加到logger.handlers列表
+logger = logging.getLogger(__name__)
+handler = logging.FileHandler('error.log')
+logger.setLevel(logging.DEBUG)#)INFO
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')  
 handler.setFormatter(formatter)  
+logger.addHandler(handler)
 
-# 配置日志等级
-app1.logger.setLevel(logging.INFO)#)DEBUG
-
-app1.logger.addHandler(handler)
 if 'REDIS_URL' in os.environ:
     
     # Use Redis if REDIS_URL set as an env variable
@@ -91,7 +90,7 @@ def get_upper_lower_price_client(frequency = 'weekly'):
                 response2 = requests.get(get_url, headers=header2)
                 response2_json = response2.json()
                 response2_str = str(response2_json)
-                app1.logger.debug('response2_str: {}'.format(response2_str[0:100]))
+                logger.debug('response2_str: {}'.format(response2_str[0:100]))
                 for item in response2_json['items']:
                     time = item['date']
                     value1 = item['price']
@@ -114,7 +113,7 @@ def get_upper_lower_price_client(frequency = 'weekly'):
                 response2 = requests.get(get_url, headers=header2)
                 response2_json = response2.json()
                 response2_str = str(response2_json)
-                app1.logger.debug('response2_str: {}'.format(response2_str[0:100]))
+                logger.debug('response2_str: {}'.format(response2_str[0:100]))
                 for item in response2_json['items']:
                     time = item['date']
                     value1 = item['price']
@@ -194,9 +193,9 @@ def update(JSoutput):
     elif is_mobile or is_tablet:
         data1 = get_upper_lower_price_client(frequency='monthly') 
     #data1 = get_upper_lower_marketcap(frequency = 'weekly')
-    app1.logger.debug('data1[0]: {}'.format(str(data1[0])[0:10]))
-    app1.logger.debug('data1[1]: {}'.format(str(data1[1])[0:10]))
-    app1.logger.debug('data1[2]: {}'.format(str(data1[2])[0:10]))
+    logger.debug('data1[0]: {}'.format(str(data1[0])[0:10]))
+    logger.debug('data1[1]: {}'.format(str(data1[1])[0:10]))
+    logger.debug('data1[2]: {}'.format(str(data1[2])[0:10]))
 
     main_panel = [
         html.Div(style={'position': 'relative', 'width': '100%', 'height': '100%', 'marginBottom': '30px'}, children=[

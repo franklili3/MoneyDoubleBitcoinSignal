@@ -1,5 +1,5 @@
 #import dash
-from dash import Dash, html, dcc, page_container, page_registry
+from dash import Dash, html, dcc, page_container
 #import dash_bootstrap_components as dbc
 from dash.exceptions import PreventUpdate
 from utils.login_handler import restricted_page
@@ -7,9 +7,10 @@ import dash
 from dash import dcc, html, Input, Output, ALL
 import os
 from flask import Flask, request, redirect, session
-from flask_login import login_user, LoginManager, UserMixin, logout_user, current_user
+from flask_login import login_user, LoginManager, UserMixin, current_user
 import requests, json
-
+from logging.handlers import RotatingFileHandler
+import logging
 # Initialize the app - incorporate a Dash Bootstrap theme
 
 #external_stylesheets = [dbc.themes.SUPERHERO]
@@ -21,6 +22,13 @@ import requests, json
 # Exposing the Flask Server to enable configuring it for logging in
 server = Flask(__name__)
 
+# 创建FileHandler，并添加到logger.handlers列表
+logger = logging.getLogger(__name__)
+handler = logging.FileHandler('error.log')
+logger.setLevel(logging.DEBUG)#)INFO
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')  
+handler.setFormatter(formatter)  
+logger.addHandler(handler)
 
 @server.route('/login', methods=['POST'])
 def login_button_click():
@@ -41,7 +49,7 @@ def login_button_click():
         response1_str = str(response1_json)
         #print('html: ', html)
         #print('response1_str: {}'.format(response1_str))
-        app.logger.debug('response1_str: {}'.format(response1_str))
+        logger.debug('response1_str: {}'.format(response1_str))
         if response1_status_code == 400:
             return """无效的用户名或密码，请 <a href='/login'>登录</a>"""
         elif response1_status_code == 200:
@@ -53,16 +61,42 @@ def login_button_click():
                     return redirect(url) ## redirect to target url
             return redirect('/home-client') ## redirect to home
         #return """无效的用户名或密码，请 <a href='/login'>登录</a>"""
-
+'''
+@server.route('/', methods=['POST'])
+def access_home():
+    home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
+    auth_path = '/api/admins/auth-with-password'
+    auth_url = home_url + auth_path
+    username = os.environ.get('admin_username')
+    logger.debug('admin_username: ', username)
+    #app1.logger.debug('admin_username: {}'.format(username))
+    password = os.environ.get('admin_password')
+    # json.dumps 将python数据结构转换为JSON
+    data1 = json.dumps({"identity": username, "password": password})
+    # Content-Type 请求的HTTP内容类型 application/json 将数据已json形式发给服务器
+    header1 = {"Content-Type": "application/json"}
+    response1 = requests.post(auth_url, data=data1, headers=header1)
+    response1_json = response1.json()
+    #response1_str = str(response1_json)
+    #print('html: ', html)
+    #app1.logger.debug('response1_str: {}'.format(response1_str[0:100]))
+    # html.json JSON 响应内容，提取token值
+    if response1_json['token']:
+        token = response1_json['token']
+        session['token'] = token
+        logger.debug('save token: {}'.format(token))
+    return
+'''
 app = Dash(__name__, 
             title="钱翻一番",
             update_title="更新中",
             use_pages=True,
-            serve_locally=False,
+            serve_locally=True,
             include_assets_files=False,
             server=server,
             suppress_callback_exceptions=True
 )#, external_stylesheets=external_stylesheets)external_scripts=external_scripts
+
 server = app.server
 
 # Updating the Flask Server configuration with Secret Key to encrypt the user session cookie
@@ -130,4 +164,4 @@ def update_authentication_status(path, n):
         return '', dash.no_update
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run(debug=True)

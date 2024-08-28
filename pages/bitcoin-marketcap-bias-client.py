@@ -25,16 +25,15 @@ register_page(__name__,
     name='3.比特币市值偏离度-客户')
 require_login(__name__)
 app1 = get_app()
-# 创建RotatingFileHandler，并添加到app.logger.handlers列表
-handler = RotatingFileHandler('../error.log', maxBytes=100000, backupCount=10)
-handler.setLevel(logging.INFO)#)DEBUG
+
+# 创建FileHandler，并添加到logger.handlers列表
+logger = logging.getLogger(__name__)
+handler = logging.FileHandler('error.log')
+logger.setLevel(logging.DEBUG)#)INFO
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')  
 handler.setFormatter(formatter)  
+logger.addHandler(handler)
 
-# 配置日志等级
-app1.logger.setLevel(logging.INFO)#)DEBUG
-
-app1.logger.addHandler(handler)
 if 'REDIS_URL' in os.environ:
     
     # Use Redis if REDIS_URL set as an env variable
@@ -91,12 +90,12 @@ def get_marketcap_bias_client(frequency='weekly'):
                 response2 = requests.get(get_url, headers=header2)
                 response2_json = response2.json()
                 response2_str = str(response2_json)
-                app1.logger.debug('response2_str: {}'.format(response2_str))
+                logger.debug('response2_str: {}'.format(response2_str))
                 for item in response2_json['items']:
                     time = item['date']
                     value1 = item['marketcap_log']
                     value2 = item['marketcap_bias']
-                    app1.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)))
+                    logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)))
                     #print('time: ', time, ', value: ', value)
                     data_marketcap_log.append({'time': time, 'value': value1})
                     data_blocks_log.append({'time': time, 'value': value2})
@@ -112,12 +111,12 @@ def get_marketcap_bias_client(frequency='weekly'):
                 response2 = requests.get(get_url, headers=header2)
                 response2_json = response2.json()
                 response2_str = str(response2_json)
-                app1.logger.debug('response2_str: {}'.format(response2_str))
+                logger.debug('response2_str: {}'.format(response2_str))
                 for item in response2_json['items']:
                     time = item['date']
                     value1 = item['marketcap_log']
                     value2 = item['marketcap_bias']
-                    app1.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)))
+                    logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)))
                     #print('time: ', time, ', value: ', value)
                     data_marketcap_log.append({'time': time, 'value': value1})
                     data_blocks_log.append({'time': time, 'value': value2})
@@ -190,8 +189,8 @@ def update(JSoutput):
     elif is_mobile or is_tablet:
         data1 = get_marketcap_bias_client(frequency='monthly') 
 
-    app1.logger.debug('data1[0]: {}'.format(str(data1[0])[0:10]))
-    app1.logger.debug('data1[1]: {}'.format(str(data1[1])[0:10]))
+    logger.debug('data1[0]: {}'.format(str(data1[0])[0:10]))
+    logger.debug('data1[1]: {}'.format(str(data1[1])[0:10]))
     main_panel = [
         html.Div(style={'position': 'relative', 'width': '100%', 'height': '100%', 'marginBottom': '30px'}, children=[
             html.Div(children=[
