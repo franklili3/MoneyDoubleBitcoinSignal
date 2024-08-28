@@ -26,16 +26,15 @@ register_page(__name__,
     name='6.我的总回报-客户')
 require_login(__name__)
 app1 = get_app()
-# 创建RotatingFileHandler，并添加到app.logger.handlers列表
-handler = RotatingFileHandler('error.log', maxBytes=100000, backupCount=10)
-handler.setLevel(logging.DEBUG)#)INFO
+# 创建logger
+# 创建FileHandler，并添加到logger.handlers列表
+logger = logging.getLogger(__name__)
+handler = logging.FileHandler('error.log')
+logger.setLevel(logging.DEBUG)#)INFO
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')  
 handler.setFormatter(formatter)  
+logger.addHandler(handler)
 
-# 配置日志等级
-app1.logger.setLevel(logging.DEBUG)#)INFO
-
-app1.logger.addHandler(handler)
 if 'REDIS_URL' in os.environ:
     
     # Use Redis if REDIS_URL set as an env variable
@@ -75,26 +74,43 @@ def get_my_total_return_client(frequency = 'daily'):
     '''
     if session.get('token'):
         token = session.get('token')
-        app1.logger.debug('token: ', token)
+        logger.debug('token: ', token)
         username = session.get('username')
-        app1.logger.debug('username: ', username)
+        logger.debug('username: ', username)
         # 使用已经登录获取到的token 发送一个get请求
         get_path = '/api/collections/clients_trade_account/records'
         data_total_return = []
         data_annualized_return = {'time': [], 'annualized_return': [], 'annualized_volatility': [],
                                             'annualized_sharpe': [], 'max_drawdown': []}
         if frequency == 'daily':
+            # 使用已经登录获取到的token，查询client_id
+            post_path0 = '/api/collections/clients/records'
+
+            query_client_id = "?filter=(username='" + username + "'||email='" + username + "')&&fields=id"#&&page=50&&perPage=100&&date&&skipTotal=1response1_json
+            post_url0 = home_url + post_path0 + query_client_id
+            header = {
+                "Content-Type": "application/json",
+                "Authorization": token
+            }
+            response = requests.post(post_url0, headers=header)
+            response_json = response.json()
+            response_str = str(response_json)
+            logger.debug('response_str: {}'.format(response_str[0:100]))
+            #print('response_str: {}'.format(response_str[0:100]))
+            client_id = response_json['items'][0]['id']
             for i in range(1,2):
-                query_total_return = "?filter=(username='" + username + "'||email='" + username + "')&&fields=date,total_return&&perPage=365&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
-                get_url = home_url + get_path + query_total_return
+                post_path = '/api/collections/clients_trade_account/records'
+
+                query_total_return = "?filter=(client_id='" + client_id + "')&&fields=date,total_return&&perPage=365&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
+                post_url = home_url + post_path + query_total_return
                 header2 = {
                     "Content-Type": "application/json",
                     "Authorization": token
                 }
-                response2 = requests.get(get_url, headers=header2)
+                response2 = requests.post(post_url, headers=header2)
                 response2_json = response2.json()
                 response2_str = str(response2_json)
-                app1.logger.debug('response2_str: {}'.format(response2_str[0:100]))
+                logger.debug('response2_str: {}'.format(response2_str[0:100]))
                 for item in response2_json['items']:
                     time = item['date']
                     value1 = item['total_return']
@@ -102,16 +118,16 @@ def get_my_total_return_client(frequency = 'daily'):
                     #print('time: ', time, ', value: ', value)
                     data_total_return.append({'time': time, 'value': value1})
 
-            query_annualized_return = "?fields=date,annualized_return,annualized_volatility,annualized_sharpe,max_drawdown&&sort=-date&&perPage=1&&page=1"# + str(i)&&page=50&&perPage=100&&skipTotal=1response1_json
-            get_url = home_url + get_path + query_annualized_return
+            query_annualized_return = "?filter=(client_id='" + client_id + "')&&fields=date,annualized_return,annualized_volatility,annualized_sharpe,max_drawdown&&sort=-date&&perPage=1&&page=1"# + str(i)&&page=50&&perPage=100&&skipTotal=1response1_json
+            post_url2 = home_url + post_path + query_annualized_return
             header2 = {
                 "Content-Type": "application/json",
                 "Authorization": token
             }
-            response3 = requests.get(get_url, headers=header2)
+            response3 = requests.post(post_url2, headers=header2)
             response3_json = response3.json()
             response3_str = str(response3_json)
-            app1.logger.debug('response2_str: {}'.format(response3_str[0:100]))
+            logger.debug('response2_str: {}'.format(response3_str[0:100]))
             data_annualized_return['time'].append(response3_json['items'][0]['date'])
             data_annualized_return['annualized_return'].append(response3_json['items'][0]['annualized_return'])
             data_annualized_return['annualized_volatility'].append(response3_json['items'][0]['annualized_volatility'])
@@ -206,8 +222,8 @@ def update(JSoutput):
     elif is_mobile or is_tablet:
         data1 = get_my_total_return_client(frequency='daily') 
     #data1 = get_upper_lower_marketcap(frequency = 'weekly')
-    app1.logger.debug('data1[0]: {}'.format(str(data1[0])[0:10]))
-    app1.logger.debug('data1[1]: {}'.format(str(data1[1])[0:10]))
+    logger.debug('data1[0]: {}'.format(str(data1[0])[0:10]))
+    logger.debug('data1[1]: {}'.format(str(data1[1])[0:10]))
 
     main_panel = [
         html.Div(style={'position': 'relative', 'width': '100%', 'height': '100%', 'marginBottom': '30px'}, children=[

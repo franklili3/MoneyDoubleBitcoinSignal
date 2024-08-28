@@ -50,82 +50,6 @@ else:
     })
 
 
-TIMEOUT = 60 * 60 * 24
-@cache.memoize(timeout=TIMEOUT)
-def get_marketcap_bias_client(frequency='weekly'):
-    home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
-    '''
-    auth_path = '/api/admins/auth-with-password'
-    auth_url = home_url + auth_path
-    username = os.environ.get('admin_username')
-    #print('username: ', username)
-    password = os.environ.get('admin_password')
-    # json.dumps 将python数据结构转换为JSON
-    data1 = json.dumps({"identity": username, "password": password})
-    # Content-Type 请求的HTTP内容类型 application/json 将数据已json形式发给服务器
-    header1 = {"Content-Type": "application/json"}
-    response1 = requests.post(auth_url, data=data1, headers=header1)
-    response1_json = response1.json()
-    response1_str = str(response1_json)
-    #print('html: ', html)
-    app1.logger.debug('response1_str: {}'.format(response1_str))
-    # html.json JSON 响应内容，提取token值
-    '''
-    if session.get('token'):
-        token = session.get('token')
-        #print('token: ', token)
-
-        # 使用已经登录获取到的token 发送一个get请求
-        get_path = '/api/collections/bitcoin_trade_signal/records'
-        data_marketcap_log = []
-        data_blocks_log = []
-        if frequency == 'monthly':
-            for i in range(1,15):             
-                query_predicted_marketcap_log = "?filter=(day_of_month=1)&&fields=date,marketcap_log,marketcap_bias&&perPage=12&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
-                get_url = home_url + get_path + query_predicted_marketcap_log
-                header2 = {
-                    "Content-Type": "application/json",
-                    "Authorization": token
-                }
-                response2 = requests.get(get_url, headers=header2)
-                response2_json = response2.json()
-                response2_str = str(response2_json)
-                logger.debug('response2_str: {}'.format(response2_str))
-                for item in response2_json['items']:
-                    time = item['date']
-                    value1 = item['marketcap_log']
-                    value2 = item['marketcap_bias']
-                    logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)))
-                    #print('time: ', time, ', value: ', value)
-                    data_marketcap_log.append({'time': time, 'value': value1})
-                    data_blocks_log.append({'time': time, 'value': value2})
-                data = [data_marketcap_log, data_blocks_log]
-        elif frequency == 'weekly':
-            for i in range(1,15):
-                query_predicted_marketcap_log = "?filter=(weekday=1)&&fields=date,marketcap_log,marketcap_bias&&perPage=52&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
-                get_url = home_url + get_path + query_predicted_marketcap_log
-                header2 = {
-                    "Content-Type": "application/json",
-                    "Authorization": token
-                }
-                response2 = requests.get(get_url, headers=header2)
-                response2_json = response2.json()
-                response2_str = str(response2_json)
-                logger.debug('response2_str: {}'.format(response2_str))
-                for item in response2_json['items']:
-                    time = item['date']
-                    value1 = item['marketcap_log']
-                    value2 = item['marketcap_bias']
-                    logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)))
-                    #print('time: ', time, ', value: ', value)
-                    data_marketcap_log.append({'time': time, 'value': value1})
-                    data_blocks_log.append({'time': time, 'value': value2})
-            data = [data_marketcap_log, data_blocks_log]
-    else:
-        data = [generate_random_series(5000, n=5000), generate_random_series(5000, n=5000)]
-
-    return data
-
 def layout(**kwargs):
     if not current_user.is_authenticated:
         return html.Div(["请", dcc.Link("登录", href="/login"), "，再继续访问"])
@@ -180,6 +104,81 @@ clientside_callback(
 
 @app1.callback(Output("main_panel-8", "children"), Input("store-8", "data"))
 def update(JSoutput):
+    TIMEOUT = 60 * 60 * 24
+    @cache.memoize(timeout=TIMEOUT)
+    def get_marketcap_bias_client(frequency='weekly'):
+        home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
+        '''
+        auth_path = '/api/admins/auth-with-password'
+        auth_url = home_url + auth_path
+        username = os.environ.get('admin_username')
+        #print('username: ', username)
+        password = os.environ.get('admin_password')
+        # json.dumps 将python数据结构转换为JSON
+        data1 = json.dumps({"identity": username, "password": password})
+        # Content-Type 请求的HTTP内容类型 application/json 将数据已json形式发给服务器
+        header1 = {"Content-Type": "application/json"}
+        response1 = requests.post(auth_url, data=data1, headers=header1)
+        response1_json = response1.json()
+        response1_str = str(response1_json)
+        #print('html: ', html)
+        app1.logger.debug('response1_str: {}'.format(response1_str))
+        # html.json JSON 响应内容，提取token值
+        '''
+        if session.get('token'):
+            token = session.get('token')
+            #print('token: ', token)
+
+            # 使用已经登录获取到的token 发送一个get请求
+            get_path = '/api/collections/bitcoin_trade_signal/records'
+            data_marketcap_log = []
+            data_blocks_log = []
+            if frequency == 'monthly':
+                for i in range(1,15):             
+                    query_predicted_marketcap_log = "?filter=(day_of_month=1)&&fields=date,marketcap_log,marketcap_bias&&perPage=12&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
+                    get_url = home_url + get_path + query_predicted_marketcap_log
+                    header2 = {
+                        "Content-Type": "application/json",
+                        "Authorization": token
+                    }
+                    response2 = requests.get(get_url, headers=header2)
+                    response2_json = response2.json()
+                    response2_str = str(response2_json)
+                    logger.debug('response2_str: {}'.format(response2_str))
+                    for item in response2_json['items']:
+                        time = item['date']
+                        value1 = item['marketcap_log']
+                        value2 = item['marketcap_bias']
+                        logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)))
+                        #print('time: ', time, ', value: ', value)
+                        data_marketcap_log.append({'time': time, 'value': value1})
+                        data_blocks_log.append({'time': time, 'value': value2})
+                    data = [data_marketcap_log, data_blocks_log]
+            elif frequency == 'weekly':
+                for i in range(1,15):
+                    query_predicted_marketcap_log = "?filter=(weekday=1)&&fields=date,marketcap_log,marketcap_bias&&perPage=52&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
+                    get_url = home_url + get_path + query_predicted_marketcap_log
+                    header2 = {
+                        "Content-Type": "application/json",
+                        "Authorization": token
+                    }
+                    response2 = requests.get(get_url, headers=header2)
+                    response2_json = response2.json()
+                    response2_str = str(response2_json)
+                    logger.debug('response2_str: {}'.format(response2_str))
+                    for item in response2_json['items']:
+                        time = item['date']
+                        value1 = item['marketcap_log']
+                        value2 = item['marketcap_bias']
+                        logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)))
+                        #print('time: ', time, ', value: ', value)
+                        data_marketcap_log.append({'time': time, 'value': value1})
+                        data_blocks_log.append({'time': time, 'value': value2})
+                data = [data_marketcap_log, data_blocks_log]
+        else:
+            data = [generate_random_series(5000, n=5000), generate_random_series(5000, n=5000)]
+
+        return data
     user_agent = parse(JSoutput)
     is_mobile = user_agent.is_mobile
     is_tablet = user_agent.is_tablet

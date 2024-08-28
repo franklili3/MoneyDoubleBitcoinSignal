@@ -43,120 +43,119 @@ else:
     })
 
 
-TIMEOUT = 60 * 60 * 24
-@cache.memoize(timeout=TIMEOUT)
-def get_upper_lower_price_client():
-    home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
-    '''
-    auth_path = '/api/admins/auth-with-password'
-    auth_url = home_url + auth_path
-    username = os.environ.get('admin_username')
-    #print('username: ', username)
-    app1.logger.debug('username: {}'.format(username))
-    password = os.environ.get('admin_password')
-    # json.dumps 将python数据结构转换为JSON
-    data1 = json.dumps({"identity": username, "password": password})
-    # Content-Type 请求的HTTP内容类型 application/json 将数据已json形式发给服务器
-    header1 = {"Content-Type": "application/json"}
-    response1 = requests.post(auth_url, data=data1, headers=header1)
-    response1_json = response1.json()
-    response1_str = str(response1_json)
-    #print('html: ', html)
-    app1.logger.debug('response1_str: {}'.format(response1_str[0:100]))
-    '''
-    # html.json JSON 响应内容，提取token值
-    if session.get('token'):
-        token = session.get('token')
-        logger.debug('token: ', token)
-        # 使用已经登录获取到的token 发送一个get请求
-        get_path = '/api/collections/bitcoin_trade_signal/records'
-
-        query_predicted_marketcap_log = "?fields=date,price,price_lower_limit,price_upper_limit,predicted_price&&sort=-created&&perPage=1&&page=1"#&&page=50&&perPage=100&&date&&skipTotal=1response1_json
-        get_url = home_url + get_path + query_predicted_marketcap_log
-        header2 = {
-            "Content-Type": "application/json",
-            "Authorization": token
-        }
-        response2 = requests.get(get_url, headers=header2)
-        response2_json = response2.json()
-        response2_str = str(response2_json)
-        logger.debug('response2_str: {}'.format(response2_str[0:100]))
-       
-        time = response2_json['items'][0]['date'][0:10]
-        data_price = response2_json['items'][0]['price']
-        data_price_lower_limit = response2_json['items'][0]['price_lower_limit']
-        data_price_upper_limit = response2_json['items'][0]['price_upper_limit']
-        data_predicted_price = response2_json['items'][0]['predicted_price']
-        #app1.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)) + ' ,value3:{}'.format(str(value3)))
-        #print('time: ', time, ', value: ', value)
-
-            
-        data = [time, data_price, data_price_lower_limit, data_price_upper_limit, data_predicted_price]
-    else:
-        data = ["2024-07-22", 39877, 229876, 325477, 35741]
-
-    return data
-
-@cache.memoize(timeout=TIMEOUT)
-def get_my_net_asset_value():
-    '''
-    home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
-    auth_path = '/api/admins/auth-with-password'
-    auth_url = home_url + auth_path
-    username = os.environ.get('username')
-    #print('username: ', username)
-    app1.logger.debug('username: {}'.format(username))
-    password = os.environ.get('password')
-    # json.dumps 将python数据结构转换为JSON
-    data1 = json.dumps({"identity": username, "password": password})
-    # Content-Type 请求的HTTP内容类型 application/json 将数据已json形式发给服务器
-    header1 = {"Content-Type": "application/json"}
-    response1 = requests.post(auth_url, data=data1, headers=header1)
-    response1_json = response1.json()
-    response1_str = str(response1_json)
-    #print('html: ', html)
-    app1.logger.debug('response1_str: {}'.format(response1_str[0:100]))
-    # html.json JSON 响应内容，提取token值
-    '''
-    if session.get('token'):
-        token = session.get('token')
-        #print('token: ', token)
-        username = session.get('username')
-        #print('username: ', username)
-        home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
-        # 使用已经登录获取到的token，查询client_id
-        get_path = '/api/collections/clients/records'
-
-        query_client_id = "?filter=(username='" + username + "'||email='" + username + "')&&fields=id"#&&page=50&&perPage=100&&date&&skipTotal=1response1_json
-        get_url = home_url + get_path + query_client_id
-        header = {
-            "Content-Type": "application/json",
-            "Authorization": token
-        }
-        response = requests.get(get_url, headers=header)
-        response_json = response.json()
-        response_str = str(response_json)
-        logger.debug('response_str: {}'.format(response_str[0:100]))
-        #print('response_str: {}'.format(response_str[0:100]))
-        client_id = response_json['items'][0]['id']
-        # 使用client_id，查询net_asset_value
-        get_path2 = '/api/collections/clients_trade_account/records'
-        query_net_asset_value = "?filter=(client_id='" + client_id + "')&&fields=net_asset_value&&sort=-created&&perPage=1&&page=1"#&&page=50&&perPage=100&&date&&skipTotal=1response1_jsonclient_id"#&&page=50&&perPage=100&&date&&skipTotal=1response1_json
-        get_url2 = home_url + get_path2 + query_net_asset_value
-        response2 = requests.get(get_url2, headers=header)
-        response2_json = response2.json()
-        response2_str = str(response2_json)
-        logger.debug('response2_str: {}'.format(response2_str[0:100]))
-        #print('response2_str: {}'.format(response2_str[0:100]))
-        net_asset_value = response2_json['items'][0]['net_asset_value']
-            
-        data = [net_asset_value]
-    else:
-        data = [35741]
-
-    return data
-
 def layout(**kwargs):
+    TIMEOUT = 60 * 60 * 24
+    @cache.memoize(timeout=TIMEOUT)
+    def get_upper_lower_price_client():
+        home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
+        '''
+        auth_path = '/api/admins/auth-with-password'
+        auth_url = home_url + auth_path
+        username = os.environ.get('admin_username')
+        #print('username: ', username)
+        app1.logger.debug('username: {}'.format(username))
+        password = os.environ.get('admin_password')
+        # json.dumps 将python数据结构转换为JSON
+        data1 = json.dumps({"identity": username, "password": password})
+        # Content-Type 请求的HTTP内容类型 application/json 将数据已json形式发给服务器
+        header1 = {"Content-Type": "application/json"}
+        response1 = requests.post(auth_url, data=data1, headers=header1)
+        response1_json = response1.json()
+        response1_str = str(response1_json)
+        #print('html: ', html)
+        app1.logger.debug('response1_str: {}'.format(response1_str[0:100]))
+        '''
+        # html.json JSON 响应内容，提取token值
+        if session.get('token'):
+            token = session.get('token')
+            logger.debug('token: ', token)
+            # 使用已经登录获取到的token 发送一个get请求
+            get_path = '/api/collections/bitcoin_trade_signal/records'
+
+            query_predicted_marketcap_log = "?fields=date,price,price_lower_limit,price_upper_limit,predicted_price&&sort=-created&&perPage=1&&page=1"#&&page=50&&perPage=100&&date&&skipTotal=1response1_json
+            get_url = home_url + get_path + query_predicted_marketcap_log
+            header2 = {
+                "Content-Type": "application/json",
+                "Authorization": token
+            }
+            response2 = requests.get(get_url, headers=header2)
+            response2_json = response2.json()
+            response2_str = str(response2_json)
+            logger.debug('response2_str: {}'.format(response2_str[0:100]))
+        
+            time = response2_json['items'][0]['date'][0:10]
+            data_price = response2_json['items'][0]['price']
+            data_price_lower_limit = response2_json['items'][0]['price_lower_limit']
+            data_price_upper_limit = response2_json['items'][0]['price_upper_limit']
+            data_predicted_price = response2_json['items'][0]['predicted_price']
+            #app1.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)) + ' ,value3:{}'.format(str(value3)))
+            #print('time: ', time, ', value: ', value)
+
+                
+            data = [time, data_price, data_price_lower_limit, data_price_upper_limit, data_predicted_price]
+        else:
+            data = ["2024-07-22", 39877, 229876, 325477, 35741]
+
+        return data
+
+    @cache.memoize(timeout=TIMEOUT)
+    def get_my_net_asset_value():
+        '''
+        home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
+        auth_path = '/api/admins/auth-with-password'
+        auth_url = home_url + auth_path
+        username = os.environ.get('username')
+        #print('username: ', username)
+        app1.logger.debug('username: {}'.format(username))
+        password = os.environ.get('password')
+        # json.dumps 将python数据结构转换为JSON
+        data1 = json.dumps({"identity": username, "password": password})
+        # Content-Type 请求的HTTP内容类型 application/json 将数据已json形式发给服务器
+        header1 = {"Content-Type": "application/json"}
+        response1 = requests.post(auth_url, data=data1, headers=header1)
+        response1_json = response1.json()
+        response1_str = str(response1_json)
+        #print('html: ', html)
+        app1.logger.debug('response1_str: {}'.format(response1_str[0:100]))
+        # html.json JSON 响应内容，提取token值
+        '''
+        if session.get('token'):
+            token = session.get('token')
+            #print('token: ', token)
+            username = session.get('username')
+            #print('username: ', username)
+            home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
+            # 使用已经登录获取到的token，查询client_id
+            get_path = '/api/collections/clients/records'
+
+            query_client_id = "?filter=(username='" + username + "'||email='" + username + "')&&fields=id"#&&page=50&&perPage=100&&date&&skipTotal=1response1_json
+            get_url = home_url + get_path + query_client_id
+            header = {
+                "Content-Type": "application/json",
+                "Authorization": token
+            }
+            response = requests.get(get_url, headers=header)
+            response_json = response.json()
+            response_str = str(response_json)
+            logger.debug('response_str: {}'.format(response_str[0:100]))
+            #print('response_str: {}'.format(response_str[0:100]))
+            client_id = response_json['items'][0]['id']
+            # 使用client_id，查询net_asset_value
+            get_path2 = '/api/collections/clients_trade_account/records'
+            query_net_asset_value = "?filter=(client_id='" + client_id + "')&&fields=net_asset_value&&sort=-created&&perPage=1&&page=1"#&&page=50&&perPage=100&&date&&skipTotal=1response1_jsonclient_id"#&&page=50&&perPage=100&&date&&skipTotal=1response1_json
+            get_url2 = home_url + get_path2 + query_net_asset_value
+            response2 = requests.get(get_url2, headers=header)
+            response2_json = response2.json()
+            response2_str = str(response2_json)
+            logger.debug('response2_str: {}'.format(response2_str[0:100]))
+            #print('response2_str: {}'.format(response2_str[0:100]))
+            net_asset_value = response2_json['items'][0]['net_asset_value']
+                
+            data = [net_asset_value]
+        else:
+            data = [35741]
+
+        return data
     if not current_user.is_authenticated:
         return html.Div(["请", dcc.Link("登录", href="/login"), "，再继续访问"])
     data1 = get_upper_lower_price_client()

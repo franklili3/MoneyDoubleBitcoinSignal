@@ -77,8 +77,8 @@ def update_gauge_output(pathname):
         auth_path = '/api/admins/auth-with-password'
         auth_url = home_url + auth_path
         username = os.environ.get('admin_username')
-        print('admin_username: ', username)
-        app1.logger.debug('admin_username: {}'.format(username))
+        #print('admin_username: ', username)
+        logger.debug('admin_username: {}'.format(username))
         password = os.environ.get('admin_password')
         # json.dumps 将python数据结构转换为JSON
         data1 = json.dumps({"identity": username, "password": password})
@@ -88,7 +88,7 @@ def update_gauge_output(pathname):
         response1_json = response1.json()
         response1_str = str(response1_json)
         #print('html: ', html)
-        app1.logger.debug('response1_str: {}'.format(response1_str[0:100]))
+        logger.debug('response1_str: {}'.format(response1_str[0:100]))
         # html.json JSON 响应内容，提取token值
         if response1_json['token']:
             token = response1_json['token']
