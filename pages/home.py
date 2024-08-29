@@ -68,33 +68,31 @@ layout = html.Div([
               Input('url', 'pathname')
               )
 def update_gauge_output(pathname):
+    home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
+    auth_path = '/api/admins/auth-with-password'
+    auth_url = home_url + auth_path
+    username = os.environ.get('admin_username')
+    #print('admin_username: ', username)
+    logger.debug('admin_username: {}'.format(username))
+    password = os.environ.get('admin_password')
+    # json.dumps 将python数据结构转换为JSON
+    data1 = json.dumps({"identity": username, "password": password})
+    # Content-Type 请求的HTTP内容类型 application/json 将数据已json形式发给服务器
+    header1 = {"Content-Type": "application/json"}
+    response1 = requests.post(auth_url, data=data1, headers=header1)
+    response1_json = response1.json()
+    response1_str = str(response1_json)
+    #print('html: ', html)
+    logger.debug('response1_str: {}'.format(response1_str[0:100]))
+    # html.json JSON 响应内容，提取token值
+    if response1_json['token']:
+        token = response1_json['token']
+        session['token'] = token
+        logger.debug('save session: {}'.format(session))
     TIMEOUT = 60 * 60 * 24
     @cache.memoize(timeout=TIMEOUT)
     def get_upper_lower_price():
-        
-        home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
-        
-        auth_path = '/api/admins/auth-with-password'
-        auth_url = home_url + auth_path
-        username = os.environ.get('admin_username')
-        #print('admin_username: ', username)
-        logger.debug('admin_username: {}'.format(username))
-        password = os.environ.get('admin_password')
-        # json.dumps 将python数据结构转换为JSON
-        data1 = json.dumps({"identity": username, "password": password})
-        # Content-Type 请求的HTTP内容类型 application/json 将数据已json形式发给服务器
-        header1 = {"Content-Type": "application/json"}
-        response1 = requests.post(auth_url, data=data1, headers=header1)
-        response1_json = response1.json()
-        response1_str = str(response1_json)
-        #print('html: ', html)
-        logger.debug('response1_str: {}'.format(response1_str[0:100]))
-        # html.json JSON 响应内容，提取token值
-        if response1_json['token']:
-            token = response1_json['token']
-            session['token'] = token
-            logger.debug('save session: {}'.format(session))
- 
+        if token:
             # 使用已经登录获取到的token 发送一个get请求
             get_path = '/api/collections/bitcoin_trade_signal/records'
 

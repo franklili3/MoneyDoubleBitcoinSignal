@@ -187,7 +187,7 @@ def update(JSoutput):
                 response3_json = response3.json()
                 response3_str = str(response3_json)
                 logger.debug('response2_str: {}'.format(response3_str[0:100]))
-                data_annualized_return['time'].append(response3_json['items'][0]['date'])
+                data_annualized_return['time'].append(response3_json['items'][0]['date'][0:10])
                 data_annualized_return['annualized_return'].append(response3_json['items'][0]['annualized_return'] * 100)
                 data_annualized_return['annualized_volatility'].append(response3_json['items'][0]['annualized_volatility'] * 100)
                 data_annualized_return['annualized_sharpe'].append(response3_json['items'][0]['annualized_sharpe'])
@@ -214,7 +214,8 @@ def update(JSoutput):
         id="getting-started-headers",
         rowData=df.to_dict("records"),
         columnDefs=columnDefs,
-        style={'height': '100px', 'width': '100%'}
+        style={'height': '100px', 'width': '100%'},
+        columnSize="sizeToFit"
     )
     '''
     user_agent = parse(JSoutput)
