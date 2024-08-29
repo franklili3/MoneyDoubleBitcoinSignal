@@ -25,7 +25,7 @@ app1 = get_app()
 # 创建FileHandler，并添加到logger.handlers列表
 logger = logging.getLogger(__name__)
 handler = logging.FileHandler('error.log')
-logger.setLevel(logging.DEBUG)#)INFO
+logger.setLevel(logging.INFO)#)DEBUG
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')  
 handler.setFormatter(formatter)  
 logger.addHandler(handler)

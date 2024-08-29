@@ -29,7 +29,7 @@ app1 = get_app()
 # 创建FileHandler，并添加到logger.handlers列表
 logger = logging.getLogger(__name__)
 handler = logging.FileHandler('error.log')
-logger.setLevel(logging.DEBUG)#)INFO
+logger.setLevel(logging.INFO)#)DEBUG
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')  
 handler.setFormatter(formatter)  
 logger.addHandler(handler)
@@ -139,12 +139,12 @@ def update(JSoutput):
                     response2 = requests.get(get_url, headers=header2)
                     response2_json = response2.json()
                     response2_str = str(response2_json)
-                    logger.debug('response2_str: {}'.format(response2_str))
+                    #logger.debug('response2_str: {}'.format(response2_str))
                     for item in response2_json['items']:
                         time = item['date']
                         value1 = item['marketcap_log']
                         value2 = item['blocks_log']
-                        logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)))
+                        #logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)))
                         #print('time: ', time, ', value: ', value)
                         data_marketcap_log.append({'time': time, 'value': value1})
                         data_blocks_log.append({'time': time, 'value': value2})
@@ -160,12 +160,12 @@ def update(JSoutput):
                     response2 = requests.get(get_url, headers=header2)
                     response2_json = response2.json()
                     response2_str = str(response2_json)
-                    logger.debug('response2_str: {}'.format(response2_str))
+                    #logger.debug('response2_str: {}'.format(response2_str))
                     for item in response2_json['items']:
                         time = item['date']
                         value1 = item['marketcap_log']
                         value2 = item['blocks_log']
-                        logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)))
+                        #logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)))
                         #print('time: ', time, ', value: ', value)
                         data_marketcap_log.append({'time': time, 'value': value1})
                         data_blocks_log.append({'time': time, 'value': value2})
@@ -183,8 +183,8 @@ def update(JSoutput):
     elif is_mobile or is_tablet:
         data1 = get_series(frequency='monthly') 
 
-    logger.debug('data1[0]: {}'.format(str(data1[0])[0:10]))
-    logger.debug('data1[1]: {}'.format(str(data1[1])[0:10]))
+    #logger.debug('data1[0]: {}'.format(str(data1[0])[0:10]))
+    #logger.debug('data1[1]: {}'.format(str(data1[1])[0:10]))
     main_panel = [
         html.Div(style={'position': 'relative', 'width': '100%', 'height': '100%', 'marginBottom': '30px'}, children=[
             html.Div(children=[
