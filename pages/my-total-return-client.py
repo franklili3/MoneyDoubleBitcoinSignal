@@ -112,7 +112,7 @@ clientside_callback(
 def update(JSoutput):
     TIMEOUT = 60 * 60 * 24
     @cache.memoize(timeout=TIMEOUT)
-    def get_my_total_return_client(frequency = 'daily'):
+    def get_my_total_return_client1(frequency = 'daily'):
         home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
         '''
         auth_path = '/api/admins/auth-with-password'
@@ -187,7 +187,7 @@ def update(JSoutput):
                 response3_json = response3.json()
                 response3_str = str(response3_json)
                 logger.debug('response2_str: {}'.format(response3_str[0:100]))
-                data_annualized_return['time'].append(response3_json['items'][0]['date'])
+                data_annualized_return['time'].append(response3_json['items'][0]['date'][0:10])
                 data_annualized_return['annualized_return'].append(response3_json['items'][0]['annualized_return'] * 100)
                 data_annualized_return['annualized_volatility'].append(response3_json['items'][0]['annualized_volatility'] * 100)
                 data_annualized_return['annualized_sharpe'].append(response3_json['items'][0]['annualized_sharpe'])
@@ -199,7 +199,7 @@ def update(JSoutput):
             data = [generate_random_series(5000, n=500), generate_random_series(5000, n=500)]
 
         return data
-    data0 = get_my_total_return_client(frequency='daily')
+    data0 = get_my_total_return_client1(frequency='daily')
     data_annualized_return = data0[1]
     df = pd.DataFrame(data_annualized_return)
     columnDefs = [
@@ -214,7 +214,8 @@ def update(JSoutput):
         id="getting-started-headers",
         rowData=df.to_dict("records"),
         columnDefs=columnDefs,
-        style={'height': '100px', 'width': '100%'}
+        style={'height': '100px', 'width': '100%'},
+        columnSize="sizeToFit"
     )
     '''
     user_agent = parse(JSoutput)
