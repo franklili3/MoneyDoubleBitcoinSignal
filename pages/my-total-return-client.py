@@ -109,7 +109,7 @@ clientside_callback(
         Output("grid_container", "children"),
         Output("main_panel-11", "children"),
         Input("store-11", "data"))
-def update(JSoutput):
+def update1(JSoutput):
     TIMEOUT = 60 * 60 * 24
     @cache.memoize(timeout=TIMEOUT)
     def get_my_total_return_client1(frequency = 'daily'):
