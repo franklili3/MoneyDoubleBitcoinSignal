@@ -214,9 +214,8 @@ def update1(JSoutput):
         id="getting-started-headers",
         rowData=df.to_dict("records"),
         columnDefs=columnDefs,
-        style={'height': '100px', 'width': '100%'},
-        columnSize="sizeToFit"
-    )
+        style={'height': '100px', 'width': '100%'}
+     )
     '''
     user_agent = parse(JSoutput)
     is_mobile = user_agent.is_mobile
