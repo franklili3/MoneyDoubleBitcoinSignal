@@ -139,8 +139,8 @@ def update(JSoutput):
             # 使用已经登录获取到的token 发送一个get请求
             get_path = '/api/collections/clients_trade_account/records'
             data_total_return = []
-            data_annualized_return = {'time': [], 'annualized_return': [], 'annualized_volatility': [],
-                                                'annualized_sharpe': [], 'max_drawdown': []}
+            data_annualized_return = {'time': '', 'annualized_return': 0, 'annualized_volatility': 0,
+                                                'annualized_sharpe': 0, 'max_drawdown': 0}
             if frequency == 'daily':
                 # 使用已经登录获取到的token，查询client_id
                 get_path0 = '/api/collections/clients/records'
@@ -187,11 +187,11 @@ def update(JSoutput):
                 response3_json = response3.json()
                 response3_str = str(response3_json)
                 logger.debug('response2_str: {}'.format(response3_str[0:100]))
-                data_annualized_return['time'].append(response3_json['items'][0]['date'][0:10])
-                data_annualized_return['annualized_return'].append(response3_json['items'][0]['annualized_return'] * 100)
-                data_annualized_return['annualized_volatility'].append(response3_json['items'][0]['annualized_volatility'] * 100)
-                data_annualized_return['annualized_sharpe'].append(response3_json['items'][0]['annualized_sharpe'])
-                data_annualized_return['max_drawdown'].append(response3_json['items'][0]['max_drawdown'] * 100)
+                data_annualized_return['time'] = response3_json['items'][0]['date'][0:10]
+                data_annualized_return['annualized_return'] = response3_json['items'][0]['annualized_return'] * 100
+                data_annualized_return['annualized_volatility'] = response3_json['items'][0]['annualized_volatility'] * 100
+                data_annualized_return['annualized_sharpe'] = response3_json['items'][0]['annualized_sharpe']
+                data_annualized_return['max_drawdown'] = response3_json['items'][0]['max_drawdown'] * 100
                 #app1.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)) + ' ,value3:{}'.format(str(value3)))
                 #print('time: ', time, ', value: ', value)
             data = [data_total_return, data_annualized_return]
@@ -201,34 +201,48 @@ def update(JSoutput):
         return data
     data0 = get_my_total_return_client1(frequency='daily')
     data_annualized_return = data0[1]
-    df = pd.DataFrame(data_annualized_return)
-    columnDefs = [
+    #df1 = pd.DataFrame(data_annualized_return)
+    #df2_1 = df1[['annualized_return ', 'annualized_volatility']]
+    #df2_2 = df1[['annualized_sharpe ', 'max_drawdown']]
+
+    columnDefs1 = [
         { 'field': 'time', 'headerName': '日期' },
         { 'field': 'annualized_return', 'headerName': '年化收益率%'},
         { 'field': 'annualized_volatility', 'headerName': '年化波动率%'},
         { 'field': 'annualized_sharpe', 'headerName': '年化夏普比率'},
         { 'field': 'max_drawdown', 'headerName': '最大回撤比率%'},
     ]
+    columnDefs2_1 = [
+        { 'field': 'annualized_return', 'headerName': '年化收益率%'},
+        { 'field': 'annualized_volatility', 'headerName': '年化波动率%'},
+    ]
+    columnDefs2_2 = [
+        { 'field': 'annualized_sharpe', 'headerName': '年化夏普比率'},
+        { 'field': 'max_drawdown', 'headerName': '最大回撤比率%'},
+    ]
 
-    grid = dag.AgGrid(
-        id="getting-started-headers",
-        rowData=df.to_dict("records"),
-        columnDefs=columnDefs,
+    grid1 = dag.AgGrid(
+        id="grid1",
+        #rowData=df1.to_dict("records"),
+        rowData=[data_annualized_return],
+        columnDefs=columnDefs1,
         style={'height': '100px', 'width': '100%'},
         columnSize="sizeToFit"
     )
-    '''
-    user_agent = parse(JSoutput)
-    is_mobile = user_agent.is_mobile
-    is_tablet = user_agent.is_tablet
-    is_pc = user_agent.is_pc
-  
-    if is_pc:
-        data1 = get_my_total_return_client(frequency='daily')
-    elif is_mobile or is_tablet:
-        data1 = get_my_total_return_client(frequency='daily') 
-    #data1 = get_upper_lower_marketcap(frequency = 'weekly')
-    '''
+    grid2_1 = dag.AgGrid(
+        id="grid2_1",
+        rowData=[data_annualized_return],
+        columnDefs=columnDefs2_1,
+        style={'height': '100px', 'width': '100%'},
+        columnSize="sizeToFit"
+    )
+    grid2_2 = dag.AgGrid(
+        id="grid2_2",
+        rowData=[data_annualized_return],
+        columnDefs=columnDefs2_2,
+        style={'height': '100px', 'width': '100%'},
+        columnSize="sizeToFit"
+    )
     logger.debug('data0[0]: {}'.format(str(data0[0])[0:10]))
     logger.debug('data0[1]: {}'.format(str(data0[1])[0:10]))
 
@@ -281,4 +295,15 @@ def update(JSoutput):
             ], style={'position': 'absolute', 'left': 0, 'top': 0, 'zIndex': 10, 'color': 'white', 'padding': '10px'})
         ])
     ]
-    return [grid], main_panel
+    user_agent = parse(JSoutput)
+    is_mobile = user_agent.is_mobile
+    is_tablet = user_agent.is_tablet
+    is_pc = user_agent.is_pc
+  
+    if is_pc:
+        return [grid1], main_panel
+    elif is_mobile or is_tablet:
+        return [grid2_1, grid2_2], main_panel
+
+
+    
