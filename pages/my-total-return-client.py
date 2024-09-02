@@ -112,7 +112,7 @@ clientside_callback(
 def update(JSoutput):
     TIMEOUT = 60 * 60 * 24
     @cache.memoize(timeout=TIMEOUT)
-    def get_my_total_return_client1(frequency = 'daily'):
+    def get_my_total_return_client2(frequency = 'daily'):
         home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
         '''
         auth_path = '/api/admins/auth-with-password'
@@ -199,7 +199,7 @@ def update(JSoutput):
             data = [generate_random_series(5000, n=500), generate_random_series(5000, n=500)]
 
         return data
-    data0 = get_my_total_return_client1(frequency='daily')
+    data0 = get_my_total_return_client2(frequency='daily')
     data_annualized_return = data0[1]
     #df1 = pd.DataFrame(data_annualized_return)
     #df2_1 = df1[['annualized_return ', 'annualized_volatility']]
