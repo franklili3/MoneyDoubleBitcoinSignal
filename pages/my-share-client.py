@@ -22,8 +22,8 @@ import pandas as pd
 import dash_ag_grid as dag
 
 register_page(__name__,
-    title='6.我的累计收益率',
-    name='6.我的累计收益率-客户')
+    title='7.我的分享',
+    name='7.我的分享-客户')
 require_login(__name__)
 app1 = get_app()
 # 创建logger
@@ -58,7 +58,7 @@ def layout(**kwargs):
     return html.Div(
         [
             #dcc.Interval(id='timer', interval=500),
-            dcc.Store(id="store-11"),            
+            dcc.Store(id="store-12"),            
             html.Div(className='container', children=[
                 html.Div([
                     html.Div([
@@ -74,21 +74,27 @@ def layout(**kwargs):
                             dcc.Link("4.比特币市值上限和下限", href="/bitcoin-upper-lower-marketcap-client"),
                             html.Br(),
                             dcc.Link("5.比特币价格上限和下限", href="/bitcoin-upper-lower-price-client")
+                            html.Br(),
+                            dcc.Link("6.我的累计收益率", href="/my-total-return-client")
                         ])
                         #    dcc.Link(f"{page['name']}", href=page["relative_path"])# - {page['path']}
                         #) for page in page_registry.values()
                     ]),            
                 ]),
                 # show annualized_return,annualized_volatility,annualized_sharpe,max_drawdown values
-                html.Div(id="grid_container"),#[grid]
-                html.Div(className='main-container', children=[
-                    html.H2('我的累计收益率图 📊'),
-                    #html.H3('根据历史经验，比特币市值偏差为1时，比特币市值在牛市顶部，计算出的比特币价格为牛市的价格上限，比特币市值偏差为-0.95时，比特币市值在熊市底部，计算出的比特币价格为熊市的价格下限。'),
-                    html.Div(id="main_panel-11")
+                html.Div([
+                    dcc.Input(id="input",
+                        type=text,
+                        placeholder="公开的昵称")
                 ]),
+                dcc.RadioItems(id="radio_items", ['不公开', '公开'], '不公开'),
+                html.Br(),
+                html.Div(id="grid_container"),#[grid]
+                html.Div(id="main_panel-12"),
                 #html.Span('李力, 2024')
             ])
-        ])
+        ]
+    )
 
 clientside_callback(
     """
@@ -101,14 +107,14 @@ clientside_callback(
         return user_Agent
     }
     """,
-    Output("store-11", "data"),
-    Input("store-11", "data"),
+    Output("store-12", "data"),
+    Input("store-12", "data"),
 )
 
 @app1.callback(
         Output("grid_container", "children"),
-        Output("main_panel-11", "children"),
-        Input("store-11", "data"))
+        Output("main_panel-12", "children"),
+        Input("store-12", "data"))
 def update1(JSoutput):
     TIMEOUT = 60 * 60 * 24
     def get_client_id():
@@ -248,6 +254,9 @@ def update1(JSoutput):
     logger.debug('data0[1]: {}'.format(str(data0[1])[0:10]))
 
     main_panel = [
+        html.H2('我的累计收益率图 📊'),
+        #html.H3('根据历史经验，比特币市值偏差为1时，比特币市值在牛市顶部，计算出的比特币价格为牛市的价格上限，比特币市值偏差为-0.95时，比特币市值在熊市底部，计算出的比特币价格为熊市的价格下限。'),
+
         html.Div(style={'position': 'relative', 'width': '100%', 'height': '100%', 'marginBottom': '30px'}, children=[
             html.Div(children=[
                 dash_tvlwc.Tvlwc(
