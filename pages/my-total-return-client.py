@@ -111,52 +111,43 @@ clientside_callback(
         Input("store-11", "data"))
 def update(JSoutput):
     TIMEOUT = 60 * 60 * 24
+    def get_client_id():
+        if session.get('token'):
+            token = session.get('token')
+            #print('token: ', token)
+            username = session.get('username')
+            #print('username: ', username)
+            home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
+            # 使用已经登录获取到的token，查询client_id
+            get_path = '/api/collections/clients/records'
+
+            query_client_id = "?filter=(username='" + username + "'||email='" + username + "')&&fields=id"#&&page=50&&perPage=100&&date&&skipTotal=1response1_json
+            get_url = home_url + get_path + query_client_id
+            header = {
+                "Content-Type": "application/json",
+                "Authorization": token
+            }
+            response = requests.get(get_url, headers=header)
+            response_json = response.json()
+            response_str = str(response_json)
+            logger.debug('response_str: {}'.format(response_str[0:100]))
+            #print('response_str: {}'.format(response_str[0:100]))
+            client_id = response_json['items'][0]['id']
+        return client_id
+        
     @cache.memoize(timeout=TIMEOUT)
-    def get_my_total_return_client2(frequency = 'daily'):
+    def get_my_total_return_client2(frequency = 'daily',client_id=''):
         home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
-        '''
-        auth_path = '/api/admins/auth-with-password'
-        auth_url = home_url + auth_path
-        username = os.environ.get('admin_username')
-        #print('username: ', username)
-        password = os.environ.get('admin_password')
-        # json.dumps 将python数据结构转换为JSON
-        data1 = json.dumps({"identity": username, "password": password})
-        # Content-Type 请求的HTTP内容类型 application/json 将数据已json形式发给服务器
-        header1 = {"Content-Type": "application/json"}
-        response1 = requests.post(auth_url, data=data1, headers=header1)
-        response1_json = response1.json()
-        response1_str = str(response1_json)
-        #print('html: ', html)
-        app1.logger.debug('response1_str: {}'.format(response1_str[0:100]))
-        # html.json JSON 响应内容，提取token值
-        '''
+
         if session.get('token'):
             token = session.get('token')
             logger.debug('token: {}'.format(token))
-            username = session.get('username')
-            logger.debug('username: {}'.format(username))
             # 使用已经登录获取到的token 发送一个get请求
             get_path = '/api/collections/clients_trade_account/records'
             data_total_return = []
             data_annualized_return = {'time': '', 'annualized_return': 0, 'annualized_volatility': 0,
                                                 'annualized_sharpe': 0, 'max_drawdown': 0}
             if frequency == 'daily':
-                # 使用已经登录获取到的token，查询client_id
-                get_path0 = '/api/collections/clients/records'
-
-                query_client_id = "?filter=(username='" + username + "'||email='" + username + "')&&fields=id"#&&page=50&&perPage=100&&date&&skipTotal=1response1_json
-                get_url0 = home_url + get_path0 + query_client_id
-                header = {
-                    "Content-Type": "application/json",
-                    "Authorization": token
-                }
-                response = requests.get(get_url0, headers=header)
-                response_json = response.json()
-                response_str = str(response_json)
-                logger.debug('response_str: {}'.format(response_str[0:100]))
-                #print('response_str: {}'.format(response_str[0:100]))
-                client_id = response_json['items'][0]['id']
                 for i in range(1,2):
                     get_path = '/api/collections/clients_trade_account/records'
 
@@ -170,13 +161,15 @@ def update(JSoutput):
                     response2_json = response2.json()
                     response2_str = str(response2_json)
                     logger.debug('response2_str: {}'.format(response2_str[0:100]))
-                    for item in response2_json['items']:
-                        time = item['date']
-                        value1 = item['total_return'] * 100
-                        #app1.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)) + ' ,value3:{}'.format(str(value3)))
-                        #print('time: ', time, ', value: ', value)
-                        data_total_return.append({'time': time, 'value': value1})
-
+                    if response2_json['totalItems'] > 0:
+                        for item in response2_json['items']:
+                            time = item['date']
+                            value1 = item['total_return'] * 100
+                            #app1.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)) + ' ,value3:{}'.format(str(value3)))
+                            #print('time: ', time, ', value: ', value)
+                            data_total_return.append({'time': time, 'value': value1})
+                    else:
+                        data_total_return.append({'time': 0, 'value': 0})
                 query_annualized_return = "?filter=(client_id='" + client_id + "')&&fields=date,annualized_return,annualized_volatility,annualized_sharpe,max_drawdown&&sort=-date&&perPage=1&&page=1"# + str(i)&&page=50&&perPage=100&&skipTotal=1response1_json
                 get_url2 = home_url + get_path + query_annualized_return
                 header2 = {
@@ -187,19 +180,27 @@ def update(JSoutput):
                 response3_json = response3.json()
                 response3_str = str(response3_json)
                 logger.debug('response2_str: {}'.format(response3_str[0:100]))
-                data_annualized_return['time'] = response3_json['items'][0]['date'][0:10]
-                data_annualized_return['annualized_return'] = response3_json['items'][0]['annualized_return'] * 100
-                data_annualized_return['annualized_volatility'] = response3_json['items'][0]['annualized_volatility'] * 100
-                data_annualized_return['annualized_sharpe'] = response3_json['items'][0]['annualized_sharpe']
-                data_annualized_return['max_drawdown'] = response3_json['items'][0]['max_drawdown'] * 100
-                #app1.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)) + ' ,value3:{}'.format(str(value3)))
-                #print('time: ', time, ', value: ', value)
+                if response3_json['totalItems'] > 0:
+                    data_annualized_return['time'] = response3_json['items'][0]['date'][0:10]
+                    data_annualized_return['annualized_return'] = response3_json['items'][0]['annualized_return'] * 100
+                    data_annualized_return['annualized_volatility'] = response3_json['items'][0]['annualized_volatility'] * 100
+                    data_annualized_return['annualized_sharpe'] = response3_json['items'][0]['annualized_sharpe']
+                    data_annualized_return['max_drawdown'] = response3_json['items'][0]['max_drawdown'] * 100
+                    #app1.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)) + ' ,value3:{}'.format(str(value3)))
+                    #print('time: ', time, ', value: ', value)
+                else:
+                    data_annualized_return['time'] = 0
+                    data_annualized_return['annualized_return'] = 0
+                    data_annualized_return['annualized_volatility'] = 0
+                    data_annualized_return['annualized_sharpe'] = 0
+                    data_annualized_return['max_drawdown'] = 0
             data = [data_total_return, data_annualized_return]
         else:
             data = [generate_random_series(5000, n=500), generate_random_series(5000, n=500)]
 
         return data
-    data0 = get_my_total_return_client2(frequency='daily')
+    client_id = get_client_id()
+    data0 = get_my_total_return_client2(frequency='daily',client_id=client_id)
     data_annualized_return = data0[1]
     #df1 = pd.DataFrame(data_annualized_return)
     #df2_1 = df1[['annualized_return ', 'annualized_volatility']]

@@ -98,27 +98,7 @@ def layout(**kwargs):
 
         return data
 
-    @cache.memoize(timeout=TIMEOUT)
-    def get_my_net_asset_value():
-        '''
-        home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
-        auth_path = '/api/admins/auth-with-password'
-        auth_url = home_url + auth_path
-        username = os.environ.get('username')
-        #print('username: ', username)
-        app1.logger.debug('username: {}'.format(username))
-        password = os.environ.get('password')
-        # json.dumps 将python数据结构转换为JSON
-        data1 = json.dumps({"identity": username, "password": password})
-        # Content-Type 请求的HTTP内容类型 application/json 将数据已json形式发给服务器
-        header1 = {"Content-Type": "application/json"}
-        response1 = requests.post(auth_url, data=data1, headers=header1)
-        response1_json = response1.json()
-        response1_str = str(response1_json)
-        #print('html: ', html)
-        app1.logger.debug('response1_str: {}'.format(response1_str[0:100]))
-        # html.json JSON 响应内容，提取token值
-        '''
+    def get_client_id():
         if session.get('token'):
             token = session.get('token')
             #print('token: ', token)
@@ -140,18 +120,32 @@ def layout(**kwargs):
             logger.debug('response_str: {}'.format(response_str[0:100]))
             #print('response_str: {}'.format(response_str[0:100]))
             client_id = response_json['items'][0]['id']
+        return client_id
+    
+    @cache.memoize(timeout=TIMEOUT)
+    def get_my_net_asset_value(client_id):
+        if session.get('token'):
+            token = session.get('token')
+            #print('token: ', token)
+            home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
             # 使用client_id，查询net_asset_value
             get_path2 = '/api/collections/clients_trade_account/records'
             query_net_asset_value = "?filter=(client_id='" + client_id + "')&&fields=net_asset_value&&sort=-created&&perPage=1&&page=1"#&&page=50&&perPage=100&&date&&skipTotal=1response1_jsonclient_id"#&&page=50&&perPage=100&&date&&skipTotal=1response1_json
             get_url2 = home_url + get_path2 + query_net_asset_value
-            response2 = requests.get(get_url2, headers=header)
-            response2_json = response2.json()
-            response2_str = str(response2_json)
-            logger.debug('response2_str: {}'.format(response2_str[0:100]))
+            header = {
+                "Content-Type": "application/json",
+                "Authorization": token
+            }
+            response3 = requests.get(get_url2, headers=header)
+            response3_json = response3.json()
+            response3_str = str(response3_json)
+            logger.debug('response3_str: {}'.format(response3_str[0:100]))
             #print('response2_str: {}'.format(response2_str[0:100]))
-            net_asset_value = response2_json['items'][0]['net_asset_value']
-                
-            data = [net_asset_value]
+            if response3_json['totalItems'] > 0:
+                net_asset_value = response3_json['items'][0]['net_asset_value']                
+                data = [net_asset_value]
+            else:
+                data = [0]
         else:
             data = [35741]
 
@@ -159,7 +153,8 @@ def layout(**kwargs):
     if not current_user.is_authenticated:
         return html.Div(["请", dcc.Link("登录", href="/login"), "，再继续访问"])
     data1 = get_upper_lower_price_client()
-    data2 = get_my_net_asset_value()
+    client_id = get_client_id()
+    data2 = get_my_net_asset_value(client_id)
     logger.debug('data1[0]: {}'.format(str(data1[0])[0:10]))
     logger.debug('data1[1]: {}'.format(str(data1[1])[0:10]))
     logger.debug('data1[2]: {}'.format(str(data1[2])[0:10]))
