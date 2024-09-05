@@ -139,6 +139,7 @@ clientside_callback(
         Input("input1", "value"),
         Input("store_12", "data"))
 def update1(contents, radio_items, input1, store_12):
+
     nick_name = html.Div([
         html.Div([html.H3(input1)], style={'padding': 10, 'flex': 1}),
         html.Div([html.Img(src=contents, style={'width': '50px', 'height': '50px'})],style={'padding': 10, 'flex': 1}),
@@ -245,6 +246,30 @@ def update1(contents, radio_items, input1, store_12):
 
         return data
     client_id = get_client_id()
+    if session.get('token'):
+        token = session.get('token')
+        #print('token: ', token)
+        home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
+        # 使用已经登录获取到的token，发送数据
+        post_path = '/api/collections/clients/' + client_id
+        data = {
+            'field1':input1,
+            'field2': contents
+        }
+        post_url = home_url + post_path
+        header = {
+            "Content-Type": "application/json",
+            "Authorization": token
+        }
+        response = requests.post(post_url, headers=header, data=data)
+        response_json = response.json()
+        response_str = str(response_json)
+        if response.StatusCode == 200:
+            logger.debug('client_id: {}, post successful.'.format(client_id))
+        else:
+            logger.debug('response_str: {}'.format(response_str[0:100]))
+        #print('response_str: {}'.format(response_str[0:100]))
+  
     data0 = get_my_total_return_client2(frequency='daily',client_id=client_id)
     data_annualized_return = data0[1]
     #df1 = pd.DataFrame(data_annualized_return)
