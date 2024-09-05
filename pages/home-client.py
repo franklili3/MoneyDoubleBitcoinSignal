@@ -178,7 +178,9 @@ def layout(**kwargs):
                 html.Br(),
                 dcc.Link("5.比特币价格上限和下限", href="/bitcoin-upper-lower-price-client"),
                 html.Br(),
-                dcc.Link("6.我的累计收益率", href="/my-total-return-client")
+                dcc.Link("6.我的累计收益率", href="/my-total-return-client"),
+                html.Br(),
+                dcc.Link("7.我的分享", href="/my-share-client")
         ])
             #    dcc.Link(f"{page['name']}", href=page["relative_path"])# - {page['path']}
             #) for page in page_registry.values()

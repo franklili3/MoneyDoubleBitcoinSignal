@@ -20,6 +20,7 @@ from utils.login_handler import require_login
 from flask import session
 import pandas as pd
 import dash_ag_grid as dag
+from dash.exceptions import PreventUpdate
 
 register_page(__name__,
     title='7.我的分享',
@@ -58,7 +59,7 @@ def layout(**kwargs):
     return html.Div(
         [
             #dcc.Interval(id='timer', interval=500),
-            dcc.Store(id="store-12"),            
+            dcc.Store(id="store_12"),            
             html.Div(className='container', children=[
                 html.Div([
                     html.Div([
@@ -73,7 +74,7 @@ def layout(**kwargs):
                             html.Br(),
                             dcc.Link("4.比特币市值上限和下限", href="/bitcoin-upper-lower-marketcap-client"),
                             html.Br(),
-                            dcc.Link("5.比特币价格上限和下限", href="/bitcoin-upper-lower-price-client")
+                            dcc.Link("5.比特币价格上限和下限", href="/bitcoin-upper-lower-price-client"),
                             html.Br(),
                             dcc.Link("6.我的累计收益率", href="/my-total-return-client")
                         ])
@@ -81,15 +82,33 @@ def layout(**kwargs):
                         #) for page in page_registry.values()
                     ]),            
                 ]),
-                # show annualized_return,annualized_volatility,annualized_sharpe,max_drawdown values
-                html.Div([
-                    dcc.Input(id="input",
-                        type=text,
-                        placeholder="公开的昵称")
-                ]),
-                dcc.RadioItems(id="radio_items", ['不公开', '公开'], '不公开'),
                 html.Br(),
-                html.Div(id="grid_container"),#[grid]
+                html.Div([
+                    dcc.Input(id="input1",
+                        type="text",
+                        placeholder="公开的昵称"), 
+                    dcc.Upload(
+                        id='upload-image',
+                        children=html.Div([
+                            '拖拽文件或',
+                            html.A(' 点击上传')
+                        ]),
+                        style={
+                            'width': '100%',
+                            'height': '60px',
+                            'lineHeight': '60px',
+                            'borderWidth': '1px',
+                            'borderStyle': 'dashed',
+                            'borderRadius': '5px',
+                            'textAlign': 'center',
+                            'margin': '10px'
+                        },
+                    )
+                ]),
+                dcc.RadioItems(['不公开', '公开'], '不公开', id="radio_items"),
+                html.Br(),
+                html.Div(id="nick_name"),
+                html.Div(id="grid_container2"),#[grid]
                 html.Div(id="main_panel-12"),
                 #html.Span('李力, 2024')
             ])
@@ -107,15 +126,35 @@ clientside_callback(
         return user_Agent
     }
     """,
-    Output("store-12", "data"),
-    Input("store-12", "data"),
+    Output("store_12", "data"),
+    Input("store_12", "data"),
 )
 
 @app1.callback(
-        Output("grid_container", "children"),
+        Output("nick_name", "children"),
+        Output("grid_container2", "children"),
         Output("main_panel-12", "children"),
-        Input("store-12", "data"))
-def update1(JSoutput):
+        Input("upload-image", "contents"),
+        Input("radio_items", "value"),
+        Input("input1", "value"),
+        Input("store_12", "data"))
+def update1(contents, radio_items, input1, store_12):
+    nick_name = html.Div([
+        html.Div([html.H3(input1)], style={'padding': 10, 'flex': 1}),
+        html.Div([html.Img(src=contents, style={'width': '50px', 'height': '50px'})],style={'padding': 10, 'flex': 1}),
+        html.Div("    ",style={'padding': 10, 'flex': 1}),
+        html.Div("    ",style={'padding': 10, 'flex': 1}),
+        html.Div("    ",style={'padding': 10, 'flex': 1}),
+        html.Div("    ",style={'padding': 10, 'flex': 1}),
+        html.Div("    ",style={'padding': 10, 'flex': 1}),
+        html.Div("    ",style={'padding': 10, 'flex': 1}),
+        html.Div("    ",style={'padding': 10, 'flex': 1}),
+        html.Div("    ",style={'padding': 10, 'flex': 1}),
+        html.Div("    ",style={'padding': 10, 'flex': 1}),
+        html.Div("    ",style={'padding': 10, 'flex': 1}),
+        html.Div("    ",style={'padding': 10, 'flex': 1}),
+        html.Div("    ",style={'padding': 10, 'flex': 1}),
+    ], style={'display': 'flex', 'flexDirection': 'row'})
     TIMEOUT = 60 * 60 * 24
     def get_client_id():
         if session.get('token'):
@@ -305,15 +344,16 @@ def update1(JSoutput):
             ], style={'position': 'absolute', 'left': 0, 'top': 0, 'zIndex': 10, 'color': 'white', 'padding': '10px'})
         ])
     ]
-    user_agent = parse(JSoutput)
+    user_agent = parse(store_12)
     is_mobile = user_agent.is_mobile
     is_tablet = user_agent.is_tablet
     is_pc = user_agent.is_pc
-  
-    if is_pc:
-        return [grid1], main_panel
-    elif is_mobile or is_tablet:
-        return [grid2_1, grid2_2], main_panel
-
+    if radio_items == "公开":
+        if is_pc:
+            return nick_name, [grid1], main_panel
+        elif is_mobile or is_tablet:
+            return nick_name, [grid2_1, grid2_2], main_panel
+    else:
+        raise PreventUpdate
 
     
