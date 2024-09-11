@@ -108,12 +108,12 @@ def layout(**kwargs):
                     html.Div([html.Img(id='output-image-upload', style={'width': '50px', 'height': '50px'})],style={'padding': 10, 'flex': 1}),
                 ]),
                 dcc.RadioItems(['不公开', '公开'],  id="radio_items"),
-                ## button
-                html.Button('  分享  ', id='button_12', n_clicks=0),
                 html.Br(),
                 html.Div(id="nick_name"),
                 html.Div(id="grid_container2"),#[grid]
                 html.Div(id="main_panel-12"),
+                ## button
+                html.Button('  分享  ', id='button_12', n_clicks=0),
                 #html.Span('李力, 2024')
             ])
         ]
@@ -213,8 +213,8 @@ def update_output_image(list_of_contents):
         Input("button_12", "n_clicks")
     )
 def update_my_share(upload_contents, database_contents, radio_items, input1, store_12, n_clicks):
-    ## if button is clicked
-    if n_clicks > 0:
+
+    if radio_items == '公开':
         contents = ""
         if upload_contents is not None:
             logger.debug('upload_contents: {}'.format(upload_contents[0:10]))
@@ -329,37 +329,6 @@ def update_my_share(upload_contents, database_contents, radio_items, input1, sto
                 data = [generate_random_series(5000, n=500), generate_random_series(5000, n=500)]
 
             return data
-
-                
-        if radio_items  == "公开":
-            is_open = True
-        else:
-            is_open = False
-        if session.get('token'):
-            token = session.get('token')
-            #print('token: ', token)
-            home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
-            # 使用已经登录获取到的token，发送数据
-            patch_path = '/api/collections/clients/records/' + client_id
-            data = {
-                'field1':input1,
-                'field2': contents,
-                'field4': is_open,
-            }
-            data_json = json.dumps(data)
-            patch_url = home_url + patch_path
-            header = {
-                "Content-Type": "application/json",
-                "Authorization": token
-            }
-            response = requests.patch(patch_url, headers=header, data=data_json)
-            response_json = response.json()
-            response_str = str(response_json)
-            if response.status_code == 200:
-                logger.debug('client_id: {}, post successful.'.format(client_id))
-            else:
-                logger.debug('response_str: {}'.format(response_str[0:100]))
-            #print('response_str: {}'.format(response_str[0:100]))
     
         data0 = get_my_total_return_client2(frequency='daily',client_id=client_id)
         data_annualized_return = data0[1]
@@ -464,13 +433,71 @@ def update_my_share(upload_contents, database_contents, radio_items, input1, sto
         is_mobile = user_agent.is_mobile
         is_tablet = user_agent.is_tablet
         is_pc = user_agent.is_pc
-        if radio_items == "公开":
-            if is_pc:
-                return nick_name, [grid1], main_panel
-            elif is_mobile or is_tablet:
-                return nick_name, [grid2_1, grid2_2], main_panel
-        else:
-            raise PreventUpdate
+        if n_clicks > 0:                
+            if radio_items  == "公开":
+                is_open = True
+            else:
+                is_open = False
+            if session.get('token'):
+                token = session.get('token')
+                #print('token: ', token)
+                home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
+                # 使用已经登录获取到的token，发送数据
+                patch_path = '/api/collections/clients/records/' + client_id
+                data = {
+                    'field1':input1,
+                    'field2': contents,
+                    'field4': is_open,
+                }
+                data_json = json.dumps(data)
+                patch_url = home_url + patch_path
+                header = {
+                    "Content-Type": "application/json",
+                    "Authorization": token
+                }
+                response = requests.patch(patch_url, headers=header, data=data_json)
+                response_json = response.json()
+                response_str = str(response_json)
+                if response.status_code == 200:
+                    logger.debug('client_id: {}, post successful.'.format(client_id))
+                else:
+                    logger.debug('response_str: {}'.format(response_str[0:100]))
+                #print('response_str: {}'.format(response_str[0:100]))
+        if is_pc:
+            return nick_name, [grid1], main_panel
+        elif is_mobile or is_tablet:
+            return nick_name, [grid2_1, grid2_2], main_panel
+
     else:
+        if n_clicks > 0:
+                
+            if radio_items  == "公开":
+                is_open = True
+            else:
+                is_open = False
+            if session.get('token'):
+                token = session.get('token')
+                #print('token: ', token)
+                home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
+                # 使用已经登录获取到的token，发送数据
+                patch_path = '/api/collections/clients/records/' + client_id
+                data = {
+                    'field1':input1,
+                    'field2': contents,
+                    'field4': is_open,
+                }
+                data_json = json.dumps(data)
+                patch_url = home_url + patch_path
+                header = {
+                    "Content-Type": "application/json",
+                    "Authorization": token
+                }
+                response = requests.patch(patch_url, headers=header, data=data_json)
+                response_json = response.json()
+                response_str = str(response_json)
+                if response.status_code == 200:
+                    logger.debug('client_id: {}, post successful.'.format(client_id))
+                else:
+                    logger.debug('response_str: {}'.format(response_str[0:100]))
+                #print('response_str: {}'.format(response_str[0:100]))
         raise PreventUpdate
-    
