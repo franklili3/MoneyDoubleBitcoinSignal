@@ -109,11 +109,12 @@ def layout(**kwargs):
                 ]),
                 dcc.RadioItems(['不公开', '公开'],  id="radio_items"),
                 html.Br(),
+               ## button
+                html.Button('  提交  ', id='button_12', n_clicks=0),
                 html.Div(id="nick_name"),
                 html.Div(id="grid_container2"),#[grid]
                 html.Div(id="main_panel-12"),
-                ## button
-                html.Button('  分享  ', id='button_12', n_clicks=0),
+ 
                 #html.Span('李力, 2024')
             ])
         ]
@@ -209,10 +210,9 @@ def update_output_image(list_of_contents):
         Input("output-image-database", "src"),
         Input("radio_items", "value"),
         Input("input1", "value"),
-        Input("store_12", "data"),
-        Input("button_12", "n_clicks")
+        Input("store_12", "data")
     )
-def update_my_share(upload_contents, database_contents, radio_items, input1, store_12, n_clicks):
+def update_my_share(upload_contents, database_contents, radio_items, input1, store_12):
 
     if radio_items == '公开':
         contents = ""
@@ -433,71 +433,83 @@ def update_my_share(upload_contents, database_contents, radio_items, input1, sto
         is_mobile = user_agent.is_mobile
         is_tablet = user_agent.is_tablet
         is_pc = user_agent.is_pc
-        if n_clicks > 0:                
-            if radio_items  == "公开":
-                is_open = True
-            else:
-                is_open = False
-            if session.get('token'):
-                token = session.get('token')
-                #print('token: ', token)
-                home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
-                # 使用已经登录获取到的token，发送数据
-                patch_path = '/api/collections/clients/records/' + client_id
-                data = {
-                    'field1':input1,
-                    'field2': contents,
-                    'field4': is_open,
-                }
-                data_json = json.dumps(data)
-                patch_url = home_url + patch_path
-                header = {
-                    "Content-Type": "application/json",
-                    "Authorization": token
-                }
-                response = requests.patch(patch_url, headers=header, data=data_json)
-                response_json = response.json()
-                response_str = str(response_json)
-                if response.status_code == 200:
-                    logger.debug('client_id: {}, post successful.'.format(client_id))
-                else:
-                    logger.debug('response_str: {}'.format(response_str[0:100]))
-                #print('response_str: {}'.format(response_str[0:100]))
         if is_pc:
             return nick_name, [grid1], main_panel
         elif is_mobile or is_tablet:
             return nick_name, [grid2_1, grid2_2], main_panel
-
     else:
-        if n_clicks > 0:
-                
-            if radio_items  == "公开":
-                is_open = True
+        nick_name = ''
+        grid1 = ''
+        main_panel = ''
+        return nick_name, [grid1], main_panel
+    
+@app1.callback(
+        Input("output-image-upload", "src"),
+        Input("output-image-database", "src"),
+        Input("radio_items", "value"),
+        Input("input1", "value"),
+        Input("button_12", "n_clicks"),
+)
+def update_database(upload_contents, database_contents, radio_items, input1, n_clicks):
+    def get_client_id():
+        if session.get('token'):
+            token = session.get('token')
+            #print('token: ', token)
+            username = session.get('username')
+            #print('username: ', username)
+            home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
+            # 使用已经登录获取到的token，查询client_id
+            get_path = '/api/collections/clients/records'
+
+            query_client_id = "?filter=(username='" + username + "'||email='" + username + "')&&fields=id"#&&page=50&&perPage=100&&date&&skipTotal=1response1_json
+            get_url = home_url + get_path + query_client_id
+            header = {
+                "Content-Type": "application/json",
+                "Authorization": token
+            }
+            response = requests.get(get_url, headers=header)
+            response_json = response.json()
+            response_str = str(response_json)
+            logger.debug('response_str: {}'.format(response_str[0:100]))
+            #print('response_str: {}'.format(response_str[0:100]))
+            client_id = response_json['items'][0]['id']
+        return client_id
+    client_id = get_client_id() 
+    if n_clicks > 0:
+        contents = ""
+        if upload_contents is not None:
+            logger.debug('upload_contents: {}'.format(upload_contents[0:10]))
+            contents = upload_contents
+        elif database_contents is not None:
+            logger.debug('database_contents: {}'.format(database_contents[0:10]))
+            contents = database_contents
+        logger.debug('contents: {}'.format(contents[0:10]))            
+        if radio_items  == "公开":
+            is_open = True
+        else:
+            is_open = False
+        if session.get('token'):
+            token = session.get('token')
+            #print('token: ', token)
+            home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
+            # 使用已经登录获取到的token，发送数据
+            patch_path = '/api/collections/clients/records/' + client_id
+            data = {
+                'field1':input1,
+                'field2': contents,
+                'field4': is_open,
+            }
+            data_json = json.dumps(data)
+            patch_url = home_url + patch_path
+            header = {
+                "Content-Type": "application/json",
+                "Authorization": token
+            }
+            response = requests.patch(patch_url, headers=header, data=data_json)
+            response_json = response.json()
+            response_str = str(response_json)
+            if response.status_code == 200:
+                logger.debug('client_id: {}, post successful.'.format(client_id))
             else:
-                is_open = False
-            if session.get('token'):
-                token = session.get('token')
-                #print('token: ', token)
-                home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
-                # 使用已经登录获取到的token，发送数据
-                patch_path = '/api/collections/clients/records/' + client_id
-                data = {
-                    'field1':input1,
-                    'field2': contents,
-                    'field4': is_open,
-                }
-                data_json = json.dumps(data)
-                patch_url = home_url + patch_path
-                header = {
-                    "Content-Type": "application/json",
-                    "Authorization": token
-                }
-                response = requests.patch(patch_url, headers=header, data=data_json)
-                response_json = response.json()
-                response_str = str(response_json)
-                if response.status_code == 200:
-                    logger.debug('client_id: {}, post successful.'.format(client_id))
-                else:
-                    logger.debug('response_str: {}'.format(response_str[0:100]))
-                #print('response_str: {}'.format(response_str[0:100]))
-        raise PreventUpdate
+                logger.debug('response_str: {}'.format(response_str[0:100]))
+            #print('response_str: {}'.format(response_str[0:100]))
