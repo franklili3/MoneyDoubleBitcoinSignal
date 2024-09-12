@@ -11,17 +11,6 @@ git clone https://github.com/franklili3/MoneyDoubleBitcoinSignal.git
 pip install -r requirements.txt
 ```
 
-## Pull submodules
-```
-git submodule update --init --recursive
-```
-
-## Install submodules
-```
-cd dash-tradingview
-pip install .
-```
-
 ## Clone empyrical
 ```
 git clone https://github.com/franklili3/empyrical.git
