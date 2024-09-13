@@ -17,17 +17,7 @@ git submodule update --init --recursive
 ```
 
 ## Install submodules
-```
-cd dash-tradingview
-pip install .
-```
 
-## Clone empyrical
-```
-git clone https://github.com/franklili3/empyrical.git
-```
-
-## Install empyrical
 ```
 cd empyrical
 pip install .

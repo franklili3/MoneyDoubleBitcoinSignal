@@ -62,7 +62,9 @@ layout = html.Div([
                             html.Br(),
                             dcc.Link("4.比特币市值上限和下限", href="/bitcoin-upper-lower-marketcap"),
                             html.Br(),
-                            dcc.Link("5.比特币价格上限和下限", href="/bitcoin-upper-lower-price")
+                            dcc.Link("5.比特币价格上限和下限", href="/bitcoin-upper-lower-price"),
+                            html.Br(),
+                            dcc.Link("6.案例", href="/case")
                         ])
                         #    dcc.Link(f"{page['name']}", href=page["relative_path"])# - {page['path']}
                         #) for page in page_registry.values()

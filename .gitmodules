@@ -1,3 +1,6 @@
 [submodule "dash-tradingview"]
 	path = dash-tradingview
 	url = https://github.com/franklili3/dash-tradingview
+[submodule "empyrical"]
+	path = empyrical
+	url = https://github.com/franklili3/empyrical
