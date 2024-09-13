@@ -49,7 +49,7 @@ def login_button_click():
         response1_str = str(response1_json)
         #print('html: ', html)
         #print('response1_str: {}'.format(response1_str))
-        logger.debug('response1_str: {}'.format(response1_str))
+        logger.debug('response1_str: {}'.format(response1_str[0:100]))
         if response1_status_code == 400:
             return """无效的用户名或密码，请 <a href='/login'>登录</a>"""
         elif response1_status_code == 200:
