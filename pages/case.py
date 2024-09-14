@@ -201,15 +201,15 @@ def update_client_info(pathname, store_13):
         for index, row in client_info_df.iterrows():
  
             nick_name = html.Div([
-                html.Div([html.Img(src=client_info['field2'][0], style={'width': '50px', 'height': '50px'})],style={'padding': 10, 'flex': 1}),
-                html.Div([html.H3(client_info['field1'][0])], style={'padding': 10, 'flex': 1}),
+                html.Div([html.Img(src=row['field2'], style={'width': '50px', 'height': '50px'})],style={'padding': 10, 'flex': 1}),
+                html.Div([html.H3(row['field1'])], style={'padding': 10, 'flex': 1}),
                 html.Div("    ",style={'padding': 10, 'flex': 1}),
                 html.Div("    ",style={'padding': 10, 'flex': 1}),
                 html.Div("    ",style={'padding': 10, 'flex': 1}),
             ], style={'display': 'flex', 'flexDirection': 'row'})
 
                     
-            data0 = get_my_total_return_client3(frequency='daily',client_id=client_info['client_id'][0])
+            data0 = get_my_total_return_client3(frequency='daily',client_id=row['client_id'])
             data_annualized_return = data0[1]
             #df1 = pd.DataFrame(data_annualized_return)
             #df2_1 = df1[['annualized_return ', 'annualized_volatility']]
@@ -314,10 +314,11 @@ def update_client_info(pathname, store_13):
             is_pc = user_agent.is_pc
 
             if is_pc:
-                return [html.Div(nick_name), html.Div([grid1]), html.Div(main_panel), html.Hr()]
+                client_info_list.append(html.Div(nick_name), html.Div([grid1]), html.Div(main_panel), html.Hr())
+
             elif is_mobile or is_tablet:
-                return [html.Div(nick_name), html.Div([grid2_1, grid2_2]), html.Div(main_panel), html.Hr()]
+                client_info_list.append(html.Div(nick_name), html.Div([grid2_1, grid2_2]), html.Div(main_panel), html.Hr())
                 #nick_name, [grid2_1, grid2_2], main_panel
- 
+        return client_info_list
 
     
