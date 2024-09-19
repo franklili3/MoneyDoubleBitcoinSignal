@@ -19,7 +19,7 @@ from flask_login import current_user
 from utils.login_handler import require_login
 from flask import session
 import pandas as pd
-import dash_ag_grid as dag
+from dash import dash_table
 from dash.exceptions import PreventUpdate
 
 register_page(__name__,
@@ -239,6 +239,8 @@ def update_my_share(upload_contents, database_contents, radio_items, input1, sto
             #html.Div("    ",style={'padding': 10, 'flex': 1}),
             #html.Div("    ",style={'padding': 10, 'flex': 1}),
             #html.Div("    ",style={'padding': 10, 'flex': 1}),
+            #html.Div("    ",style={'padding': 10, 'flex': 1}),
+            #html.Div("    ",style={'padding': 10, 'flex': 1}),
         ], style={'display': 'flex', 'flexDirection': 'row'})
         TIMEOUT = 60 * 60 * 24
         def get_client_id():
@@ -337,12 +339,13 @@ def update_my_share(upload_contents, database_contents, radio_items, input1, sto
         #df2_2 = df1[['annualized_sharpe ', 'max_drawdown']]
 
         columnDefs1 = [
-            { 'field': 'time', 'headerName': '日期' },
-            { 'field': 'annualized_return', 'headerName': '年化收益率%'},
-            { 'field': 'annualized_volatility', 'headerName': '年化波动率%'},
-            { 'field': 'annualized_sharpe', 'headerName': '年化夏普比率'},
-            { 'field': 'max_drawdown', 'headerName': '最大回撤比率%'},
+            {'name': '日期', 'id': 'time'},
+            {'name': '年化收益率%', 'id': 'annualized_return'},
+            {'name': '年化波动率%', 'id': 'annualized_volatility'},
+            {'name': '年化夏普比率', 'id': 'annualized_sharpe'},
+            {'name': '最大回撤比率%', 'id': 'max_drawdown'},
         ]
+        '''
         columnDefs2_1 = [
             { 'field': 'annualized_return', 'headerName': '年化收益率%'},
             { 'field': 'annualized_volatility', 'headerName': '年化波动率%'},
@@ -351,29 +354,30 @@ def update_my_share(upload_contents, database_contents, radio_items, input1, sto
             { 'field': 'annualized_sharpe', 'headerName': '年化夏普比率'},
             { 'field': 'max_drawdown', 'headerName': '最大回撤比率%'},
         ]
-
-        grid1 = dag.AgGrid(
+        '''
+        grid1 = dash_table.DataTable(
             id="grid1",
-            #rowData=df1.to_dict("records"),
-            rowData=[data_annualized_return],
-            columnDefs=columnDefs1,
-            style={'height': '100px', 'width': '100%'},
-            columnSize="sizeToFit"
+            columns=[{"name": i['name'], "id": i['id']} for i in columnDefs1],
+            data=[data_annualized_return],
+            style_table={'height': '100px', 'width': '100%'},
+            style_cell={'textAlign': 'center'}
         )
-        grid2_1 = dag.AgGrid(
+        '''
+        grid2_1 = dash_table.DataTable(
             id="grid2_1",
-            rowData=[data_annualized_return],
-            columnDefs=columnDefs2_1,
-            style={'height': '100px', 'width': '100%'},
-            columnSize="sizeToFit"
+            columns=[{"name": i, "id": i} for i in columnDefs2_1],
+            data=[data_annualized_return],
+            style_table={'height': '100px', 'width': '100%'},
+            style_cell={'textAlign': 'center'}
         )
-        grid2_2 = dag.AgGrid(
+        grid2_2 = dash_table.DataTable(
             id="grid2_2",
-            rowData=[data_annualized_return],
-            columnDefs=columnDefs2_2,
-            style={'height': '100px', 'width': '100%'},
-            columnSize="sizeToFit"
+            columns=[{"name": i, "id": i} for i in columnDefs2_2],
+            data=[data_annualized_return],
+            style_table={'height': '100px', 'width': '100%'},
+            style_cell={'textAlign': 'center'}
         )
+        '''
         logger.debug('data0[0]: {}'.format(str(data0[0])[0:50]))
         logger.debug('data0[1]: {}'.format(str(data0[1])[0:50]))
 
@@ -429,19 +433,22 @@ def update_my_share(upload_contents, database_contents, radio_items, input1, sto
                 ], style={'position': 'absolute', 'left': 0, 'top': 0, 'zIndex': 10, 'color': 'white', 'padding': '10px'})
             ])
         ]
+        '''
         user_agent = parse(store_12)
         is_mobile = user_agent.is_mobile
         is_tablet = user_agent.is_tablet
         is_pc = user_agent.is_pc
+        
         if is_pc:
-            return nick_name, [grid1], main_panel
-        elif is_mobile or is_tablet:
-            return nick_name, [grid2_1, grid2_2], main_panel
+        '''
+        return nick_name, grid1, main_panel
+        #elif is_mobile or is_tablet:
+        #    return nick_name, [grid2_1, grid2_2], main_panel
     else:
         nick_name = ''
-        grid1 = ''
+        grid1 = dash_table.DataTable(id="empty-grid")  # 创建一个空的DataTable
         main_panel = ''
-        return nick_name, [grid1], main_panel
+        return nick_name, grid1, main_panel
     
 @app1.callback(
         Input("output-image-upload", "src"),
