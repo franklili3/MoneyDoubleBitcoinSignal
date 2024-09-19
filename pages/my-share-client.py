@@ -230,17 +230,6 @@ def update_my_share(upload_contents, database_contents, radio_items, input1, sto
             html.Div("    ",style={'padding': 10, 'flex': 1}),
             html.Div("    ",style={'padding': 10, 'flex': 1}),
             html.Div("    ",style={'padding': 10, 'flex': 1}),
-            #html.Div("    ",style={'padding': 10, 'flex': 1}),
-            #html.Div("    ",style={'padding': 10, 'flex': 1}),
-            #html.Div("    ",style={'padding': 10, 'flex': 1}),
-            #html.Div("    ",style={'padding': 10, 'flex': 1}),
-            #html.Div("    ",style={'padding': 10, 'flex': 1}),
-            #html.Div("    ",style={'padding': 10, 'flex': 1}),
-            #html.Div("    ",style={'padding': 10, 'flex': 1}),
-            #html.Div("    ",style={'padding': 10, 'flex': 1}),
-            #html.Div("    ",style={'padding': 10, 'flex': 1}),
-            #html.Div("    ",style={'padding': 10, 'flex': 1}),
-            #html.Div("    ",style={'padding': 10, 'flex': 1}),
         ], style={'display': 'flex', 'flexDirection': 'row'})
         TIMEOUT = 60 * 60 * 24
         def get_client_id():

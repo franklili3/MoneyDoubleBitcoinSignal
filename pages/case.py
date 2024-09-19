@@ -20,6 +20,7 @@ from utils.login_handler import require_login
 from flask import session
 import pandas as pd
 from dash import dash_table
+from urllib.parse import parse_qs
 
 register_page(__name__,
     title='6.案例',
@@ -99,9 +100,10 @@ clientside_callback(
 @app1.callback(
     Output("case", "children"),
     Input('url', 'pathname'),
+    Input('url', 'search'),  # 添加这一行来获取 URL 参数
     Input("store_13", "data")
-    )
-def update_client_info(pathname, store_13):
+)
+def update_client_info(pathname, search, store_13):
     def get_client_info():
         client_info = {'client_id': [], 'field1': [], 'field2': []}
         if session.get('token'):
@@ -194,8 +196,17 @@ def update_client_info(pathname, store_13):
 
         return data
     if pathname == '/case':
+        # 解析 URL 参数
+        parsed_search = parse_qs(search[1:]) if search else {}
+        client_id_param = parsed_search.get('id', [None])[0]
+
         client_info = get_client_info()
         client_info_df = pd.DataFrame(client_info)
+        
+        # 如果 URL 中有 id 参数,筛选对应的客户数据
+        if client_id_param:
+            client_info_df = client_info_df[client_info_df['client_id'] == client_id_param]
+        
         client_info_list = []
         for index, row in client_info_df.iterrows():
  
@@ -324,6 +335,6 @@ def update_client_info(pathname, store_13):
             #elif is_mobile or is_tablet:
             #    client_info_list.append(html.Div(nick_name), html.Div([grid2_1, grid2_2]), html.Div(main_panel), html.Hr())
                 #nick_name, [grid2_1, grid2_2], main_panel
-        return client_info_list
+        return client_info_list if client_info_list else html.Div("没有找到匹配的客户数据")
 
     
