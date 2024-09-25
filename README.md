@@ -11,12 +11,12 @@ git clone https://github.com/franklili3/MoneyDoubleBitcoinSignal.git
 pip install -r requirements.txt
 ```
 
-## Pull submodules
+## Pull submodule
 ```
 git submodule update --init --recursive
 ```
 
-## Install submodules
+## Install submodule
 
 ```
 cd empyrical
