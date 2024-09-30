@@ -21,7 +21,7 @@ from flask import session
 import pandas as pd
 from dash import dash_table
 from dash.exceptions import PreventUpdate
-import pyperclip  # 用于复制到剪贴板
+import clipboard  # 用于复制到剪贴板
 
 
 register_page(__name__,
@@ -640,7 +640,7 @@ def on_copy_share_link(n_clicks):
                 data = response.json()
                 share_link = data.get('field5')
                 if share_link:
-                    pyperclip.copy(share_link)
+                    clipboard.copy(share_link)
                     logger.debug('分享链接已复制到剪贴板.')
                     return "分享链接已复制到剪贴板"
                 else:
