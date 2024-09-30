@@ -562,7 +562,7 @@ def on_generate_share_link(n_clicks):
             
             # 更新客户记录，添加分享链接
             update_path = f'/api/collections/clients/records/{client_id}'
-            share_link = f"https://fanyifan.com.cn/case?id={client_id}"
+            share_link = f"https://app.fanyifan.com.cn/case?id={client_id}"
             data = {
                 'field5': share_link,
             }
