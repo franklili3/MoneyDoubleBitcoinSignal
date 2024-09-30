@@ -4,7 +4,7 @@ from data_generator import generate_random_series
 import dash_tvlwc
 #import dash
 from dash.dependencies import Input, Output
-from dash import html, register_page, get_app, dcc, clientside_callback#, ctx
+from dash import html, register_page, get_app, dcc, clientside_callback, dash_table#, ctx
 from dash_tvlwc.types import ColorType, SeriesType
 import os
 import requests, json
@@ -19,7 +19,7 @@ from flask_login import current_user
 from utils.login_handler import require_login
 from flask import session
 import pandas as pd
-import dash_ag_grid as dag
+#import dash_ag_grid as dag
 
 register_page(__name__,
     title='6.我的累计收益率',
@@ -209,43 +209,45 @@ def update1(JSoutput):
     #df2_2 = df1[['annualized_sharpe ', 'max_drawdown']]
 
     columnDefs1 = [
-        { 'field': 'time', 'headerName': '日期' },
-        { 'field': 'annualized_return', 'headerName': '年化收益率%'},
-        { 'field': 'annualized_volatility', 'headerName': '年化波动率%'},
-        { 'field': 'annualized_sharpe', 'headerName': '年化夏普比率'},
-        { 'field': 'max_drawdown', 'headerName': '最大回撤比率%'},
+        {'name': '日期', 'id': 'time'},
+        {'name': '年化收益率%', 'id': 'annualized_return'},
+        {'name': '年化波动率%', 'id': 'annualized_volatility'},
+        {'name': '年化夏普比率', 'id': 'annualized_sharpe'},
+        {'name': '最大回撤比率%', 'id': 'max_drawdown'},
     ]
+    '''
     columnDefs2_1 = [
-        { 'field': 'annualized_return', 'headerName': '年化收益率%'},
-        { 'field': 'annualized_volatility', 'headerName': '年化波动率%'},
+        {'name': '年化收益率%', 'id': 'annualized_return'},
+        {'name': '年化波动率%', 'id': 'annualized_volatility'},
     ]
     columnDefs2_2 = [
-        { 'field': 'annualized_sharpe', 'headerName': '年化夏普比率'},
-        { 'field': 'max_drawdown', 'headerName': '最大回撤比率%'},
+        {'name': '年化夏普比率', 'id': 'annualized_sharpe'},
+        {'name': '最大回撤比率%', 'id': 'max_drawdown'},
     ]
-
-    grid1 = dag.AgGrid(
+    '''
+    grid1 = dash_table.DataTable(
         id="grid1",
-        #rowData=df1.to_dict("records"),
-        rowData=[data_annualized_return],
-        columnDefs=columnDefs1,
-        style={'height': '100px', 'width': '100%'},
-        columnSize="sizeToFit"
+        columns=columnDefs1,
+        data=[data_annualized_return],
+        style_table={'height': '100px', 'width': '100%'},
+        style_cell={'textAlign': 'center'}
     )
-    grid2_1 = dag.AgGrid(
+    '''
+    grid2_1 = dash_table.DataTable(
         id="grid2_1",
-        rowData=[data_annualized_return],
-        columnDefs=columnDefs2_1,
-        style={'height': '100px', 'width': '100%'},
-        columnSize="sizeToFit"
+        columns=columnDefs2_1,
+        data=[data_annualized_return],
+        style_table={'height': '100px', 'width': '100%'},
+        style_cell={'textAlign': 'center'}
     )
-    grid2_2 = dag.AgGrid(
+    grid2_2 = dash_table.DataTable(
         id="grid2_2",
-        rowData=[data_annualized_return],
-        columnDefs=columnDefs2_2,
-        style={'height': '100px', 'width': '100%'},
-        columnSize="sizeToFit"
+        columns=columnDefs2_2,
+        data=[data_annualized_return],
+        style_table={'height': '100px', 'width': '100%'},
+        style_cell={'textAlign': 'center'}
     )
+    '''
     logger.debug('data0[0]: {}'.format(str(data0[0])[0:10]))
     logger.debug('data0[1]: {}'.format(str(data0[1])[0:10]))
 
@@ -298,15 +300,16 @@ def update1(JSoutput):
             ], style={'position': 'absolute', 'left': 0, 'top': 0, 'zIndex': 10, 'color': 'white', 'padding': '10px'})
         ])
     ]
+    '''
     user_agent = parse(JSoutput)
     is_mobile = user_agent.is_mobile
     is_tablet = user_agent.is_tablet
     is_pc = user_agent.is_pc
-  
-    if is_pc:
-        return [grid1], main_panel
-    elif is_mobile or is_tablet:
-        return [grid2_1, grid2_2], main_panel
+    '''
+    #if is_pc:
+    return [grid1], main_panel
+    #elif is_mobile or is_tablet:
+    #    return [grid2_1, grid2_2], main_panel
 
 
     

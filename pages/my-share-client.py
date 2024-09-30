@@ -3,7 +3,7 @@
 from data_generator import generate_random_series
 import dash_tvlwc
 #import dash
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 from dash import html, register_page, get_app, dcc, clientside_callback#, ctx
 from dash_tvlwc.types import ColorType, SeriesType
 import os
@@ -19,8 +19,10 @@ from flask_login import current_user
 from utils.login_handler import require_login
 from flask import session
 import pandas as pd
-import dash_ag_grid as dag
+from dash import dash_table
 from dash.exceptions import PreventUpdate
+import pyperclip  # 用于复制到剪贴板
+
 
 register_page(__name__,
     title='7.我的分享',
@@ -52,12 +54,13 @@ else:
     })
 
 
+
+
 def layout(**kwargs):
     if not current_user.is_authenticated:
         return html.Div(["请 ", dcc.Link("登录", href="/login"), " 继续查看。"])
 
-    return html.Div(
-        [
+    return html.Div([
             #dcc.Interval(id='timer', interval=500),
             dcc.Store(id="store_12"),            
             html.Div(className='container', children=[
@@ -111,6 +114,15 @@ def layout(**kwargs):
                 html.Br(),
                ## button
                 html.Button('  提交  ', id='button_12', n_clicks=0),
+                
+                html.Div([
+                    html.Br(),
+                    html.Button('生成分享链接', id='generate-share-link-button', n_clicks=0, style={'display': 'none'}),
+                    html.Div(id='share-link-output'),
+                    html.Br(),
+                    html.Button('复制分享链接', id='copy-share-link-button', n_clicks=0, style={'display': 'none'}),
+                    html.Div(id='copy-link-status-output')
+                ], id='share-link-container'),
                 html.Div(id="nick_name"),
                 html.Div(id="grid_container2"),#[grid]
                 html.Div(id="main_panel-12"),
@@ -230,15 +242,6 @@ def update_my_share(upload_contents, database_contents, radio_items, input1, sto
             html.Div("    ",style={'padding': 10, 'flex': 1}),
             html.Div("    ",style={'padding': 10, 'flex': 1}),
             html.Div("    ",style={'padding': 10, 'flex': 1}),
-            #html.Div("    ",style={'padding': 10, 'flex': 1}),
-            #html.Div("    ",style={'padding': 10, 'flex': 1}),
-            #html.Div("    ",style={'padding': 10, 'flex': 1}),
-            #html.Div("    ",style={'padding': 10, 'flex': 1}),
-            #html.Div("    ",style={'padding': 10, 'flex': 1}),
-            #html.Div("    ",style={'padding': 10, 'flex': 1}),
-            #html.Div("    ",style={'padding': 10, 'flex': 1}),
-            #html.Div("    ",style={'padding': 10, 'flex': 1}),
-            #html.Div("    ",style={'padding': 10, 'flex': 1}),
         ], style={'display': 'flex', 'flexDirection': 'row'})
         TIMEOUT = 60 * 60 * 24
         def get_client_id():
@@ -337,12 +340,13 @@ def update_my_share(upload_contents, database_contents, radio_items, input1, sto
         #df2_2 = df1[['annualized_sharpe ', 'max_drawdown']]
 
         columnDefs1 = [
-            { 'field': 'time', 'headerName': '日期' },
-            { 'field': 'annualized_return', 'headerName': '年化收益率%'},
-            { 'field': 'annualized_volatility', 'headerName': '年化波动率%'},
-            { 'field': 'annualized_sharpe', 'headerName': '年化夏普比率'},
-            { 'field': 'max_drawdown', 'headerName': '最大回撤比率%'},
+            {'name': '日期', 'id': 'time'},
+            {'name': '年化收益率%', 'id': 'annualized_return'},
+            {'name': '年化波动率%', 'id': 'annualized_volatility'},
+            {'name': '年化夏普比率', 'id': 'annualized_sharpe'},
+            {'name': '最大回撤比率%', 'id': 'max_drawdown'},
         ]
+        '''
         columnDefs2_1 = [
             { 'field': 'annualized_return', 'headerName': '年化收益率%'},
             { 'field': 'annualized_volatility', 'headerName': '年化波动率%'},
@@ -351,29 +355,30 @@ def update_my_share(upload_contents, database_contents, radio_items, input1, sto
             { 'field': 'annualized_sharpe', 'headerName': '年化夏普比率'},
             { 'field': 'max_drawdown', 'headerName': '最大回撤比率%'},
         ]
-
-        grid1 = dag.AgGrid(
+        '''
+        grid1 = dash_table.DataTable(
             id="grid1",
-            #rowData=df1.to_dict("records"),
-            rowData=[data_annualized_return],
-            columnDefs=columnDefs1,
-            style={'height': '100px', 'width': '100%'},
-            columnSize="sizeToFit"
+            columns=[{"name": i['name'], "id": i['id']} for i in columnDefs1],
+            data=[data_annualized_return],
+            style_table={'height': '100px', 'width': '100%'},
+            style_cell={'textAlign': 'center'}
         )
-        grid2_1 = dag.AgGrid(
+        '''
+        grid2_1 = dash_table.DataTable(
             id="grid2_1",
-            rowData=[data_annualized_return],
-            columnDefs=columnDefs2_1,
-            style={'height': '100px', 'width': '100%'},
-            columnSize="sizeToFit"
+            columns=[{"name": i, "id": i} for i in columnDefs2_1],
+            data=[data_annualized_return],
+            style_table={'height': '100px', 'width': '100%'},
+            style_cell={'textAlign': 'center'}
         )
-        grid2_2 = dag.AgGrid(
+        grid2_2 = dash_table.DataTable(
             id="grid2_2",
-            rowData=[data_annualized_return],
-            columnDefs=columnDefs2_2,
-            style={'height': '100px', 'width': '100%'},
-            columnSize="sizeToFit"
+            columns=[{"name": i, "id": i} for i in columnDefs2_2],
+            data=[data_annualized_return],
+            style_table={'height': '100px', 'width': '100%'},
+            style_cell={'textAlign': 'center'}
         )
+        '''
         logger.debug('data0[0]: {}'.format(str(data0[0])[0:50]))
         logger.debug('data0[1]: {}'.format(str(data0[1])[0:50]))
 
@@ -429,19 +434,22 @@ def update_my_share(upload_contents, database_contents, radio_items, input1, sto
                 ], style={'position': 'absolute', 'left': 0, 'top': 0, 'zIndex': 10, 'color': 'white', 'padding': '10px'})
             ])
         ]
+        '''
         user_agent = parse(store_12)
         is_mobile = user_agent.is_mobile
         is_tablet = user_agent.is_tablet
         is_pc = user_agent.is_pc
+        
         if is_pc:
-            return nick_name, [grid1], main_panel
-        elif is_mobile or is_tablet:
-            return nick_name, [grid2_1, grid2_2], main_panel
+        '''
+        return nick_name, grid1, main_panel
+        #elif is_mobile or is_tablet:
+        #    return nick_name, [grid2_1, grid2_2], main_panel
     else:
         nick_name = ''
-        grid1 = ''
+        grid1 = dash_table.DataTable(id="empty-grid")  # 创建一个空的DataTable
         main_panel = ''
-        return nick_name, [grid1], main_panel
+        return nick_name, grid1, main_panel
     
 @app1.callback(
         Input("output-image-upload", "src"),
@@ -513,3 +521,148 @@ def update_database(upload_contents, database_contents, radio_items, input1, n_c
             else:
                 logger.debug('response_str: {}'.format(response_str[0:100]))
             #print('response_str: {}'.format(response_str[0:100]))
+# 添加新的回调函数
+@app1.callback(
+    Output('share-link-output', 'children'),
+    Input('generate-share-link-button', 'n_clicks'),
+    prevent_initial_call=True
+)
+def on_generate_share_link(n_clicks):
+    def generate_share_link():
+        def get_client_id():
+            if session.get('token'):
+                token = session.get('token')
+                #print('token: ', token)
+                username = session.get('username')
+                #print('username: ', username)
+                home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
+                # 使用已经登录获取到的token，查询client_id
+                get_path = '/api/collections/clients/records'
+
+                query_client_id = "?filter=(username='" + username + "'||email='" + username + "')&&fields=id"#&&page=50&&perPage=100&&date&&skipTotal=1response1_json
+                get_url = home_url + get_path + query_client_id
+                header = {
+                    "Content-Type": "application/json",
+                    "Authorization": token
+                }
+                response = requests.get(get_url, headers=header)
+                response_json = response.json()
+                response_str = str(response_json)
+                logger.debug('response_str: {}'.format(response_str[0:100]))
+                #print('response_str: {}'.format(response_str[0:100]))
+                client_id = response_json['items'][0]['id']
+            return client_id
+        """生成一个唯一的分享链接"""
+        #unique_id = str(uuid.uuid4())
+        
+        if session.get('token'):
+            token = session.get('token')
+            client_id = get_client_id()
+            home_url = 'https://pocketbase-5umc.onrender.com'
+            
+            # 更新客户记录，添加分享链接
+            update_path = f'/api/collections/clients/records/{client_id}'
+            share_link = f"https://fanyifan.com.cn/case?id={client_id}"
+            data = {
+                'field5': share_link,
+            }
+            update_url = home_url + update_path
+            header = {
+                "Content-Type": "application/json",
+                "Authorization": token
+            }
+            response = requests.patch(update_url, headers=header, json=data)
+            
+            if response.status_code == 200:
+                logger.debug('生成分享链接成功.')
+                return share_link
+            else:
+                logger.error('生成分享链接失败.')
+                return None
+        else:
+            logger.error('用户未登录.')
+            return None
+ 
+    if n_clicks > 0:
+        share_link = generate_share_link()
+        if share_link:
+            return f"分享链接: {share_link}"
+        else:
+            return "生成分享链接失败"
+    return ""
+
+@app1.callback(
+    Output('copy-link-status-output', 'children'),
+    Input('copy-share-link-button', 'n_clicks'),
+    prevent_initial_call=True
+)
+def on_copy_share_link(n_clicks):
+    def get_client_id():
+        if session.get('token'):
+            token = session.get('token')
+            #print('token: ', token)
+            username = session.get('username')
+            #print('username: ', username)
+            home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
+            # 使用已经登录获取到的token，查询client_id
+            get_path = '/api/collections/clients/records'
+
+            query_client_id = "?filter=(username='" + username + "'||email='" + username + "')&&fields=id"#&&page=50&&perPage=100&&date&&skipTotal=1response1_json
+            get_url = home_url + get_path + query_client_id
+            header = {
+                "Content-Type": "application/json",
+                "Authorization": token
+            }
+            response = requests.get(get_url, headers=header)
+            response_json = response.json()
+            response_str = str(response_json)
+            logger.debug('response_str: {}'.format(response_str[0:100]))
+            #print('response_str: {}'.format(response_str[0:100]))
+            client_id = response_json['items'][0]['id']
+        return client_id
+    def copy_share_link():
+        """复制分享链接到剪贴板"""
+        if session.get('token'):
+            token = session.get('token')
+            client_id = get_client_id()
+            home_url = 'https://pocketbase-5umc.onrender.com'
+            
+            # 获取客户记录中的分享链接
+            get_path = f'/api/collections/clients/records/{client_id}'
+            get_url = home_url + get_path
+            header = {
+                "Content-Type": "application/json",
+                "Authorization": token
+            }
+            response = requests.get(get_url, headers=header)
+            
+            if response.status_code == 200:
+                data = response.json()
+                share_link = data.get('field5')
+                if share_link:
+                    pyperclip.copy(share_link)
+                    logger.debug('分享链接已复制到剪贴板.')
+                    return "分享链接已复制到剪贴板"
+                else:
+                    logger.error('未找到分享链接.')
+                    return "未找到分享链接"
+            else:
+                logger.error('获取分享链接失败.')
+                return "获取分享链接失败"
+        else:
+            logger.error('未授权.')
+            return "未授权"
+    if n_clicks > 0:
+        status = copy_share_link()
+        return f"状态: {status}"
+    return ""
+@app1.callback(
+    Output('generate-share-link-button', 'style'),
+    Output('copy-share-link-button', 'style'),
+    Input('radio_items', 'value')
+)
+def toggle_share_buttons(radio_value):
+    if radio_value == '公开':
+        return {'display': 'block'}, {'display': 'block'}
+    else:
+        return {'display': 'none'}, {'display': 'none'}
