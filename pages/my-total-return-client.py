@@ -114,27 +114,44 @@ clientside_callback(
 def update1(JSoutput):
     TIMEOUT = 60 * 60 * 24
     def get_client_id():
+        home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
         if session.get('token'):
             token = session.get('token')
             #print('token: ', token)
-            username = session.get('username')
+        else:
+            auth_path = '/api/admins/auth-with-password'
+            auth_url = home_url + auth_path
+            username = os.environ.get('admin_username')
             #print('username: ', username)
-            home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
-            # 使用已经登录获取到的token，查询client_id
-            get_path = '/api/collections/clients/records'
+            password = os.environ.get('admin_password')
+            #print('password: ', password)
+            # json.dumps 将python数据结构转换为JSON
+            data1 = json.dumps({"identity": username, "password": password})
+            # Content-Type 请求的HTTP内容类型 application/json 将数据已json形式发给服务器
+            header1 = {"Content-Type": "application/json"}
+            response1 = requests.post(auth_url, data=data1, headers=header1)
+            response1_json = response1.json()
+            response1_str = str(response1_json)
+            for key, value in response1_json.items():
+                if key == 'token':
+                    token = value
+        username = session.get('username')
+        #print('username: ', username)
+        # 使用已经登录获取到的token，查询client_id
+        get_path = '/api/collections/clients/records'
 
-            query_client_id = "?filter=(username='" + username + "'||email='" + username + "')&&fields=id"#&&page=50&&perPage=100&&date&&skipTotal=1response1_json
-            get_url = home_url + get_path + query_client_id
-            header = {
-                "Content-Type": "application/json",
-                "Authorization": token
-            }
-            response = requests.get(get_url, headers=header)
-            response_json = response.json()
-            response_str = str(response_json)
-            logger.debug('response_str: {}'.format(response_str[0:100]))
-            #print('response_str: {}'.format(response_str[0:100]))
-            client_id = response_json['items'][0]['id']
+        query_client_id = "?filter=(username='" + username + "'||email='" + username + "')&&fields=id"#&&page=50&&perPage=100&&date&&skipTotal=1response1_json
+        get_url = home_url + get_path + query_client_id
+        header = {
+            "Content-Type": "application/json",
+            "Authorization": token
+        }
+        response = requests.get(get_url, headers=header)
+        response_json = response.json()
+        response_str = str(response_json)
+        logger.debug('response_str: {}'.format(response_str[0:100]))
+        #print('response_str: {}'.format(response_str[0:100]))
+        client_id = response_json['items'][0]['id']
         return client_id
         
     @cache.memoize(timeout=TIMEOUT)

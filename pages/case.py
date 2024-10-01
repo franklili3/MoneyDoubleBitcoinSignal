@@ -106,29 +106,46 @@ clientside_callback(
 def update_client_info(pathname, search, store_13):
     def get_client_info():
         client_info = {'client_id': [], 'field1': [], 'field2': []}
+        home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
         if session.get('token'):
             token = session.get('token')
             #print('token: ', token)
-            home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
-            # 使用已经登录获取到的token，查询client_id
-            get_path = '/api/collections/clients/records'
+        else:
+            auth_path = '/api/admins/auth-with-password'
+            auth_url = home_url + auth_path
+            username = os.environ.get('admin_username')
+            #print('username: ', username)
+            password = os.environ.get('admin_password')
+            #print('password: ', password)
+            # json.dumps 将python数据结构转换为JSON
+            data1 = json.dumps({"identity": username, "password": password})
+            # Content-Type 请求的HTTP内容类型 application/json 将数据已json形式发给服务器
+            header1 = {"Content-Type": "application/json"}
+            response1 = requests.post(auth_url, data=data1, headers=header1)
+            response1_json = response1.json()
+            response1_str = str(response1_json)
+            for key, value in response1_json.items():
+                if key == 'token':
+                    token = value
+        # 使用已经登录获取到的token，查询client_id
+        get_path = '/api/collections/clients/records'
 
-            query_client_info = "?filter=(field4=True)&&fields=id,field1,field2"#&&page=50&&perPage=100&&date&&skipTotal=1response1_json
-            get_url = home_url + get_path + query_client_info
-            header = {
-                "Content-Type": "application/json",
-                "Authorization": token
-            }
-            response = requests.get(get_url, headers=header)
-            response_json = response.json()
-            response_str = str(response_json)
-            logger.debug('response_str: {}'.format(response_str[0:100]))
-            #print('response_str: {}'.format(response_str[0:100]))
-            if response_json['totalItems'] > 0:
-                for item in response_json['items']:
-                    client_info['client_id'].append(item['id'])
-                    client_info['field1'].append(item['field1'])
-                    client_info['field2'].append(item['field2'])
+        query_client_info = "?filter=(field4=True)&&fields=id,field1,field2"#&&page=50&&perPage=100&&date&&skipTotal=1response1_json
+        get_url = home_url + get_path + query_client_info
+        header = {
+            "Content-Type": "application/json",
+            "Authorization": token
+        }
+        response = requests.get(get_url, headers=header)
+        response_json = response.json()
+        response_str = str(response_json)
+        logger.debug('response_str: {}'.format(response_str[0:100]))
+        #print('response_str: {}'.format(response_str[0:100]))
+        if response_json['totalItems'] > 0:
+            for item in response_json['items']:
+                client_info['client_id'].append(item['id'])
+                client_info['field1'].append(item['field1'])
+                client_info['field2'].append(item['field2'])
         return client_info
     TIMEOUT = 60 * 60 * 24
     @cache.memoize(timeout=TIMEOUT)
