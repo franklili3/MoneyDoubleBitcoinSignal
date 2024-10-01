@@ -100,7 +100,7 @@ clientside_callback(
 def update(JSoutput):
     TIMEOUT = 60 * 60 * 24
     @cache.memoize(timeout=TIMEOUT)
-    def get_predicted_marketcap(frequency='weekly'):
+    def get_predicted_marketcap2(frequency='weekly'):
         home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
         '''
         auth_path = '/api/admins/auth-with-password'
@@ -194,9 +194,9 @@ def update(JSoutput):
     is_tablet = user_agent.is_tablet
     is_pc = user_agent.is_pc
     if is_pc:
-        data1 = get_predicted_marketcap(frequency='weekly')
+        data1 = get_predicted_marketcap2(frequency='weekly')
     elif is_mobile or is_tablet:
-        data1 = get_predicted_marketcap(frequency='monthly') 
+        data1 = get_predicted_marketcap2(frequency='monthly') 
 
     #data1 = get_predicted_marketcap(frequency='weekly')
     logger.debug('data1[0]: {}'.format(str(data1[0])[0:10]))
