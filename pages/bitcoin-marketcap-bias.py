@@ -98,7 +98,7 @@ clientside_callback(
 def update(JSoutput):
     TIMEOUT = 60 * 60 * 24
     @cache.memoize(timeout=TIMEOUT)
-    def get_marketcap_bias(frequency='weekly'):
+    def get_marketcap_bias2(frequency='weekly'):
         home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
         '''
         auth_path = '/api/admins/auth-with-password'
@@ -189,9 +189,9 @@ def update(JSoutput):
     is_tablet = user_agent.is_tablet
     is_pc = user_agent.is_pc
     if is_pc:
-        data1 = get_marketcap_bias(frequency='weekly')
+        data1 = get_marketcap_bias2(frequency='weekly')
     elif is_mobile or is_tablet:
-        data1 = get_marketcap_bias(frequency='monthly') 
+        data1 = get_marketcap_bias2(frequency='monthly') 
 
     logger.debug('data1[0]: {}'.format(str(data1[0])[0:10]))
     logger.debug('data1[1]: {}'.format(str(data1[1])[0:10]))
