@@ -67,7 +67,7 @@ def layout(**kwargs):
                             html.Br(),
                             dcc.Link("2.比特币预测市值", href="/bitcoin-predicted-marketcap-client"),
                             html.Br(),
-                            dcc.Link("3.比特币市值偏离度", href="/bitcoin-marketcap-bias-client"),
+                            dcc.Link("3.比特币市值偏差", href="/bitcoin-marketcap-bias-client"),
                             html.Br(),
                             dcc.Link("4.比特币市值上限和下限", href="/bitcoin-upper-lower-marketcap-client"),
                             html.Br(),
