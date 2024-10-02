@@ -230,7 +230,7 @@ def update(JSoutput):
                         },
                         {
                             'title': '比特币市值偏离度',
-                            'color': '#FFAA30' 
+                            'color': 'orange' 
                         }
                     ]
                 ),
