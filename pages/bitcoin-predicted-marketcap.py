@@ -241,7 +241,7 @@ def update(JSoutput):
                         },
                         {
                             'title': '比特币预测市值(对数)',
-                            'color': '#FFAA30' 
+                            'color': 'white' 
                         }
                     ]
                 ),

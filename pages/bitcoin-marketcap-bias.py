@@ -19,8 +19,8 @@ from user_agents import parse
 from flask import session
 
 register_page(__name__,
-    title='3.比特币市值偏离度',
-    name='3.比特币市值偏离度')
+    title='3.比特币市值偏差',
+    name='3.比特币市值偏差')
 app1 = get_app()
 
 # 创建FileHandler，并添加到logger.handlers列表
@@ -71,8 +71,8 @@ layout = html.Div([
                     ]),            
                 ]),
                 html.Div(className='main-container', children=[
-                    html.H2('比特币市值偏离度和市值图 📊'),
-                    html.H3('比特币市值和比特币预测市值的差为比特币市值偏离度，比特币市值和比特币市值偏离度的顶部和底部很一致，而且比特币市值偏离度-1到2之间震荡，比特币市值偏离度能预测比特币市值的牛市顶部和熊市底部。'),
+                    html.H2('比特币市值偏差和市值图 📊'),
+                    html.H3('比特币市值和比特币预测市值的差为比特币市值偏差，比特币市值和比特币市值偏差的顶部和底部很一致，而且比特币市值偏差在-1到2之间震荡，比特币市值偏差能预测比特币市值的牛市顶部和熊市底部。'),
                     html.Div(id="main_panel-3")
                 ]),
                 html.Span('李力, 2024')
@@ -234,8 +234,8 @@ def update(JSoutput):
                             'priceScaleId': 'left'
                         },
                         {
-                            'title': '比特币市值偏离度',
-                            'color': '#FFAA30' 
+                            'title': '比特币市值偏差',
+                            'color': 'orange' 
                         }
                     ]
                 ),

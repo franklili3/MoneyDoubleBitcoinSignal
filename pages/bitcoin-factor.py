@@ -228,7 +228,7 @@ def update(JSoutput):
                         },
                         {
                             'title': '比特币区块数(对数)',
-                            'color': '#FFAA30' 
+                            'color': 'yellow' 
                         }
                     ]
                 ),
