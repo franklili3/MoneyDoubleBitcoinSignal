@@ -19,8 +19,8 @@ from user_agents import parse
 from flask import session
 
 register_page(__name__,
-    title='3.比特币市值偏离度',
-    name='3.比特币市值偏离度')
+    title='3.比特币市值偏差',
+    name='3.比特币市值偏差')
 app1 = get_app()
 
 # 创建FileHandler，并添加到logger.handlers列表
@@ -71,8 +71,8 @@ layout = html.Div([
                     ]),            
                 ]),
                 html.Div(className='main-container', children=[
-                    html.H2('比特币市值偏离度和市值图 📊'),
-                    html.H3('比特币市值和比特币预测市值的差为比特币市值偏离度，比特币市值和比特币市值偏离度的顶部和底部很一致，而且比特币市值偏离度-1到2之间震荡，比特币市值偏离度能预测比特币市值的牛市顶部和熊市底部。'),
+                    html.H2('比特币市值偏差和市值图 📊'),
+                    html.H3('比特币市值和比特币预测市值的差为比特币市值偏差，比特币市值和比特币市值偏差的顶部和底部很一致，而且比特币市值偏差在-1到2之间震荡，比特币市值偏差能预测比特币市值的牛市顶部和熊市底部。'),
                     html.Div(id="main_panel-3")
                 ]),
                 html.Span('李力, 2024')
@@ -98,7 +98,7 @@ clientside_callback(
 def update(JSoutput):
     TIMEOUT = 60 * 60 * 24
     @cache.memoize(timeout=TIMEOUT)
-    def get_marketcap_bias(frequency='weekly'):
+    def get_marketcap_bias2(frequency='weekly'):
         home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
         '''
         auth_path = '/api/admins/auth-with-password'
@@ -189,9 +189,9 @@ def update(JSoutput):
     is_tablet = user_agent.is_tablet
     is_pc = user_agent.is_pc
     if is_pc:
-        data1 = get_marketcap_bias(frequency='weekly')
+        data1 = get_marketcap_bias2(frequency='weekly')
     elif is_mobile or is_tablet:
-        data1 = get_marketcap_bias(frequency='monthly') 
+        data1 = get_marketcap_bias2(frequency='monthly') 
 
     logger.debug('data1[0]: {}'.format(str(data1[0])[0:10]))
     logger.debug('data1[1]: {}'.format(str(data1[1])[0:10]))
@@ -234,8 +234,8 @@ def update(JSoutput):
                             'priceScaleId': 'left'
                         },
                         {
-                            'title': '比特币市值偏离度',
-                            'color': '#FFAA30' 
+                            'title': '比特币市值偏差',
+                            'color': 'orange' 
                         }
                     ]
                 ),
