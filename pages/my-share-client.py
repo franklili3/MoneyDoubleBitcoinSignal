@@ -153,28 +153,35 @@ clientside_callback(
     Output("radio_items", "value"),
     Input('url', 'pathname'))
 def update_input(pathname):
-    def get_client_id():
-        home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
+    home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
+    def get_token():
+        auth_path = '/api/admins/auth-with-password'
+        auth_url = home_url + auth_path
+        username = os.environ.get('admin_username')
+        #print('admin_username: ', username)
+        logger.debug('admin_username: {}'.format(username))
+        password = os.environ.get('admin_password')
+        # json.dumps 将python数据结构转换为JSON
+        data1 = json.dumps({"identity": username, "password": password})
+        # Content-Type 请求的HTTP内容类型 application/json 将数据已json形式发给服务器
+        header1 = {"Content-Type": "application/json"}
+        response1 = requests.post(auth_url, data=data1, headers=header1)
+        response1_json = response1.json()
+        response1_str = str(response1_json)
+        #print('html: ', html)
+        logger.debug('response1_str: {}'.format(response1_str[0:100]))
+        # html.json JSON 响应内容，提取token值
+        if response1_json['token']:
+            token = response1_json['token']
+            session['token'] = token
+            logger.debug('save session: {}'.format(session))
+            return token
+    def get_client_id1():
         if session.get('token'):
             token = session.get('token')
             #print('token: ', token)
         else:
-            auth_path = '/api/admins/auth-with-password'
-            auth_url = home_url + auth_path
-            username = os.environ.get('admin_username')
-            #print('username: ', username)
-            password = os.environ.get('admin_password')
-            #print('password: ', password)
-            # json.dumps 将python数据结构转换为JSON
-            data1 = json.dumps({"identity": username, "password": password})
-            # Content-Type 请求的HTTP内容类型 application/json 将数据已json形式发给服务器
-            header1 = {"Content-Type": "application/json"}
-            response1 = requests.post(auth_url, data=data1, headers=header1)
-            response1_json = response1.json()
-            response1_str = str(response1_json)
-            for key, value in response1_json.items():
-                if key == 'token':
-                    token = value
+            token = get_token()
         username = session.get('username')
         #print('username: ', username)
         # 使用已经登录获取到的token，查询client_id
@@ -192,35 +199,36 @@ def update_input(pathname):
         logger.debug('response_str: {}'.format(response_str[0:100]))
         #print('response_str: {}'.format(response_str[0:100]))
         client_id = response_json['items'][0]['id']
+        session['client_id'] = client_id       
         return client_id
-    client_id = get_client_id()
-    home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
-
+    client_id = get_client_id1()
     if session.get('token'):
         token = session.get('token')
         logger.debug('token: {}'.format(token))
-        # 使用已经登录获取到的token 发送一个get请求
-        get_path = '/api/collections/clients/records'
+    else:
+        token = get_token()
+    # 使用已经登录获取到的token 发送一个get请求
+    get_path = '/api/collections/clients/records'
 
-        query_field1 = "?filter=(id='" + client_id + "')&&fields=field1,field2,field4&&perPage=1&&page=1"# + str(i)&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
-        get_url = home_url + get_path + query_field1
-        header2 = {
-            "Content-Type": "application/json",
-            "Authorization": token
-        }
-        response4 = requests.get(get_url, headers=header2)
-        response4_json = response4.json()
-        response4_str = str(response4_json)
-        logger.debug('response4_str: {}'.format(response4_str[0:100]))
-        if response4_json['totalItems'] > 0:
-            field1 = response4_json['items'][0]['field1']
-            field2 = response4_json['items'][0]['field2']
-            field4 = response4_json['items'][0]['field4']
-            logger.debug('field1: {}, field4: {}'.format(field1, field4))
-            if field4 == True:
-                get_radio_items = "公开"
-            else:
-                get_radio_items = "不公开"
+    query_field1 = "?filter=(id='" + client_id + "')&&fields=field1,field2,field4&&perPage=1&&page=1"# + str(i)&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
+    get_url = home_url + get_path + query_field1
+    header2 = {
+        "Content-Type": "application/json",
+        "Authorization": token
+    }
+    response4 = requests.get(get_url, headers=header2)
+    response4_json = response4.json()
+    response4_str = str(response4_json)
+    logger.debug('response4_str: {}'.format(response4_str[0:100]))
+    if response4_json['totalItems'] > 0:
+        field1 = response4_json['items'][0]['field1']
+        field2 = response4_json['items'][0]['field2']
+        field4 = response4_json['items'][0]['field4']
+        logger.debug('field1: {}, field4: {}'.format(field1, field4))
+        if field4 == True:
+            get_radio_items = "公开"
+        else:
+            get_radio_items = "不公开"
     return field1, field2, get_radio_items   
 
 @app1.callback(
@@ -242,7 +250,117 @@ def update_output_image(list_of_contents):
         Input("store_12", "data")
     )
 def update_my_share(upload_contents, database_contents, radio_items, input1, store_12):
+    home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
+    def get_token():
+        auth_path = '/api/admins/auth-with-password'
+        auth_url = home_url + auth_path
+        username = os.environ.get('admin_username')
+        #print('admin_username: ', username)
+        logger.debug('admin_username: {}'.format(username))
+        password = os.environ.get('admin_password')
+        # json.dumps 将python数据结构转换为JSON
+        data1 = json.dumps({"identity": username, "password": password})
+        # Content-Type 请求的HTTP内容类型 application/json 将数据已json形式发给服务器
+        header1 = {"Content-Type": "application/json"}
+        response1 = requests.post(auth_url, data=data1, headers=header1)
+        response1_json = response1.json()
+        response1_str = str(response1_json)
+        #print('html: ', html)
+        logger.debug('response1_str: {}'.format(response1_str[0:100]))
+        # html.json JSON 响应内容，提取token值
+        if response1_json['token']:
+            token = response1_json['token']
+            session['token'] = token
+            logger.debug('save session: {}'.format(session))
+            return token
+    def get_client_id1():
+        if session.get('token'):
+            token = session.get('token')
+            #print('token: ', token)
+        else:
+            token = get_token()
+        username = session.get('username')
+        #print('username: ', username)
+        home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
+        # 使用已经登录获取到的token，查询client_id
+        get_path = '/api/collections/clients/records'
 
+        query_client_id = "?filter=(username='" + username + "'||email='" + username + "')&&fields=id"#&&page=50&&perPage=100&&date&&skipTotal=1response1_json
+        get_url = home_url + get_path + query_client_id
+        header = {
+            "Content-Type": "application/json",
+            "Authorization": token
+        }
+        response = requests.get(get_url, headers=header)
+        response_json = response.json()
+        response_str = str(response_json)
+        logger.debug('response_str: {}'.format(response_str[0:100]))
+        #print('response_str: {}'.format(response_str[0:100]))
+        client_id = response_json['items'][0]['id']
+        session['client_id'] = client_id
+        return client_id
+    TIMEOUT = 60 * 60 * 24
+    @cache.memoize(timeout=TIMEOUT)
+    def get_my_total_return_client3(frequency = 'daily',client_id=''):
+        if session.get('token'):
+            token = session.get('token')
+            logger.debug('token: {}'.format(token))
+        else:
+            token = get_token()
+            # 使用已经登录获取到的token 发送一个get请求
+        get_path = '/api/collections/clients_trade_account/records'
+        data_total_return = []
+        data_annualized_return = {'time': '', 'annualized_return': 0, 'annualized_volatility': 0,
+                                            'annualized_sharpe': 0, 'max_drawdown': 0}
+        if frequency == 'daily':
+            for i in range(1,2):
+                get_path = '/api/collections/clients_trade_account/records'
+
+                query_total_return = "?filter=(client_id='" + client_id + "')&&fields=date,total_return&&perPage=365&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
+                get_url = home_url + get_path + query_total_return
+                header2 = {
+                    "Content-Type": "application/json",
+                    "Authorization": token
+                }
+                response2 = requests.get(get_url, headers=header2)
+                response2_json = response2.json()
+                response2_str = str(response2_json)
+                logger.debug('response2_str: {}'.format(response2_str[0:100]))
+                if response2_json['totalItems'] > 0:
+                    for item in response2_json['items']:
+                        time = item['date']
+                        value1 = item['total_return'] * 100
+                        #app1.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)) + ' ,value3:{}'.format(str(value3)))
+                        #print('time: ', time, ', value: ', value)
+                        data_total_return.append({'time': time, 'value': value1})
+                else:
+                    data_total_return.append({'time': 0, 'value': 0})
+            query_annualized_return = "?filter=(client_id='" + client_id + "')&&fields=date,annualized_return,annualized_volatility,annualized_sharpe,max_drawdown&&sort=-date&&perPage=1&&page=1"# + str(i)&&page=50&&perPage=100&&skipTotal=1response1_json
+            get_url2 = home_url + get_path + query_annualized_return
+            header2 = {
+                "Content-Type": "application/json",
+                "Authorization": token
+            }
+            response3 = requests.get(get_url2, headers=header2)
+            response3_json = response3.json()
+            response3_str = str(response3_json)
+            logger.debug('response2_str: {}'.format(response3_str[0:100]))
+            if response3_json['totalItems'] > 0:
+                data_annualized_return['time'] = response3_json['items'][0]['date'][0:10]
+                data_annualized_return['annualized_return'] = response3_json['items'][0]['annualized_return'] * 100
+                data_annualized_return['annualized_volatility'] = response3_json['items'][0]['annualized_volatility'] * 100
+                data_annualized_return['annualized_sharpe'] = response3_json['items'][0]['annualized_sharpe']
+                data_annualized_return['max_drawdown'] = response3_json['items'][0]['max_drawdown'] * 100
+                #app1.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)) + ' ,value3:{}'.format(str(value3)))
+                #print('time: ', time, ', value: ', value)
+            else:
+                data_annualized_return['time'] = 0
+                data_annualized_return['annualized_return'] = 0
+                data_annualized_return['annualized_volatility'] = 0
+                data_annualized_return['annualized_sharpe'] = 0
+                data_annualized_return['max_drawdown'] = 0
+        data = [data_total_return, data_annualized_return]
+        return data
     if radio_items == '公开':
         contents = ""
         if upload_contents is not None:
@@ -260,97 +378,12 @@ def update_my_share(upload_contents, database_contents, radio_items, input1, sto
             html.Div("    ",style={'padding': 10, 'flex': 1}),
             html.Div("    ",style={'padding': 10, 'flex': 1}),
         ], style={'display': 'flex', 'flexDirection': 'row'})
-        TIMEOUT = 60 * 60 * 24
-        def get_client_id():
-            if session.get('token'):
-                token = session.get('token')
-                #print('token: ', token)
-                username = session.get('username')
-                #print('username: ', username)
-                home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
-                # 使用已经登录获取到的token，查询client_id
-                get_path = '/api/collections/clients/records'
 
-                query_client_id = "?filter=(username='" + username + "'||email='" + username + "')&&fields=id"#&&page=50&&perPage=100&&date&&skipTotal=1response1_json
-                get_url = home_url + get_path + query_client_id
-                header = {
-                    "Content-Type": "application/json",
-                    "Authorization": token
-                }
-                response = requests.get(get_url, headers=header)
-                response_json = response.json()
-                response_str = str(response_json)
-                logger.debug('response_str: {}'.format(response_str[0:100]))
-                #print('response_str: {}'.format(response_str[0:100]))
-                client_id = response_json['items'][0]['id']
-            return client_id
-        client_id = get_client_id() 
-        @cache.memoize(timeout=TIMEOUT)
-        def get_my_total_return_client2(frequency = 'daily',client_id=''):
-            home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
-
-            if session.get('token'):
-                token = session.get('token')
-                logger.debug('token: {}'.format(token))
-                # 使用已经登录获取到的token 发送一个get请求
-                get_path = '/api/collections/clients_trade_account/records'
-                data_total_return = []
-                data_annualized_return = {'time': '', 'annualized_return': 0, 'annualized_volatility': 0,
-                                                    'annualized_sharpe': 0, 'max_drawdown': 0}
-                if frequency == 'daily':
-                    for i in range(1,2):
-                        get_path = '/api/collections/clients_trade_account/records'
-
-                        query_total_return = "?filter=(client_id='" + client_id + "')&&fields=date,total_return&&perPage=365&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
-                        get_url = home_url + get_path + query_total_return
-                        header2 = {
-                            "Content-Type": "application/json",
-                            "Authorization": token
-                        }
-                        response2 = requests.get(get_url, headers=header2)
-                        response2_json = response2.json()
-                        response2_str = str(response2_json)
-                        logger.debug('response2_str: {}'.format(response2_str[0:100]))
-                        if response2_json['totalItems'] > 0:
-                            for item in response2_json['items']:
-                                time = item['date']
-                                value1 = item['total_return'] * 100
-                                #app1.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)) + ' ,value3:{}'.format(str(value3)))
-                                #print('time: ', time, ', value: ', value)
-                                data_total_return.append({'time': time, 'value': value1})
-                        else:
-                            data_total_return.append({'time': 0, 'value': 0})
-                    query_annualized_return = "?filter=(client_id='" + client_id + "')&&fields=date,annualized_return,annualized_volatility,annualized_sharpe,max_drawdown&&sort=-date&&perPage=1&&page=1"# + str(i)&&page=50&&perPage=100&&skipTotal=1response1_json
-                    get_url2 = home_url + get_path + query_annualized_return
-                    header2 = {
-                        "Content-Type": "application/json",
-                        "Authorization": token
-                    }
-                    response3 = requests.get(get_url2, headers=header2)
-                    response3_json = response3.json()
-                    response3_str = str(response3_json)
-                    logger.debug('response2_str: {}'.format(response3_str[0:100]))
-                    if response3_json['totalItems'] > 0:
-                        data_annualized_return['time'] = response3_json['items'][0]['date'][0:10]
-                        data_annualized_return['annualized_return'] = response3_json['items'][0]['annualized_return'] * 100
-                        data_annualized_return['annualized_volatility'] = response3_json['items'][0]['annualized_volatility'] * 100
-                        data_annualized_return['annualized_sharpe'] = response3_json['items'][0]['annualized_sharpe']
-                        data_annualized_return['max_drawdown'] = response3_json['items'][0]['max_drawdown'] * 100
-                        #app1.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)) + ' ,value3:{}'.format(str(value3)))
-                        #print('time: ', time, ', value: ', value)
-                    else:
-                        data_annualized_return['time'] = 0
-                        data_annualized_return['annualized_return'] = 0
-                        data_annualized_return['annualized_volatility'] = 0
-                        data_annualized_return['annualized_sharpe'] = 0
-                        data_annualized_return['max_drawdown'] = 0
-                data = [data_total_return, data_annualized_return]
-            else:
-                data = [generate_random_series(5000, n=500), generate_random_series(5000, n=500)]
-
-            return data
-    
-        data0 = get_my_total_return_client2(frequency='daily',client_id=client_id)
+        if session.get('client_id'): 
+            client_id = session.get('client_id')
+        else:
+            client_id = get_client_id1() 
+        data0 = get_my_total_return_client3(frequency='daily',client_id=client_id)
         data_annualized_return = data0[1]
         #df1 = pd.DataFrame(data_annualized_return)
         #df2_1 = df1[['annualized_return ', 'annualized_volatility']]
@@ -363,16 +396,7 @@ def update_my_share(upload_contents, database_contents, radio_items, input1, sto
             {'name': '年化夏普比率', 'id': 'annualized_sharpe'},
             {'name': '最大回撤比率%', 'id': 'max_drawdown'},
         ]
-        '''
-        columnDefs2_1 = [
-            { 'field': 'annualized_return', 'headerName': '年化收益率%'},
-            { 'field': 'annualized_volatility', 'headerName': '年化波动率%'},
-        ]
-        columnDefs2_2 = [
-            { 'field': 'annualized_sharpe', 'headerName': '年化夏普比率'},
-            { 'field': 'max_drawdown', 'headerName': '最大回撤比率%'},
-        ]
-        '''
+
         grid1 = dash_table.DataTable(
             id="grid1",
             columns=[{"name": i['name'], "id": i['id']} for i in columnDefs1],
@@ -380,22 +404,7 @@ def update_my_share(upload_contents, database_contents, radio_items, input1, sto
             style_table={'height': '100px', 'width': '100%'},
             style_cell={'textAlign': 'center'}
         )
-        '''
-        grid2_1 = dash_table.DataTable(
-            id="grid2_1",
-            columns=[{"name": i, "id": i} for i in columnDefs2_1],
-            data=[data_annualized_return],
-            style_table={'height': '100px', 'width': '100%'},
-            style_cell={'textAlign': 'center'}
-        )
-        grid2_2 = dash_table.DataTable(
-            id="grid2_2",
-            columns=[{"name": i, "id": i} for i in columnDefs2_2],
-            data=[data_annualized_return],
-            style_table={'height': '100px', 'width': '100%'},
-            style_cell={'textAlign': 'center'}
-        )
-        '''
+ 
         logger.debug('data0[0]: {}'.format(str(data0[0])[0:50]))
         logger.debug('data0[1]: {}'.format(str(data0[1])[0:50]))
 
@@ -451,14 +460,7 @@ def update_my_share(upload_contents, database_contents, radio_items, input1, sto
                 ], style={'position': 'absolute', 'left': 0, 'top': 0, 'zIndex': 10, 'color': 'white', 'padding': '10px'})
             ])
         ]
-        '''
-        user_agent = parse(store_12)
-        is_mobile = user_agent.is_mobile
-        is_tablet = user_agent.is_tablet
-        is_pc = user_agent.is_pc
-        
-        if is_pc:
-        '''
+ 
         return nick_name, grid1, main_panel
         #elif is_mobile or is_tablet:
         #    return nick_name, [grid2_1, grid2_2], main_panel
@@ -476,30 +478,59 @@ def update_my_share(upload_contents, database_contents, radio_items, input1, sto
         Input("button_12", "n_clicks"),
 )
 def update_database(upload_contents, database_contents, radio_items, input1, n_clicks):
-    def get_client_id():
+
+    home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
+    def get_token():
+        auth_path = '/api/admins/auth-with-password'
+        auth_url = home_url + auth_path
+        username = os.environ.get('admin_username')
+        #print('admin_username: ', username)
+        logger.debug('admin_username: {}'.format(username))
+        password = os.environ.get('admin_password')
+        # json.dumps 将python数据结构转换为JSON
+        data1 = json.dumps({"identity": username, "password": password})
+        # Content-Type 请求的HTTP内容类型 application/json 将数据已json形式发给服务器
+        header1 = {"Content-Type": "application/json"}
+        response1 = requests.post(auth_url, data=data1, headers=header1)
+        response1_json = response1.json()
+        response1_str = str(response1_json)
+        #print('html: ', html)
+        logger.debug('response1_str: {}'.format(response1_str[0:100]))
+        # html.json JSON 响应内容，提取token值
+        if response1_json['token']:
+            token = response1_json['token']
+            session['token'] = token
+            logger.debug('save session: {}'.format(session))
+            return token
+    def get_client_id1():
         if session.get('token'):
             token = session.get('token')
             #print('token: ', token)
-            username = session.get('username')
-            #print('username: ', username)
-            home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
-            # 使用已经登录获取到的token，查询client_id
-            get_path = '/api/collections/clients/records'
+        else:
+            token = get_token()
+        username = session.get('username')
+        #print('username: ', username)
+        # 使用已经登录获取到的token，查询client_id
+        get_path = '/api/collections/clients/records'
 
-            query_client_id = "?filter=(username='" + username + "'||email='" + username + "')&&fields=id"#&&page=50&&perPage=100&&date&&skipTotal=1response1_json
-            get_url = home_url + get_path + query_client_id
-            header = {
-                "Content-Type": "application/json",
-                "Authorization": token
-            }
-            response = requests.get(get_url, headers=header)
-            response_json = response.json()
-            response_str = str(response_json)
-            logger.debug('response_str: {}'.format(response_str[0:100]))
-            #print('response_str: {}'.format(response_str[0:100]))
-            client_id = response_json['items'][0]['id']
+        query_client_id = "?filter=(username='" + username + "'||email='" + username + "')&&fields=id"#&&page=50&&perPage=100&&date&&skipTotal=1response1_json
+        get_url = home_url + get_path + query_client_id
+        header = {
+            "Content-Type": "application/json",
+            "Authorization": token
+        }
+        response = requests.get(get_url, headers=header)
+        response_json = response.json()
+        response_str = str(response_json)
+        logger.debug('response_str: {}'.format(response_str[0:100]))
+        #print('response_str: {}'.format(response_str[0:100]))
+        client_id = response_json['items'][0]['id']
+        session['client_id'] = client_id
         return client_id
-    client_id = get_client_id() 
+    if session.get('client_id'): 
+        client_id = session.get('client_id')
+    else:
+        client_id = get_client_id1()
     if n_clicks > 0:
         contents = ""
         if upload_contents is not None:
@@ -516,28 +547,29 @@ def update_database(upload_contents, database_contents, radio_items, input1, n_c
         if session.get('token'):
             token = session.get('token')
             #print('token: ', token)
-            home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
-            # 使用已经登录获取到的token，发送数据
-            patch_path = '/api/collections/clients/records/' + client_id
-            data = {
-                'field1':input1,
-                'field2': contents,
-                'field4': is_open,
-            }
-            data_json = json.dumps(data)
-            patch_url = home_url + patch_path
-            header = {
-                "Content-Type": "application/json",
-                "Authorization": token
-            }
-            response = requests.patch(patch_url, headers=header, data=data_json)
-            response_json = response.json()
-            response_str = str(response_json)
-            if response.status_code == 200:
-                logger.debug('client_id: {}, post successful.'.format(client_id))
-            else:
-                logger.debug('response_str: {}'.format(response_str[0:100]))
-            #print('response_str: {}'.format(response_str[0:100]))
+        else:
+            token = get_token()
+        # 使用已经登录获取到的token，发送数据
+        patch_path = '/api/collections/clients/records/' + client_id
+        data = {
+            'field1':input1,
+            'field2': contents,
+            'field4': is_open,
+        }
+        data_json = json.dumps(data)
+        patch_url = home_url + patch_path
+        header = {
+            "Content-Type": "application/json",
+            "Authorization": token
+        }
+        response = requests.patch(patch_url, headers=header, data=data_json)
+        response_json = response.json()
+        response_str = str(response_json)
+        if response.status_code == 200:
+            logger.debug('client_id: {}, post successful.'.format(client_id))
+        else:
+            logger.debug('response_str: {}'.format(response_str[0:100]))
+        #print('response_str: {}'.format(response_str[0:100]))
 # 添加新的回调函数
 @app1.callback(
     Output('share-link-output', 'children'),
@@ -545,59 +577,83 @@ def update_database(upload_contents, database_contents, radio_items, input1, n_c
     prevent_initial_call=True
 )
 def on_generate_share_link(n_clicks):
+    home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
+    def get_token():
+        auth_path = '/api/admins/auth-with-password'
+        auth_url = home_url + auth_path
+        username = os.environ.get('admin_username')
+        #print('admin_username: ', username)
+        logger.debug('admin_username: {}'.format(username))
+        password = os.environ.get('admin_password')
+        # json.dumps 将python数据结构转换为JSON
+        data1 = json.dumps({"identity": username, "password": password})
+        # Content-Type 请求的HTTP内容类型 application/json 将数据已json形式发给服务器
+        header1 = {"Content-Type": "application/json"}
+        response1 = requests.post(auth_url, data=data1, headers=header1)
+        response1_json = response1.json()
+        response1_str = str(response1_json)
+        #print('html: ', html)
+        logger.debug('response1_str: {}'.format(response1_str[0:100]))
+        # html.json JSON 响应内容，提取token值
+        if response1_json['token']:
+            token = response1_json['token']
+            session['token'] = token
+            logger.debug('save session: {}'.format(session))
+            return token
     def generate_share_link():
         def get_client_id():
             if session.get('token'):
                 token = session.get('token')
                 #print('token: ', token)
-                username = session.get('username')
-                #print('username: ', username)
-                home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
-                # 使用已经登录获取到的token，查询client_id
-                get_path = '/api/collections/clients/records'
+            else:
+                token = get_token()
+            username = session.get('username')
+            #print('username: ', username)
+            # 使用已经登录获取到的token，查询client_id
+            get_path = '/api/collections/clients/records'
 
-                query_client_id = "?filter=(username='" + username + "'||email='" + username + "')&&fields=id"#&&page=50&&perPage=100&&date&&skipTotal=1response1_json
-                get_url = home_url + get_path + query_client_id
-                header = {
-                    "Content-Type": "application/json",
-                    "Authorization": token
-                }
-                response = requests.get(get_url, headers=header)
-                response_json = response.json()
-                response_str = str(response_json)
-                logger.debug('response_str: {}'.format(response_str[0:100]))
-                #print('response_str: {}'.format(response_str[0:100]))
-                client_id = response_json['items'][0]['id']
+            query_client_id = "?filter=(username='" + username + "'||email='" + username + "')&&fields=id"#&&page=50&&perPage=100&&date&&skipTotal=1response1_json
+            get_url = home_url + get_path + query_client_id
+            header = {
+                "Content-Type": "application/json",
+                "Authorization": token
+            }
+            response = requests.get(get_url, headers=header)
+            response_json = response.json()
+            response_str = str(response_json)
+            logger.debug('response_str: {}'.format(response_str[0:100]))
+            #print('response_str: {}'.format(response_str[0:100]))
+            client_id = response_json['items'][0]['id']
             return client_id
         """生成一个唯一的分享链接"""
         #unique_id = str(uuid.uuid4())
         
         if session.get('token'):
             token = session.get('token')
-            client_id = get_client_id()
-            home_url = 'https://pocketbase-5umc.onrender.com'
-            
-            # 更新客户记录，添加分享链接
-            update_path = f'/api/collections/clients/records/{client_id}'
-            share_link = f"https://app.fanyifan.com.cn/case?id={client_id}"
-            data = {
-                'field5': share_link,
-            }
-            update_url = home_url + update_path
-            header = {
-                "Content-Type": "application/json",
-                "Authorization": token
-            }
-            response = requests.patch(update_url, headers=header, json=data)
-            
-            if response.status_code == 200:
-                logger.debug('生成分享链接成功.')
-                return share_link
-            else:
-                logger.error('生成分享链接失败.')
-                return None
         else:
-            logger.error('用户未登录.')
+            token = get_token()
+        if session.get('client_id'):
+            client_id = session.get('client_id')
+        else:
+            client_id = get_client_id()            
+        # 更新客户记录，添加分享链接
+        update_path = f'/api/collections/clients/records/{client_id}'
+        share_link = f"https://app.fanyifan.com.cn/case?id={client_id}"
+        data = {
+            'field5': share_link,
+        }
+        update_url = home_url + update_path
+        header = {
+            "Content-Type": "application/json",
+            "Authorization": token
+        }
+        response = requests.patch(update_url, headers=header, json=data)
+        
+        if response.status_code == 200:
+            logger.debug('生成分享链接成功.')
+            return share_link
+        else:
+            logger.error('生成分享链接失败.')
             return None
  
     if n_clicks > 0:
@@ -614,61 +670,86 @@ def on_generate_share_link(n_clicks):
     prevent_initial_call=True
 )
 def on_copy_share_link(n_clicks):
+    home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
+    def get_token():
+        auth_path = '/api/admins/auth-with-password'
+        auth_url = home_url + auth_path
+        username = os.environ.get('admin_username')
+        #print('admin_username: ', username)
+        logger.debug('admin_username: {}'.format(username))
+        password = os.environ.get('admin_password')
+        # json.dumps 将python数据结构转换为JSON
+        data1 = json.dumps({"identity": username, "password": password})
+        # Content-Type 请求的HTTP内容类型 application/json 将数据已json形式发给服务器
+        header1 = {"Content-Type": "application/json"}
+        response1 = requests.post(auth_url, data=data1, headers=header1)
+        response1_json = response1.json()
+        response1_str = str(response1_json)
+        #print('html: ', html)
+        logger.debug('response1_str: {}'.format(response1_str[0:100]))
+        # html.json JSON 响应内容，提取token值
+        if response1_json['token']:
+            token = response1_json['token']
+            session['token'] = token
+            logger.debug('save session: {}'.format(session))
+            return token
     def get_client_id():
         if session.get('token'):
             token = session.get('token')
             #print('token: ', token)
+        else:
+            token = get_token()
             username = session.get('username')
             #print('username: ', username)
-            home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
-            # 使用已经登录获取到的token，查询client_id
-            get_path = '/api/collections/clients/records'
-
-            query_client_id = "?filter=(username='" + username + "'||email='" + username + "')&&fields=id"#&&page=50&&perPage=100&&date&&skipTotal=1response1_json
-            get_url = home_url + get_path + query_client_id
-            header = {
-                "Content-Type": "application/json",
-                "Authorization": token
-            }
-            response = requests.get(get_url, headers=header)
-            response_json = response.json()
-            response_str = str(response_json)
-            logger.debug('response_str: {}'.format(response_str[0:100]))
-            #print('response_str: {}'.format(response_str[0:100]))
-            client_id = response_json['items'][0]['id']
+        # 使用已经登录获取到的token，查询client_id
+        get_path = '/api/collections/clients/records'
+        query_client_id = "?filter=(username='" + username + "'||email='" + username + "')&&fields=id"#&&page=50&&perPage=100&&date&&skipTotal=1response1_json
+        get_url = home_url + get_path + query_client_id
+        header = {
+            "Content-Type": "application/json",
+            "Authorization": token
+        }
+        response = requests.get(get_url, headers=header)
+        response_json = response.json()
+        response_str = str(response_json)
+        logger.debug('response_str: {}'.format(response_str[0:100]))
+        #print('response_str: {}'.format(response_str[0:100]))
+        client_id = response_json['items'][0]['id']
+        session['client_id'] = client_id
         return client_id
     def copy_share_link():
         """复制分享链接到剪贴板"""
         if session.get('token'):
             token = session.get('token')
-            client_id = get_client_id()
-            home_url = 'https://pocketbase-5umc.onrender.com'
-            
-            # 获取客户记录中的分享链接
-            get_path = f'/api/collections/clients/records/{client_id}'
-            get_url = home_url + get_path
-            header = {
-                "Content-Type": "application/json",
-                "Authorization": token
-            }
-            response = requests.get(get_url, headers=header)
-            
-            if response.status_code == 200:
-                data = response.json()
-                share_link = data.get('field5')
-                if share_link:
-                    clipboard.copy(share_link)
-                    logger.debug('分享链接已复制到剪贴板.')
-                    return "分享链接已复制到剪贴板"
-                else:
-                    logger.error('未找到分享链接.')
-                    return "未找到分享链接"
-            else:
-                logger.error('获取分享链接失败.')
-                return "获取分享链接失败"
         else:
-            logger.error('未授权.')
-            return "未授权"
+            token = get_token()
+        if session.get('client_id'):
+            client_id = session.get('client_id')
+        else:
+            client_id = get_client_id()            
+        # 获取客户记录中的分享链接
+        get_path = f'/api/collections/clients/records/{client_id}'
+        get_url = home_url + get_path
+        header = {
+            "Content-Type": "application/json",
+            "Authorization": token
+        }
+        response = requests.get(get_url, headers=header)
+        
+        if response.status_code == 200:
+            data = response.json()
+            share_link = data.get('field5')
+            if share_link:
+                clipboard.copy(share_link)
+                logger.debug('分享链接已复制到剪贴板.')
+                return "分享链接已复制到剪贴板"
+            else:
+                logger.error('未找到分享链接.')
+                return "未找到分享链接"
+        else:
+            logger.error('获取分享链接失败.')
+            return "获取分享链接失败"
+
     if n_clicks > 0:
         status = copy_share_link()
         return f"状态: {status}"

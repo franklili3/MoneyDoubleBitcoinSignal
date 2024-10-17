@@ -19,7 +19,7 @@ app1 = get_app()
 # 创建FileHandler，并添加到logger.handlers列表
 logger = logging.getLogger(__name__)
 handler = logging.FileHandler('error.log')
-logger.setLevel(logging.INFO)#)DEBUG
+logger.setLevel(logging.DEBUG)#) INFO
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')  
 handler.setFormatter(formatter)  
 logger.addHandler(handler)
@@ -71,30 +71,34 @@ layout = html.Div([
               )
 def update_gauge_output(pathname):
     home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
-    auth_path = '/api/admins/auth-with-password'
-    auth_url = home_url + auth_path
-    username = os.environ.get('admin_username')
-    #print('admin_username: ', username)
-    logger.debug('admin_username: {}'.format(username))
-    password = os.environ.get('admin_password')
-    # json.dumps 将python数据结构转换为JSON
-    data1 = json.dumps({"identity": username, "password": password})
-    # Content-Type 请求的HTTP内容类型 application/json 将数据已json形式发给服务器
-    header1 = {"Content-Type": "application/json"}
-    response1 = requests.post(auth_url, data=data1, headers=header1)
-    response1_json = response1.json()
-    response1_str = str(response1_json)
-    #print('html: ', html)
-    logger.debug('response1_str: {}'.format(response1_str[0:100]))
-    # html.json JSON 响应内容，提取token值
-    if response1_json['token']:
-        token = response1_json['token']
-        session['token'] = token
-        logger.debug('save session: {}'.format(session))
+    def get_token():
+        auth_path = '/api/admins/auth-with-password'
+        auth_url = home_url + auth_path
+        username = os.environ.get('admin_username')
+        #print('admin_username: ', username)
+        logger.debug('admin_username: {}'.format(username))
+        password = os.environ.get('admin_password')
+        # json.dumps 将python数据结构转换为JSON
+        data1 = json.dumps({"identity": username, "password": password})
+        # Content-Type 请求的HTTP内容类型 application/json 将数据已json形式发给服务器
+        header1 = {"Content-Type": "application/json"}
+        response1 = requests.post(auth_url, data=data1, headers=header1)
+        response1_json = response1.json()
+        response1_str = str(response1_json)
+        #print('html: ', html)
+        logger.debug('response1_str: {}'.format(response1_str[0:100]))
+        # html.json JSON 响应内容，提取token值
+        if response1_json['token']:
+            token = response1_json['token']
+            session['token'] = token
+            logger.debug('save session: {}'.format(session))
+            return token
     TIMEOUT = 60 * 60 * 24
     @cache.memoize(timeout=TIMEOUT)
-    def get_upper_lower_price():
-        if token:
+    def get_upper_lower_price1(token):
+        if not token:
+            token = get_token()
+        else:
             # 使用已经登录获取到的token 发送一个get请求
             get_path = '/api/collections/bitcoin_trade_signal/records'
 
@@ -116,16 +120,12 @@ def update_gauge_output(pathname):
             data_predicted_price = response2_json['items'][-1]['predicted_price']
             #app1.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)) + ' ,value3:{}'.format(str(value3)))
             #print('time: ', time, ', value: ', value)
-
-                
             data = [time, data_price, data_price_lower_limit, data_price_upper_limit, data_predicted_price]
-        else:
-            data = ["2024-07-22", 39877, 229876, 325477, 35741]
-
         return data
 
     if pathname == '/':
-        data1 = get_upper_lower_price()
+        token = get_token()
+        data1 = get_upper_lower_price1(token)
         logger.debug('data1[0]: {}'.format(str(data1[0])[0:10]))
         logger.debug('data1[1]: {}'.format(str(data1[1])[0:10]))
         logger.debug('data1[2]: {}'.format(str(data1[2])[0:10]))
