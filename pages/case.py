@@ -23,8 +23,8 @@ from dash import dash_table
 from urllib.parse import parse_qs
 
 register_page(__name__,
-    title='6.案例',
-    name='6.案例')
+    title='7.案例',
+    name='7.案例')
 
 app1 = get_app()
 # 创建logger
@@ -62,15 +62,17 @@ layout = html.Div(
                         html.Div([
                             dcc.Link("主页", href="/home-client"),
                             html.Br(),
-                            dcc.Link("1.比特币因子", href="/bitcoin-factor-client"),
+                            dcc.Link("1.钱翻一番历史回测", href="/money-double-strategy-back-test"),
                             html.Br(),
-                            dcc.Link("2.比特币预测市值", href="/bitcoin-predicted-marketcap-client"),
+                            dcc.Link("2.比特币因子", href="/bitcoin-factor-client"),
                             html.Br(),
-                            dcc.Link("3.比特币市值偏差", href="/bitcoin-marketcap-bias-client"),
+                            dcc.Link("3.比特币预测市值", href="/bitcoin-predicted-marketcap-client"),
                             html.Br(),
-                            dcc.Link("4.比特币市值上限和下限", href="/bitcoin-upper-lower-marketcap-client"),
+                            dcc.Link("4.比特币市值偏差", href="/bitcoin-marketcap-bias-client"),
                             html.Br(),
-                            dcc.Link("5.比特币价格上限和下限", href="/bitcoin-upper-lower-price-client"),
+                            dcc.Link("5.比特币市值上限和下限", href="/bitcoin-upper-lower-marketcap-client"),
+                            html.Br(),
+                            dcc.Link("6.比特币价格上限和下限", href="/bitcoin-upper-lower-price-client"),
                             html.Br(),
                         ])
                     ]),            

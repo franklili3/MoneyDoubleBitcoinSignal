@@ -22,8 +22,8 @@ from logging.handlers import RotatingFileHandler
 from flask import session
 
 register_page(__name__,
-    title='1.比特币因子',
-    name='1.比特币因子')
+    title='2.比特币因子',
+    name='2.比特币因子')
 app1 = get_app()
 
 # 创建FileHandler，并添加到logger.handlers列表
@@ -59,15 +59,17 @@ layout = html.Div([
                         html.Div([
                             dcc.Link("主页", href="/"),
                             html.Br(),
-                            dcc.Link("2.比特币预测市值", href="/bitcoin-predicted-marketcap"),
+                            dcc.Link("1.钱翻一番历史回测", href="/money-double-strategy-back-test"),
                             html.Br(),
-                            dcc.Link("3.比特币市值偏差", href="/bitcoin-marketcap-bias"),
+                            dcc.Link("3.比特币预测市值", href="/bitcoin-predicted-marketcap"),
                             html.Br(),
-                            dcc.Link("4.比特币市值上限和下限", href="/bitcoin-upper-lower-marketcap"),
+                            dcc.Link("4.比特币市值偏差", href="/bitcoin-marketcap-bias"),
                             html.Br(),
-                            dcc.Link("5.比特币价格上限和下限", href="/bitcoin-upper-lower-price"),
+                            dcc.Link("5.比特币市值上限和下限", href="/bitcoin-upper-lower-marketcap"),
                             html.Br(),
-                            dcc.Link("6.案例", href="/case")
+                            dcc.Link("6.比特币价格上限和下限", href="/bitcoin-upper-lower-price"),
+                            html.Br(),
+                            dcc.Link("7.案例", href="/case")
                         ])
                         #    dcc.Link(f"{page['name']}", href=page["relative_path"])# - {page['path']}
                         #) for page in page_registry.values()

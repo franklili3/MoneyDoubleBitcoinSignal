@@ -1,14 +1,15 @@
 #import random
 #from datetime import datetime, timedelta
-from data_generator import generate_random_series
+#from data_generator import generate_random_series
 import dash_tvlwc
 #import dash
 from dash.dependencies import Input, Output#, State
-from dash import html, register_page, get_app, dcc, clientside_callback#, ctx
+from dash import html, clientside_callback, dcc, register_page, get_app#, ctx
 
 from dash_tvlwc.types import ColorType, SeriesType
 import os
 import requests, json
+#from flask import request
 from user_agents import parse
 #import sys
 #sys.path.append('..')
@@ -21,14 +22,14 @@ from logging.handlers import RotatingFileHandler
 from flask import session
 
 register_page(__name__,
-    title='3.比特币预测市值',
-    name='3.比特币预测市值')
+    title='1.钱翻一番历史回测',
+    name='1.钱翻一番历史回测')
 app1 = get_app()
 
 # 创建FileHandler，并添加到logger.handlers列表
 logger = logging.getLogger(__name__)
 handler = logging.FileHandler('error.log')
-logger.setLevel(logging.DEBUG)#)INFO
+logger.setLevel(logging.INFO)#)DEBUG
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')  
 handler.setFormatter(formatter)  
 logger.addHandler(handler)
@@ -51,16 +52,16 @@ else:
 
 layout = html.Div([
             #dcc.Interval(id='timer', interval=500),
-            dcc.Store(id="store-2"),
+            dcc.Store(id="store-13"),
             html.Div(className='container', children=[
                 html.Div([
                     html.Div([
                         html.Div([
                             dcc.Link("主页", href="/"),
                             html.Br(),
-                            dcc.Link("1.钱翻一番历史回测", href="/money-double-strategy-back-test"),
-                            html.Br(),
                             dcc.Link("2.比特币因子", href="/bitcoin-factor"),
+                            html.Br(),
+                            dcc.Link("3.比特币预测市值", href="/bitcoin-predicted-marketcap"),
                             html.Br(),
                             dcc.Link("4.比特币市值偏差", href="/bitcoin-marketcap-bias"),
                             html.Br(),
@@ -75,9 +76,9 @@ layout = html.Div([
                     ]),            
                 ]),
                 html.Div(className='main-container', children=[
-                    html.H2('比特币预测市值和市值图 📊'),
-                    html.H3('根据比特币市值和比特币区块数建立预测模型，比特币预测市值和实际市值的走势很一致，模型的R方（可解释度）高达0.8。'),
-                    html.Div(id="main_panel-2")
+                    html.H2('钱翻一番策略历史回测业绩图 📊'),
+                    html.H3('钱翻一番策略在过去9年历史回测中，实现了年化收益率134%，年化波动率，最大回撤比率32%的好成绩。'),
+                    html.Div(id="main_panel-13")
                 ]),
                 html.Span('李力, 2024')
             ])
@@ -94,11 +95,11 @@ clientside_callback(
         return user_Agent
     }
     """,
-    Output("store-2", "data"),
-    Input("store-2", "data"),
+    Output("store-13", "data"),
+    Input("store-13", "data"),
 )
 
-@app1.callback(Output("main_panel-2", "children"), Input("store-2", "data"))
+@app1.callback(Output("main_panel-13", "children"), Input("store-13", "data"))
 def update(JSoutput):
     home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
     def get_token():
@@ -125,36 +126,21 @@ def update(JSoutput):
             return token
     TIMEOUT = 60 * 60 * 24
     @cache.memoize(timeout=TIMEOUT)
-    def get_predicted_marketcap3(frequency='weekly'):
+    def get_fanyifan_back_test(frequency='monthly'):
 
         if session.get('token'):
             token = session.get('token')
             #print('token: ', token)
         else:
-            token = get_token()            
-        auth_path = '/api/admins/auth-with-password'
-        auth_url = home_url + auth_path
-        username = os.environ.get('admin_username')
-        #print('username: ', username)
-        password = os.environ.get('admin_password')
-        #print('password: ', password)
-        # json.dumps 将python数据结构转换为JSON
-        data1 = json.dumps({"identity": username, "password": password})
-        # Content-Type 请求的HTTP内容类型 application/json 将数据已json形式发给服务器
-        header1 = {"Content-Type": "application/json"}
-        response1 = requests.post(auth_url, data=data1, headers=header1)
-        response1_json = response1.json()
-        response1_str = str(response1_json)
-        for key, value in response1_json.items():
-            if key == 'token':
-                token = value
-        get_path = '/api/collections/bitcoin_trade_signal/records'
-        data_marketcap_log = []
-        data_blocks_log = []
+            token = get_token()
+        # 使用已经登录获取到的token 发送一个get请求
+        get_path = '/api/collections/bitcoin_strategy_backtest_returns/records'
+        data_cum_returns = []
+        data_portfolio_value = []
         if frequency == 'monthly':
-            for i in range(1,14):                 
-                query_predicted_marketcap_log = "?filter=(day_of_month=1)&&fields=date,marketcap_log,predicted_marketcap_log&&perPage=12&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
-                get_url = home_url + get_path + query_predicted_marketcap_log
+            for i in range(1, 10):        
+                query_cum_returns = "?fields=date,portfolio_value,cum_return&&perPage=365&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
+                get_url = home_url + get_path + query_cum_returns
                 header2 = {
                     "Content-Type": "application/json",
                     "Authorization": token
@@ -162,20 +148,21 @@ def update(JSoutput):
                 response2 = requests.get(get_url, headers=header2)
                 response2_json = response2.json()
                 response2_str = str(response2_json)
-                logger.debug('response2_str: {}'.format(response2_str))
+                #logger.debug('response2_str: {}'.format(response2_str))
                 for item in response2_json['items']:
                     time = item['date']
-                    value1 = item['marketcap_log']
-                    value2 = item['predicted_marketcap_log']
-                    logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)))
+                    value1 = item['portfolio_value']
+                    value2 = item['cum_return']
+                    #logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)))
                     #print('time: ', time, ', value: ', value)
-                    data_marketcap_log.append({'time': time, 'value': value1})
-                    data_blocks_log.append({'time': time, 'value': value2})
-                data = [data_marketcap_log, data_blocks_log]
+                    data_portfolio_value.append({'time': time, 'value': value1})
+                    data_cum_returns.append({'time': time, 'value': value2})
+                data = [data_portfolio_value, data_cum_returns]
+        '''
         elif frequency == 'weekly':
             for i in range(1,14):
-                query_predicted_marketcap_log = "?filter=(weekday=1)&&fields=date,marketcap_log,predicted_marketcap_log&&perPage=52&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
-                get_url = home_url + get_path + query_predicted_marketcap_log
+                query_bitcoin_marketcap_log = "?filter=(weekday=1)&&fields=date,marketcap_log,blocks_log&&perPage=52&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
+                get_url = home_url + get_path + query_bitcoin_marketcap_log
                 header2 = {
                     "Content-Type": "application/json",
                     "Authorization": token
@@ -183,29 +170,29 @@ def update(JSoutput):
                 response2 = requests.get(get_url, headers=header2)
                 response2_json = response2.json()
                 response2_str = str(response2_json)
-                logger.debug('response2_str: {}'.format(response2_str))
+                #logger.debug('response2_str: {}'.format(response2_str))
                 for item in response2_json['items']:
                     time = item['date']
                     value1 = item['marketcap_log']
-                    value2 = item['predicted_marketcap_log']
-                    logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)))
+                    value2 = item['blocks_log']
+                    #logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)))
                     #print('time: ', time, ', value: ', value)
                     data_marketcap_log.append({'time': time, 'value': value1})
                     data_blocks_log.append({'time': time, 'value': value2})
-            data = [data_marketcap_log, data_blocks_log] 
+            data = [data_marketcap_log, data_blocks_log]
+        '''
         return data
     user_agent = parse(JSoutput)
     is_mobile = user_agent.is_mobile
     is_tablet = user_agent.is_tablet
     is_pc = user_agent.is_pc
     if is_pc:
-        data1 = get_predicted_marketcap3(frequency='weekly')
+        data1 = get_fanyifan_back_test(frequency='monthly')
     elif is_mobile or is_tablet:
-        data1 = get_predicted_marketcap3(frequency='monthly') 
+        data1 = get_fanyifan_back_test(frequency='monthly') 
 
-    #data1 = get_predicted_marketcap(frequency='weekly')
-    logger.debug('data1[0]: {}'.format(str(data1[0])[0:10]))
-    logger.debug('data1[1]: {}'.format(str(data1[1])[0:10]))
+    #logger.debug('data1[0]: {}'.format(str(data1[0])[0:10]))
+    #logger.debug('data1[1]: {}'.format(str(data1[1])[0:10]))
     main_panel = [
         html.Div(style={'position': 'relative', 'width': '100%', 'height': '100%', 'marginBottom': '30px'}, children=[
             html.Div(children=[
@@ -240,13 +227,13 @@ def update(JSoutput):
                     },
                     seriesOptions=[
                         {
-                            'title': '比特币市值(对数)',
+                            'title': '模拟账户价值',
                             #'color': 'blue' 
                             'priceScaleId': 'left'
                         },
                         {
-                            'title': '比特币预测市值(对数)',
-                            'color': 'white' 
+                            'title': '模拟账户累计收益率',
+                            'color': 'yellow' 
                         }
                     ]
                 ),
