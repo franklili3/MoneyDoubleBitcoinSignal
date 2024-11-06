@@ -50,6 +50,8 @@ layout = html.Div([
                 html.Br(),
                 dcc.Link("1.钱翻一番历史回测", href="/money-double-strategy-back-test"),
                 html.Br(),
+                dcc.Link("2.比特币因子", href="/bitcoin-factor"),
+                html.Br(),
                 dcc.Link("3.比特币预测市值", href="/bitcoin-predicted-marketcap"),
                 html.Br(),
                 dcc.Link("4.比特币市值偏差", href="/bitcoin-marketcap-bias"),
@@ -58,7 +60,7 @@ layout = html.Div([
                 html.Br(),
                 dcc.Link("6.比特币价格上限和下限", href="/bitcoin-upper-lower-price"),
                 html.Br(),
-                dcc.Link("7.案例", href="/case")
+                dcc.Link("7.实盘案例", href="/case")
         ])
             #    dcc.Link(f"{page['name']}", href=page["relative_path"])# - {page['path']}
             #) for page in page_registry.values()
@@ -126,45 +128,45 @@ def update_gauge_output(pathname):
 
     if pathname == '/':
         token = get_token()
-        data1 = get_upper_lower_price1(token)
-        logger.debug('data1[0]: {}'.format(str(data1[0])[0:10]))
-        logger.debug('data1[1]: {}'.format(str(data1[1])[0:10]))
-        logger.debug('data1[2]: {}'.format(str(data1[2])[0:10]))
-        logger.debug('data1[3]: {}'.format(str(data1[3])[0:10]))
-        logger.debug('data1[4]: {}'.format(str(data1[4])[0:10]))
-    return html.Div([
-    html.H2('一年前数据-' + data1[0],
-        style={
-            'textAlign': 'center'
-        }          
-    ),
-    html.Div(className='row', children=[
-        daq.Gauge(
-            value=data1[1]/10000,
-            label='比特币价格',
-            max=round(data1[3]/10000, 4),
-            min=0,
-            showCurrentValue=True,
-            units="万美元",
-            scale={'interval': 2, 'labelInterval': 2}
+        data = get_upper_lower_price1(token)
+        logger.debug('data1[0]: {}'.format(str(data[0])[0:10]))
+        logger.debug('data1[1]: {}'.format(str(data[1])[0:10]))
+        logger.debug('data1[2]: {}'.format(str(data[2])[0:10]))
+        logger.debug('data1[3]: {}'.format(str(data[3])[0:10]))
+        logger.debug('data1[4]: {}'.format(str(data[4])[0:10]))
+        return html.Div([
+        html.H2('一年前数据-' + data[0],
+            style={
+                'textAlign': 'center'
+            }          
         ),
-        daq.Gauge(
-            value=data1[4]/10000,
-            label='比特币预测价格',
-            max=round(data1[3]/10000, 4),
-            min=0,
-            showCurrentValue=True,
-            units="万美元",
-            scale={'interval': 2, 'labelInterval': 2}
-        ),
-        daq.Gauge(
-            value=data1[3]/10000,
-            label='比特币价格上限',
-            max=round(data1[3]/10000, 4),
-            min=0,
-            showCurrentValue=True,
-            units="万美元",
-            scale={'interval': 2, 'labelInterval': 2}
-        ) 
-    ]) 
-    ])
+        html.Div(className='row', children=[
+            daq.Gauge(
+                value=data[1]/10000,
+                label='比特币价格',
+                max=round(data[3]/10000, 4),
+                min=0,
+                showCurrentValue=True,
+                units="万美元",
+                scale={'interval': 2, 'labelInterval': 2}
+            ),
+            daq.Gauge(
+                value=data[4]/10000,
+                label='比特币预测价格',
+                max=round(data[3]/10000, 4),
+                min=0,
+                showCurrentValue=True,
+                units="万美元",
+                scale={'interval': 2, 'labelInterval': 2}
+            ),
+            daq.Gauge(
+                value=data[3]/10000,
+                label='比特币价格上限',
+                max=round(data[3]/10000, 4),
+                min=0,
+                showCurrentValue=True,
+                units="万美元",
+                scale={'interval': 2, 'labelInterval': 2}
+            ) 
+        ]) 
+        ])

@@ -20,6 +20,7 @@ from flask_caching import Cache
 from logging.handlers import RotatingFileHandler
 #import dash_bootstrap_components as dbc
 from flask import session
+from dash import dash_table
 
 register_page(__name__,
     title='1.钱翻一番历史回测',
@@ -29,7 +30,7 @@ app1 = get_app()
 # 创建FileHandler，并添加到logger.handlers列表
 logger = logging.getLogger(__name__)
 handler = logging.FileHandler('error.log')
-logger.setLevel(logging.INFO)#)DEBUG
+logger.setLevel(logging.INFO)#)  DEBUG
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')  
 handler.setFormatter(formatter)  
 logger.addHandler(handler)
@@ -77,7 +78,7 @@ layout = html.Div([
                 ]),
                 html.Div(className='main-container', children=[
                     html.H2('钱翻一番策略历史回测业绩图 📊'),
-                    html.H3('钱翻一番策略在过去9年历史回测中，实现了年化收益率134%，年化波动率，最大回撤比率32%的好成绩。'),
+                    html.H3('钱翻一番策略在过去9年历史回测中，实现了年化收益率134%，年化波动率49%，最大回撤比率32%的好成绩。'),
                     html.Div(id="main_panel-13")
                 ]),
                 html.Span('李力, 2024')
@@ -157,7 +158,26 @@ def update(JSoutput):
                     #print('time: ', time, ', value: ', value)
                     data_portfolio_value.append({'time': time, 'value': value1})
                     data_cum_returns.append({'time': time, 'value': value2})
-                data = [data_portfolio_value, data_cum_returns]
+        # 使用已经登录获取到的token 发送一个get请求
+        get_path3 = '/api/collections/bitcoin_strategy_backtest_cn_stock_performance/records'
+        data_performance = {'instrument': '', 'instrument_annual_return': '', 'instrument_annual_volatility': '', 'instrument_sharpe': ''}
+        query_performance = "?filter=(instrument='BTCUSD')&&fields=instrument,instrument_annual_return,instrument_annual_volatility,instrument_sharpe&&perPage=1&&page=1"# + str(i)&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
+        get_url3 = home_url + get_path3 + query_performance
+        header3 = {
+            "Content-Type": "application/json",
+            "Authorization": token
+        }
+        response3 = requests.get(get_url3, headers=header3)
+        response3_json = response3.json()
+        response3_str = str(response3_json)
+        logger.debug('response3_str: {}'.format(response3_str))
+        for item in response3_json['items']:
+            data_performance['instrument'] = item['instrument']
+            data_performance['instrument_annual_return'] = item['instrument_annual_return'] * 100
+            data_performance['instrument_annual_volatility'] = round(item['instrument_annual_volatility'] * 100, 2)
+            data_performance['instrument_sharpe'] = item['instrument_sharpe']
+          
+        data = [data_performance, data_portfolio_value, data_cum_returns]
         '''
         elif frequency == 'weekly':
             for i in range(1,14):
@@ -190,8 +210,22 @@ def update(JSoutput):
         data1 = get_fanyifan_back_test(frequency='monthly')
     elif is_mobile or is_tablet:
         data1 = get_fanyifan_back_test(frequency='monthly') 
+    back_test_list = []
+    columnDefs1 = [
+        {'name': '交易品种', 'id': 'instrument'},
+        {'name': '年化收益率%', 'id': 'instrument_annual_return'},
+        {'name': '年化波动率%', 'id': 'instrument_annual_volatility'},
+        {'name': '年化夏普比率', 'id': 'instrument_sharpe'},
+    ]
 
-    #logger.debug('data1[0]: {}'.format(str(data1[0])[0:10]))
+    grid1 = dash_table.DataTable(
+        id="grid1",
+        columns=[{"name": i['name'], "id": i['id']} for i in columnDefs1],
+        data=[data1[0]],
+        style_table={'height': '100px', 'width': '100%'},
+        style_cell={'textAlign': 'center'}
+    )
+    logger.debug('data1[0]: {}'.format(str(data1[0])))
     #logger.debug('data1[1]: {}'.format(str(data1[1])[0:10]))
     main_panel = [
         html.Div(style={'position': 'relative', 'width': '100%', 'height': '100%', 'marginBottom': '30px'}, children=[
@@ -200,7 +234,7 @@ def update(JSoutput):
                     #id='tv-chart-1',
                     #seriesData=[generate_random_ohlc(1000, n=1000)],
                     #seriesTypes=[SeriesType.Candlestick],
-                    seriesData=[data1[0], data1[1]],
+                    seriesData=[data1[1], data1[2]],
                     seriesTypes=[SeriesType.Line, SeriesType.Line],
                     width='99%',
                     chartOptions={
@@ -215,25 +249,30 @@ def update(JSoutput):
                         'localization': {
                             'locale': 'zh-CN',
                             #en-US
-                            'priceFormatter': "(function(price) { return price.toFixed(2); })"
-                            #'$' + 
+                            #'priceFormatter': "(function(price) { return price.toFixed(0) ; })"
+                            #+  + '$'
                         },
                         'rightPriceScale': {
-                            'visible': 'true'
+                            'visible': 'true',
+                            'priceFormatter': "(function(price) { return (price).toFixed(0); })"  # 右轴价格格式化
+
                         },
                         'leftPriceScale': {
-                            'visible': 'true'
+                            'visible': 'true',
+                            'priceFormatter': "(function(price) { return (price / 1000000).toFixed(0) + 'M$'; })"  # 左轴价格格式化
+
                         }
                     },
                     seriesOptions=[
                         {
                             'title': '模拟账户价值',
-                            #'color': 'blue' 
+                            'color': '#B2DFF7',
                             'priceScaleId': 'left'
                         },
                         {
                             'title': '模拟账户累计收益率',
-                            'color': 'yellow' 
+                            'color': '#B2E0D9', 
+                            'priceScaleId': 'right'
                         }
                     ]
                 ),
@@ -244,4 +283,6 @@ def update(JSoutput):
             ], style={'position': 'absolute', 'left': 0, 'top': 0, 'zIndex': 10, 'color': 'white', 'padding': '10px'})
         ])
     ]
-    return main_panel
+    back_test_list.append(html.Div(grid1))
+    back_test_list.append(html.Div(main_panel))    
+    return back_test_list if back_test_list else html.Div("没有找到回测数据")

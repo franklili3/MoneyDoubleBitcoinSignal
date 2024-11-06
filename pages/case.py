@@ -204,10 +204,10 @@ def update_client_info(pathname, search, store_13):
             logger.debug('response2_str: {}'.format(response3_str[0:100]))
             if response3_json['totalItems'] > 0:
                 data_annualized_return['time'] = response3_json['items'][0]['date'][0:10]
-                data_annualized_return['annualized_return'] = response3_json['items'][0]['annualized_return'] * 100
-                data_annualized_return['annualized_volatility'] = response3_json['items'][0]['annualized_volatility'] * 100
-                data_annualized_return['annualized_sharpe'] = response3_json['items'][0]['annualized_sharpe']
-                data_annualized_return['max_drawdown'] = response3_json['items'][0]['max_drawdown'] * 100
+                data_annualized_return['annualized_return'] = round(response3_json['items'][0]['annualized_return'] * 100, 2)
+                data_annualized_return['annualized_volatility'] = round(response3_json['items'][0]['annualized_volatility'] * 100, 2)
+                data_annualized_return['annualized_sharpe'] = round(response3_json['items'][0]['annualized_sharpe'], 2)
+                data_annualized_return['max_drawdown'] = round(response3_json['items'][0]['max_drawdown'] * 100, 2)
                 #app1.logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)) + ' ,value3:{}'.format(str(value3)))
                 #print('time: ', time, ', value: ', value)
             else:
@@ -255,16 +255,7 @@ def update_client_info(pathname, search, store_13):
                 {'name': '年化夏普比率', 'id': 'annualized_sharpe'},
                 {'name': '最大回撤比率%', 'id': 'max_drawdown'},
             ]
-            '''
-            columnDefs2_1 = [
-                { 'field': 'annualized_return', 'headerName': '年化收益率%'},
-                { 'field': 'annualized_volatility', 'headerName': '年化波动率%'},
-            ]
-            columnDefs2_2 = [
-                { 'field': 'annualized_sharpe', 'headerName': '年化夏普比率'},
-                { 'field': 'max_drawdown', 'headerName': '最大回撤比率%'},
-            ]
-            '''
+
             grid1 = dash_table.DataTable(
                 id="grid1",
                 columns=[{"name": i['name'], "id": i['id']} for i in columnDefs1],
@@ -272,22 +263,7 @@ def update_client_info(pathname, search, store_13):
                 style_table={'height': '100px', 'width': '100%'},
                 style_cell={'textAlign': 'center'}
             )
-            '''
-            grid2_1 = dash_table.DataTable(
-                id="grid2_1",
-                columns=[{"name": i, "id": i} for i in columnDefs2_1],
-                data=[data_annualized_return],
-                style_table={'height': '100px', 'width': '100%'},
-                style_cell={'textAlign': 'center'}
-            )
-            grid2_2 = dash_table.DataTable(
-                id="grid2_2",
-                columns=[{"name": i, "id": i} for i in columnDefs2_2],
-                data=[data_annualized_return],
-                style_table={'height': '100px', 'width': '100%'},
-                style_cell={'textAlign': 'center'}
-            )
-            '''
+
             logger.debug('data0[0]: {}'.format(str(data0[0])[0:50]))
             logger.debug('data0[1]: {}'.format(str(data0[1])[0:50]))
 
@@ -343,14 +319,7 @@ def update_client_info(pathname, search, store_13):
                     ], style={'position': 'absolute', 'left': 0, 'top': 0, 'zIndex': 10, 'color': 'white', 'padding': '10px'})
                 ])
             ]
-            '''
-            user_agent = parse(store_13)
-            is_mobile = user_agent.is_mobile
-            is_tablet = user_agent.is_tablet
-            is_pc = user_agent.is_pc
 
-            if is_pc:
-            '''
             client_info_list.append(html.Div(nick_name))
             client_info_list.append(html.Div(grid1))
             client_info_list.append(html.Div(main_panel))

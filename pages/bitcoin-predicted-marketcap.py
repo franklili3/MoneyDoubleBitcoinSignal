@@ -28,7 +28,7 @@ app1 = get_app()
 # 创建FileHandler，并添加到logger.handlers列表
 logger = logging.getLogger(__name__)
 handler = logging.FileHandler('error.log')
-logger.setLevel(logging.DEBUG)#)INFO
+logger.setLevel(logging.INFO)#) DEBUG
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')  
 handler.setFormatter(formatter)  
 logger.addHandler(handler)
@@ -68,7 +68,7 @@ layout = html.Div([
                             html.Br(),
                             dcc.Link("6.比特币价格上限和下限", href="/bitcoin-upper-lower-price"),
                             html.Br(),
-                            dcc.Link("7.案例", href="/case")
+                            dcc.Link("7.实盘案例", href="/case")
                         ])
                         #    dcc.Link(f"{page['name']}", href=page["relative_path"])# - {page['path']}
                         #) for page in page_registry.values()
