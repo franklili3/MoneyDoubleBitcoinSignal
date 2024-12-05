@@ -52,7 +52,7 @@ else:
 
 layout = html.Div([
             #dcc.Interval(id='timer', interval=500),
-            dcc.Store(id="store-13"),
+            dcc.Store(id="store-14"),
             html.Div(className='container', children=[
                 html.Div([
                     html.Div([
@@ -78,7 +78,7 @@ layout = html.Div([
                 html.Div(className='main-container', children=[
                     html.H2('钱翻一番策略历史回测业绩图 📊'),
                     html.H3('钱翻一番策略在过去9年历史回测中，实现了年化收益率134%，年化波动率，最大回撤比率32%的好成绩。'),
-                    html.Div(id="main_panel-13")
+                    html.Div(id="main_panel-14")
                 ]),
                 html.Span('李力, 2024')
             ])
@@ -95,11 +95,11 @@ clientside_callback(
         return user_Agent
     }
     """,
-    Output("store-13", "data"),
-    Input("store-13", "data"),
+    Output("store-14", "data"),
+    Input("store-14", "data"),
 )
 
-@app1.callback(Output("main_panel-13", "children"), Input("store-13", "data"))
+@app1.callback(Output("main_panel-14", "children"), Input("store-14", "data"))
 def update(JSoutput):
     home_url = 'https://pocketbase-5umc.onrender.com' #'http://127.0.0.1:8090/'
     def get_token():
@@ -151,7 +151,7 @@ def update(JSoutput):
                 #logger.debug('response2_str: {}'.format(response2_str))
                 for item in response2_json['items']:
                     time = item['date']
-                    value1 = item['portfolio_value']
+                    value1 = item['portfolio_value'] / 1000000
                     value2 = item['cum_return']
                     #logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)))
                     #print('time: ', time, ', value: ', value)
@@ -227,7 +227,7 @@ def update(JSoutput):
                     },
                     seriesOptions=[
                         {
-                            'title': '模拟账户价值',
+                            'title': '模拟账户价值-百万$',
                             #'color': 'blue' 
                             'priceScaleId': 'left'
                         },

@@ -73,7 +73,9 @@ def layout(**kwargs):
                             html.Br(),
                             dcc.Link("5.比特币价格上限和下限", href="/bitcoin-upper-lower-price-client"),
                             html.Br(),
-                            dcc.Link("6.我的累计收益率", href="/my-total-return-client")
+                            dcc.Link("6.我的累计收益率", href="/my-total-return-client"),
+                            html.Br(),
+                            dcc.Link("7.我的分享", href="/my-share-client")                            
                     ])
                         #    dcc.Link(f"{page['name']}", href=page["relative_path"])# - {page['path']}
                         #) for page in page_registry.values()
@@ -140,7 +142,7 @@ def update(JSoutput):
         data_marketcap_log = []
         data_blocks_log = []
         if frequency == 'monthly':
-            for i in range(1,15):                 
+            for i in range(1,16):                 
                 query_predicted_marketcap_log = "?filter=(day_of_month=1)&&fields=date,marketcap_log,predicted_marketcap_log&&perPage=12&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
                 get_url = home_url + get_path + query_predicted_marketcap_log
                 header2 = {
@@ -161,7 +163,7 @@ def update(JSoutput):
                     data_blocks_log.append({'time': time, 'value': value2})
                 data = [data_marketcap_log, data_blocks_log]
         elif frequency == 'weekly':
-            for i in range(1,15):
+            for i in range(1,16):
                 query_predicted_marketcap_log = "?filter=(weekday=1)&&fields=date,marketcap_log,predicted_marketcap_log&&perPage=52&&page=" + str(i)#&&page=50&&perPage=100&&sort=date&&skipTotal=1response1_json
                 get_url = home_url + get_path + query_predicted_marketcap_log
                 header2 = {

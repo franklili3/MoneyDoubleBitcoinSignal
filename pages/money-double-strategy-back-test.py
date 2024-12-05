@@ -70,7 +70,7 @@ layout = html.Div([
                             html.Br(),
                             dcc.Link("6.比特币价格上限和下限", href="/bitcoin-upper-lower-price"),
                             html.Br(),
-                            dcc.Link("7.案例", href="/case")
+                            #dcc.Link("7.案例", href="/case")
                         ])
                         #    dcc.Link(f"{page['name']}", href=page["relative_path"])# - {page['path']}
                         #) for page in page_registry.values()
@@ -152,7 +152,7 @@ def update(JSoutput):
                 #logger.debug('response2_str: {}'.format(response2_str))
                 for item in response2_json['items']:
                     time = item['date']
-                    value1 = item['portfolio_value']
+                    value1 = item['portfolio_value'] / 1000000
                     value2 = item['cum_return']
                     #logger.debug('time: {}'.format(str(time)) + ' ,value1:{}'.format(str(value1)) + ' ,value2:{}'.format(str(value2)))
                     #print('time: ', time, ', value: ', value)
@@ -265,7 +265,7 @@ def update(JSoutput):
                     },
                     seriesOptions=[
                         {
-                            'title': '模拟账户价值',
+                            'title': '模拟账户价值-百万美元',
                             'color': '#B2DFF7',
                             'priceScaleId': 'left'
                         },
